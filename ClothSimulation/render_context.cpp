@@ -116,6 +116,11 @@ void RenderContext::ClearBuffer(float r, float g, float b)
 	_deviceContext->ClearRenderTargetView(_renderTargetView, colors);
 }
 
+HWND RenderContext::GetWindowHandle()
+{
+	return *_windowHandle;
+}
+
 ID3D11Device* RenderContext::GetDevice()
 {
 	return _device;

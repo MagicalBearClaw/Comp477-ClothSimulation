@@ -20,7 +20,7 @@ public:
 	bool CreateRenderTarget();
 	void CleanupRenderTarget();
 	void ClearBuffer(float r, float g, float b);
-
+	HWND GetWindowHandle();
 private:
 
 	bool Initialize(bool isFullScreen);

@@ -3,6 +3,7 @@
 #include "ClothSimulationApplication.h"
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 
 // Main code
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
