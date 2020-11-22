@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "ForwardEulerIntergrator.h"
+#include "ExplicitEulerIntergrator.h"
 
-void ForwardEulerIntegrator::Intergrate(Body* body, DirectX::XMFLOAT3 acceleration, float timeStep)
+void ExplicitEulerIntergrator::Intergrate(Body* body, DirectX::XMFLOAT3 acceleration, float timeStep)
 {
 	DirectX::XMVECTOR currentVelocity = DirectX::XMLoadFloat3(&body->GetVelocity());
 	DirectX::XMVECTOR scaledVelocity = DirectX::XMVectorScale(currentVelocity, timeStep);

@@ -15,6 +15,7 @@ public:
 	BodyType GetType();
 	DirectX::XMFLOAT3 GetCurrentPosition();
 	void SetPosition(DirectX::XMFLOAT3 position);
+	void SetPreviousPosition(DirectX::XMFLOAT3 position);
 	DirectX::XMFLOAT3 GetPreviousPosition();
 	DirectX::XMFLOAT3 GetVelocity();
 	void SetVelocity(DirectX::XMFLOAT3 velocity);

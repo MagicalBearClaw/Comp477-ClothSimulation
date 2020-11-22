@@ -28,6 +28,11 @@ void Body::SetPosition(DirectX::XMFLOAT3 position)
     _currentPoistion;
 }
 
+void Body::SetPreviousPosition(DirectX::XMFLOAT3 position)
+{
+    _previousPoistion = position;
+}
+
 DirectX::XMFLOAT3 Body::GetPreviousPosition()
 {
     return _previousPoistion;

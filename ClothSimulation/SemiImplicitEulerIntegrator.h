@@ -3,7 +3,7 @@
 #include "Body.h"
 #include "IIntergrator.h"
 
-class ForwardEulerIntegrator : public IIntegrator
+class SemiImplicitEulerIntergrator : public IIntegrator
 {
 public:
 	// Inherited via IIntegrator
