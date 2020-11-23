@@ -446,4 +446,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-.cso
+*.cso
