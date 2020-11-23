@@ -42,10 +42,10 @@ private:
 private:
 	RenderContext* _renderContext;
 	static std::unique_ptr<TextureLoader> _textureLoader;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _indexBuffer;
+	ID3D11Buffer* _vertexBuffer;
+	ID3D11Buffer* _indexBuffer;
 	ModelType* _model;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _texture;
+	ID3D11ShaderResourceView* _texture;
 	DirectX::XMFLOAT3 _position;
 	int _vertexCount;
 	int _indexCount;

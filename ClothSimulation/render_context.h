@@ -35,15 +35,15 @@ private:
 	bool Initialize(int screenWidth, int screenHeight, float screenDepth, float screenNear, bool isFullScreen);
 
 private:
-	Microsoft::WRL::ComPtr<IDXGISwapChain> _swapChain;
-	Microsoft::WRL::ComPtr<ID3D11Device> _device;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> _deviceContext;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _renderTargetView;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> _depthStencilBuffer;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depthStencilState;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthStencilView;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterState;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depthDisabledStencilState;
+	IDXGISwapChain* _swapChain;
+	ID3D11Device* _device;
+	ID3D11DeviceContext* _deviceContext;
+	ID3D11RenderTargetView* _renderTargetView;
+	ID3D11Texture2D* _depthStencilBuffer;
+	ID3D11DepthStencilState* _depthStencilState;
+	ID3D11DepthStencilView* _depthStencilView;
+	ID3D11RasterizerState* _rasterState;
+	ID3D11DepthStencilState* _depthDisabledStencilState;
 	
 	DirectX::XMFLOAT4X4 _projectionMatrix;
 	DirectX::XMFLOAT4X4 _worldMatrix;

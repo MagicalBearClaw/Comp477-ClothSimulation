@@ -53,7 +53,7 @@ bool RenderTexture::Create(int textureWidth, int textureHeight, float screenDept
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
 	// Create the render target view.
-	result = device->CreateRenderTargetView(_renderTargetTexture.Get(), &renderTargetViewDesc, &_renderTargetView);
+	result = device->CreateRenderTargetView(_renderTargetTexture, &renderTargetViewDesc, &_renderTargetView);
 	if (FAILED(result))
 	{
 		return false;
@@ -66,7 +66,7 @@ bool RenderTexture::Create(int textureWidth, int textureHeight, float screenDept
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
 	// Create the shader resource view.
-	result = device->CreateShaderResourceView(_renderTargetTexture.Get(), &shaderResourceViewDesc, &_shaderResourceView);
+	result = device->CreateShaderResourceView(_renderTargetTexture, &shaderResourceViewDesc, &_shaderResourceView);
 	if (FAILED(result))
 	{
 		return false;
@@ -104,7 +104,7 @@ bool RenderTexture::Create(int textureWidth, int textureHeight, float screenDept
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
 	// Create the depth stencil view.
-	result = device->CreateDepthStencilView(_depthStencilBuffer.Get(), &depthStencilViewDesc, &_depthStencilView);
+	result = device->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc, &_depthStencilView);
 	if (FAILED(result))
 	{
 		return false;
@@ -134,7 +134,7 @@ void RenderTexture::Bind()
 {
 	ID3D11DeviceContext * deviceContext = _renderContext->GetDeviceContext();
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
-	deviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView.Get());
+	deviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
 
 	// Set the viewport.
 	deviceContext->RSSetViewports(1, &_viewport);
@@ -151,10 +151,10 @@ void RenderTexture::ClearRenderTarget(DirectX::XMFLOAT4 color)
 	colorArray[3] = color.w;
 
 	ID3D11DeviceContext* deviceContext = _renderContext->GetDeviceContext();
-	deviceContext->ClearRenderTargetView(_renderTargetView.Get(), colorArray);
+	deviceContext->ClearRenderTargetView(_renderTargetView, colorArray);
 
 	// Clear the depth buffer.
-	deviceContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	deviceContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> RenderTexture::GetShaderResourceView()

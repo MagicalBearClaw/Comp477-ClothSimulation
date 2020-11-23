@@ -29,9 +29,9 @@ private:
 
 private:
 	RenderContext* _renderContext;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> _layout;
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> _sampleState;
+	ID3D11PixelShader* _pixelShader;
+	ID3D11InputLayout* _layout;
+	ID3D11SamplerState* _sampleState;
+	ID3D11VertexShader* _vertexShader;
 	ID3D11Buffer* _matrixBuffer;
 };

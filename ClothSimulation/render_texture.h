@@ -18,11 +18,11 @@ public:
 
 private:
 	RenderContext * _renderContext;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> _renderTargetTexture;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _renderTargetView;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _shaderResourceView;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> _depthStencilBuffer;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthStencilView;
+	ID3D11Texture2D* _renderTargetTexture;
+	ID3D11RenderTargetView* _renderTargetView;
+	ID3D11ShaderResourceView* _shaderResourceView;
+	ID3D11Texture2D* _depthStencilBuffer;
+	ID3D11DepthStencilView* _depthStencilView;
 	D3D11_VIEWPORT _viewport;
 	DirectX::XMFLOAT4X4 _projectionMatrix;
 	DirectX::XMFLOAT4X4 _orthographicMatrix;

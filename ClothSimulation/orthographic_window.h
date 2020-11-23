@@ -26,8 +26,8 @@ private:
 
 private:
 	RenderContext* _renderContext;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _indexBuffer;
+	ID3D11Buffer* _vertexBuffer;
+	ID3D11Buffer* _indexBuffer;
 	
 	int _vertexCount;
 	int _indexCount;

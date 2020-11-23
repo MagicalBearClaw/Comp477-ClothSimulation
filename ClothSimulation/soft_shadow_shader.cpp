@@ -367,11 +367,11 @@ bool SoftShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 void SoftShadowShader::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// Set the vertex input layout.
-	deviceContext->IASetInputLayout(_layout.Get());
+	deviceContext->IASetInputLayout(_layout);
 
 	// Set the vertex and pixel shaders that will be used to render this triangle.
-	deviceContext->VSSetShader(_vertexShader.Get(), NULL, 0);
-	deviceContext->PSSetShader(_pixelShader.Get(), NULL, 0);
+	deviceContext->VSSetShader(_vertexShader, NULL, 0);
+	deviceContext->PSSetShader(_pixelShader, NULL, 0);
 
 	// Set the sampler states in the pixel shader.
 	deviceContext->PSSetSamplers(0, 1, &_sampleStateClamp);

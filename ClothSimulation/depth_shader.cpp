@@ -232,11 +232,11 @@ bool DepthShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Direct
 void DepthShader::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// Set the vertex input layout.
-	deviceContext->IASetInputLayout(_layout.Get());
+	deviceContext->IASetInputLayout(_layout);
 
 	// Set the vertex and pixel shaders that will be used to render this triangle.
-	deviceContext->VSSetShader(_vertexShader.Get(), NULL, 0);
-	deviceContext->PSSetShader(_pixelShader.Get(), NULL, 0);
+	deviceContext->VSSetShader(_vertexShader, NULL, 0);
+	deviceContext->PSSetShader(_pixelShader, NULL, 0);
 
 	// Render the triangle.
 	deviceContext->DrawIndexed(indexCount, 0, 0);

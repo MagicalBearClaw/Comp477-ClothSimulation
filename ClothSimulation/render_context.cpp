@@ -134,7 +134,7 @@ bool RenderContext::Initialize(int screenWidth, int screenHeight, float screenDe
 	}
 
 	// Set the depth stencil state.
-	_deviceContext->OMSetDepthStencilState(_depthStencilState.Get(), 1);
+	_deviceContext->OMSetDepthStencilState(_depthStencilState, 1);
 
 	// Initialize the depth stencil view.
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
@@ -145,13 +145,13 @@ bool RenderContext::Initialize(int screenWidth, int screenHeight, float screenDe
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
 	// Create the depth stencil view.
-	result = _device->CreateDepthStencilView(_depthStencilBuffer.Get(), &depthStencilViewDesc, &_depthStencilView);
+	result = _device->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc, &_depthStencilView);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	_deviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView.Get());
+	_deviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
 
 	// Setup the raster description which will determine how and what polygons will be drawn.
 	rasterDesc.AntialiasedLineEnable = false;
@@ -172,7 +172,7 @@ bool RenderContext::Initialize(int screenWidth, int screenHeight, float screenDe
 		return false;
 	}
 
-	_deviceContext->RSSetState(_rasterState.Get());
+	_deviceContext->RSSetState(_rasterState);
 
 	// Setup the viewport for rendering.
 	_viewport.Width = (float)screenWidth;
@@ -255,10 +255,10 @@ void RenderContext::Present()
 void RenderContext::ClearBuffer(float r, float g, float b)
 {
 	const float colors[] = { r, g,b, 1.0f };
-	_deviceContext->ClearRenderTargetView(_renderTargetView.Get(), colors);
+	_deviceContext->ClearRenderTargetView(_renderTargetView, colors);
 
 	// Clear the depth buffer.
-	_deviceContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	_deviceContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 HWND RenderContext::GetWindowHandle()
@@ -283,7 +283,7 @@ DirectX::XMFLOAT4X4& RenderContext::GetOrthographicMatrix()
 
 void RenderContext::SetBackBufferRenderTarget()
 {
-	_deviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView.Get());
+	_deviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
 }
 
 void RenderContext::ResetViewport()
@@ -295,30 +295,30 @@ void RenderContext::EnableZbuffer(bool state)
 {
 	if (state)
 	{
-		_deviceContext->OMSetDepthStencilState(_depthStencilState.Get(), 1);
+		_deviceContext->OMSetDepthStencilState(_depthStencilState, 1);
 	}
 	else 
 	{
-		_deviceContext->OMSetDepthStencilState(_depthDisabledStencilState.Get(), 1);
+		_deviceContext->OMSetDepthStencilState(_depthDisabledStencilState, 1);
 	}
 }
 
 ID3D11Device* RenderContext::GetDevice()
 {
-	return _device.Get();
+	return _device;
 }
 
 ID3D11DeviceContext* RenderContext::GetDeviceContext()
 {
-	return _deviceContext.Get();
+	return _deviceContext;
 }
 
 IDXGISwapChain* RenderContext::GetSwapChain()
 {
-	return _swapChain.Get();
+	return _swapChain;
 }
 
 ID3D11RenderTargetView* RenderContext::GetMainRenderTargetView()
 {
-	return _renderTargetView.Get();
+	return _renderTargetView;
 }
