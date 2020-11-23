@@ -7,6 +7,14 @@ Application::Application(const std::string& windowTitle, int windowWith, int win
 {
 }
 
+Application::~Application()
+{
+	if (_renderContext)
+	{
+		delete _renderContext;
+	}
+}
+
 int Application::Run()
 {
 	bool isDOne = false;
@@ -40,12 +48,12 @@ bool Application::Initialize()
 	}
 
 	unsigned int windowFlags = (SDL_WindowFlags::SDL_WINDOW_RESIZABLE | SDL_WindowFlags::SDL_WINDOW_ALLOW_HIGHDPI);
-	_window = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1680, 1050, windowFlags);
+	_window = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _windowWith, _windowHeight, windowFlags);
 	SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);
 	SDL_GetWindowWMInfo(_window, &wmInfo);
 	_windowHandle = (HWND)wmInfo.info.win.window;
-	_renderContext = RenderContext::CreateInstance(_windowHandle, false);
+	_renderContext = RenderContext::CreateInstance(_windowHandle, _windowWith, _windowHeight, false);
 	if (!_renderContext)
 	{
 		return false;

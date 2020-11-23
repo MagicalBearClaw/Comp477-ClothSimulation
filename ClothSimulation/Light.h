@@ -1,13 +1,10 @@
 #pragma once
-
-#include <DirectXMath.h>
-
+#include "stdafx.h"
+#include "render_context.h"
 class Light
 {
 public:
-	Light();
-	Light(const Light& light);
-	~Light();
+	Light(RenderContext* context);
 
 	void SetAmbientColor(DirectX::XMFLOAT4 color);
 	void SetDiffuseColor(DirectX::XMFLOAT4 color);
@@ -25,6 +22,7 @@ public:
 	DirectX::XMFLOAT4X4& GetProjectionMatrix();
 
 private:
+	RenderContext* _renderContext;
 	DirectX::XMFLOAT4 _ambientColor;
 	DirectX::XMFLOAT4 _diffuseColor;
 	DirectX::XMFLOAT3 _position;

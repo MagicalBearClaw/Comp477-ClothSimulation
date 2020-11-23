@@ -7,6 +7,7 @@ class Application
 {
 public:
 	Application(const std::string& windowTitle, int windowWith, int windowHeight);
+	~Application();
 	int Run();
 protected:
 	virtual bool Initialize();

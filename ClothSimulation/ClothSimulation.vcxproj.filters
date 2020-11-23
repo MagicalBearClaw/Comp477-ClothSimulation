@@ -84,9 +84,6 @@
     <ClCompile Include="application.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="render_context.cpp">
-      <Filter>Source Files\System</Filter>
-    </ClCompile>
     <ClCompile Include="stop_watch.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
     <ClCompile Include="PositionConstraint.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="render_context.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -184,9 +184,6 @@
     </ClInclude>
     <ClInclude Include="application.h">
       <Filter>Header Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="render_context.h">
-      <Filter>Header Files\System</Filter>
     </ClInclude>
     <ClInclude Include="stop_watch.h">
       <Filter>Header Files\System</Filter>
@@ -271,6 +268,9 @@
     </ClInclude>
     <ClInclude Include="PositionConstraint.h">
       <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="render_context.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

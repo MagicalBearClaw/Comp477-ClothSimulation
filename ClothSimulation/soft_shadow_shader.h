@@ -29,7 +29,7 @@ public:
 
 	bool Initialize();
 
-	bool Render(ID3D11DeviceContext* deviceContext, int indexCount, DirectX::XMFLOAT4X4 worldMatrix, DirectX::XMFLOAT4X4 viewMatrix,
+	bool Render(int indexCount, DirectX::XMFLOAT4X4 worldMatrix, DirectX::XMFLOAT4X4 viewMatrix,
 		DirectX::XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* shadowTexture,
 		DirectX::XMFLOAT3 lightPosition, DirectX::XMFLOAT4 ambientColor, DirectX::XMFLOAT4 diffuseColor);
 
@@ -50,7 +50,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> _layout;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> _sampleStateWrap;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> _sampleStateClamp;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _matrixBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _lightBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _lightBuffer2;
+	ID3D11Buffer* _matrixBuffer;
+	ID3D11Buffer* _lightBuffer;
+	ID3D11Buffer* _lightBuffer2;
 };

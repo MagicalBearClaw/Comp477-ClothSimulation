@@ -1,15 +1,7 @@
 #include "stdafx.h"
 #include "Light.h"
 
-Light::Light()
-{
-}
-
-Light::Light(const Light& light)
-{
-}
-
-Light::~Light()
+Light::Light(RenderContext* renderContext) : _renderContext(renderContext)
 {
 }
 

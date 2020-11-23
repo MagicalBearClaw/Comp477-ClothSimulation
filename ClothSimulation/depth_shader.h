@@ -30,6 +30,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> _layout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _matrixBuffer;
+	ID3D11Buffer* _matrixBuffer;
 
 };

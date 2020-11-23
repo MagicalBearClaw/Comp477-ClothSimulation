@@ -16,7 +16,7 @@ bool ShadowShader::Initialize()
 	ID3D11Device* device = _renderContext->GetDevice();
 	HWND windowHandle = _renderContext->GetWindowHandle();
 	// Initialize the vertex and pixel shaders.
-	bool result = InitializeShader(device, windowHandle, L"../Engine/shadow.vs", L"../Engine/shadow.ps");
+	bool result = InitializeShader(device, windowHandle, L"./Assets/Shaders/shadow.vs", L"./Assets/Shaders/shadow.ps");
 	if (!result)
 	{
 		return false;
@@ -60,7 +60,7 @@ bool ShadowShader::InitializeShader(ID3D11Device* device, HWND windowHandle, con
 	pixelShaderBuffer = 0;
 
 	// Compile the vertex shader code.
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "ShadowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&vertexShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -79,7 +79,7 @@ bool ShadowShader::InitializeShader(ID3D11Device* device, HWND windowHandle, con
 	}
 
 	// Compile the pixel shader code.
-	result = D3DCompileFromFile(psFilename, NULL, NULL, "ShadowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&pixelShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -263,7 +263,7 @@ bool ShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Direc
 	DirectX::XMMATRIX lightProjectionMatrixSim = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&lightProjectionMatrix));
 
 	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(_matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -280,7 +280,7 @@ bool ShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Direc
 	DirectX::XMStoreFloat4x4(&dataPtr->lightProjection, lightProjectionMatrixSim);
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_matrixBuffer.Get(), 0);
+	deviceContext->Unmap(_matrixBuffer, 0);
 
 	// Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 0;
@@ -292,7 +292,7 @@ bool ShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Direc
 	deviceContext->PSSetShaderResources(0, 1, &depthMapTexture);
 
 	// Lock the second light constant buffer so it can be written to.
-	result = deviceContext->Map(_lightBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -306,7 +306,7 @@ bool ShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Direc
 	dataPtr3->padding = 0.0f;
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_lightBuffer.Get(), 0);
+	deviceContext->Unmap(_lightBuffer, 0);
 
 	// Set the position of the light constant buffer in the vertex shader.
 	bufferNumber = 1;

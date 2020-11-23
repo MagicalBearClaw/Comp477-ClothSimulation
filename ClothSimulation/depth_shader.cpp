@@ -14,7 +14,7 @@ bool DepthShader::Initialize()
 	ID3D11Device* device = _renderContext->GetDevice();
 	HWND windowHandle = _renderContext->GetWindowHandle();
 
-	bool result = InitializeShader(device, windowHandle, L"../Engine/depth.vs", L"../Engine/depth.ps");
+	bool result = InitializeShader(device, windowHandle, L"./Assets/Shaders/depth.vs", L"./Assets/Shaders/depth.ps");
 	if (!result)
 	{
 		return false;
@@ -55,7 +55,7 @@ bool DepthShader::InitializeShader(ID3D11Device* device, HWND windowHandle, cons
 	pixelShaderBuffer = 0;
 
 	// Compile the vertex shader code.
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "DepthVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&vertexShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -74,7 +74,7 @@ bool DepthShader::InitializeShader(ID3D11Device* device, HWND windowHandle, cons
 	}
 
 	// Compile the pixel shader code.
-	result = D3DCompileFromFile(psFilename, NULL, NULL, "DepthPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&pixelShaderBuffer, &errorMessage);
 
 	if (FAILED(result))
@@ -203,7 +203,7 @@ bool DepthShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Direct
 
 
 	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(_matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -218,13 +218,13 @@ bool DepthShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Direct
 	DirectX::XMStoreFloat4x4(&dataPtr->projection, projectionMatrix);
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_matrixBuffer.Get(), 0);
+	deviceContext->Unmap(_matrixBuffer, 0);
 
 	// Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 0;
 
 	// Now set the constant buffer in the vertex shader with the updated values.
-	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &_matrixBuffer);
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1,&_matrixBuffer);
 
 	return true;
 }

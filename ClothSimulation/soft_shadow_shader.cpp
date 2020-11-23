@@ -17,7 +17,7 @@ bool SoftShadowShader::Initialize()
 {
 	ID3D11Device* device = _renderContext->GetDevice();
 	HWND windowHandle = _renderContext->GetWindowHandle();
-	bool result = InitializeShader(device, windowHandle, L"../Engine/softshadow.vs", L"../Engine/softshadow.ps");
+	bool result = InitializeShader(device, windowHandle, L"./Assets/Shaders/softshadow.vs", L"./Assets/Shaders/softshadow.ps");
 	if (!result)
 	{
 		return false;
@@ -26,8 +26,9 @@ bool SoftShadowShader::Initialize()
 	return true;
 }
 
-bool SoftShadowShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, DirectX::XMFLOAT4X4 worldMatrix, DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* shadowTexture, DirectX::XMFLOAT3 lightPosition, DirectX::XMFLOAT4 ambientColor, DirectX::XMFLOAT4 diffuseColor)
+bool SoftShadowShader::Render(int indexCount, DirectX::XMFLOAT4X4 worldMatrix, DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* shadowTexture, DirectX::XMFLOAT3 lightPosition, DirectX::XMFLOAT4 ambientColor, DirectX::XMFLOAT4 diffuseColor)
 {
+	ID3D11DeviceContext* deviceContext = _renderContext->GetDeviceContext();
 	bool result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, shadowTexture, lightPosition, ambientColor, diffuseColor);
 	if (!result)
 	{
@@ -60,7 +61,7 @@ bool SoftShadowShader::InitializeShader(ID3D11Device* device, HWND hwnd, const W
 	pixelShaderBuffer = 0;
 
 	// Compile the vertex shader code.
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "SoftShadowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&vertexShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -79,7 +80,7 @@ bool SoftShadowShader::InitializeShader(ID3D11Device* device, HWND hwnd, const W
 	}
 
 	// Compile the pixel shader code.
-	result = D3DCompileFromFile(psFilename, NULL, NULL, "SoftShadowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&pixelShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -287,7 +288,7 @@ bool SoftShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	DirectX::XMMATRIX projectionMatrixSim = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&projectionMatrix));
 
 	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(_matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -302,7 +303,7 @@ bool SoftShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	DirectX::XMStoreFloat4x4(&dataPtr->projection, projectionMatrixSim);
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_matrixBuffer.Get(), 0);
+	deviceContext->Unmap(_matrixBuffer, 0);
 
 	// Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 0;
@@ -315,7 +316,7 @@ bool SoftShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	deviceContext->PSSetShaderResources(1, 1, &shadowTexture);
 
 	// Lock the light constant buffer so it can be written to.
-	result = deviceContext->Map(_lightBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -329,7 +330,7 @@ bool SoftShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	dataPtr2->diffuseColor = diffuseColor;
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_lightBuffer.Get(), 0);
+	deviceContext->Unmap(_lightBuffer, 0);
 
 	// Set the position of the light constant buffer in the pixel shader.
 	bufferNumber = 0;
@@ -338,7 +339,7 @@ bool SoftShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &_lightBuffer);
 
 	// Lock the second light constant buffer so it can be written to.
-	result = deviceContext->Map(_lightBuffer2.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_lightBuffer2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -352,7 +353,7 @@ bool SoftShadowShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	dataPtr3->padding = 0.0f;
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_lightBuffer2.Get(), 0);
+	deviceContext->Unmap(_lightBuffer2, 0);
 
 	// Set the position of the light constant buffer in the vertex shader.
 	bufferNumber = 1;

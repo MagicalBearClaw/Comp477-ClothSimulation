@@ -1,14 +1,19 @@
 #include "stdafx.h"
 #include "model.h"
 
+std::unique_ptr<TextureLoader> Model::_textureLoader = nullptr;
 Model::Model(RenderContext* renderContext) : _renderContext(renderContext), _vertexCount(0), _indexCount(0)
 {
 	_vertexBuffer = nullptr;
 	_indexBuffer = nullptr;
 	_model = nullptr;
+	if (_textureLoader == nullptr)
+	{
+		_textureLoader = std::make_unique<TextureLoader>(renderContext);
+	}
 }
 
-bool Model::Initialize(const char* modelFilename, const WCHAR* textureFilename)
+bool Model::Initialize(const char* modelFilename, const std::string& textureFilename)
 {
 	ID3D11Device* device = _renderContext->GetDevice();
 	// Load in the model data,
@@ -26,7 +31,7 @@ bool Model::Initialize(const char* modelFilename, const WCHAR* textureFilename)
 	}
 
 	// Load the texture for this model.
-	result = LoadTexture(device, textureFilename);
+	result = LoadTexture(textureFilename);
 	if (!result)
 	{
 		return false;
@@ -51,7 +56,7 @@ int Model::GetIndexCount()
 
 ID3D11ShaderResourceView* Model::GetTexture()
 {
-	return nullptr;
+	return _texture.Get();
 }
 
 bool Model::InitializeBuffers(ID3D11Device* device)
@@ -160,24 +165,13 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
-bool Model::LoadTexture(ID3D11Device* device, const WCHAR* filename)
+bool Model::LoadTexture(const std::string& filename)
 {
-	//bool result;
-
-
-	//// Create the texture object.
-	//m_Texture = new TextureClass;
-	//if (!m_Texture)
-	//{
-	//	return false;
-	//}
-
-	//// Initialize the texture object.
-	//result = m_Texture->Initialize(device, filename);
-	//if (!result)
-	//{
-	//	return false;
-	//}
+	_texture = _textureLoader->Load(filename);
+	if (!_texture)
+	{
+		return false;
+	}
 
 	return true;
 }

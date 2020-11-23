@@ -9,8 +9,8 @@ public:
 	Camera(const Camera&);
 	~Camera();
 
-	void SetPosition(DirectX::XMFLOAT3& postion);
-	void SetRotation(DirectX::XMFLOAT3& rotation);
+	void SetPosition(DirectX::XMFLOAT3 postion);
+	void SetRotation(DirectX::XMFLOAT3 rotation);
 
 	DirectX::XMFLOAT3 GetPosition();
 	DirectX::XMFLOAT3 GetRotation();

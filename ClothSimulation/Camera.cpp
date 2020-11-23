@@ -13,12 +13,12 @@ Camera::~Camera()
 {
 }
 
-void Camera::SetPosition(DirectX::XMFLOAT3& position)
+void Camera::SetPosition(DirectX::XMFLOAT3 position)
 {
 	_position = position;
 }
 
-void Camera::SetRotation(DirectX::XMFLOAT3& rotation)
+void Camera::SetRotation(DirectX::XMFLOAT3 rotation)
 {
 	_rotation = rotation;
 }

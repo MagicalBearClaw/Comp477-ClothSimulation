@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "render_context.h"
+#include "texture_loader.h"
 
 class Model
 {
@@ -21,7 +22,7 @@ private:
 
 public:
 	Model(RenderContext* renderContext);
-	bool Initialize(const char* modelFilename, const WCHAR* textureFilename);
+	bool Initialize(const char* modelFilename, const std::string& textureFilename);
 	void Render();
 
 	int GetIndexCount();
@@ -34,16 +35,17 @@ private:
 	bool InitializeBuffers(ID3D11Device* device);
 	void RenderBuffers(ID3D11DeviceContext* deviceContext);
 
-	bool LoadTexture(ID3D11Device* device, const WCHAR* fileName);
+	bool LoadTexture(const std::string& filename);
 	bool LoadModel(const char* fileName);
 
 
 private:
 	RenderContext* _renderContext;
+	static std::unique_ptr<TextureLoader> _textureLoader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> _indexBuffer;
 	ModelType* _model;
-
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _texture;
 	DirectX::XMFLOAT3 _position;
 	int _vertexCount;
 	int _indexCount;

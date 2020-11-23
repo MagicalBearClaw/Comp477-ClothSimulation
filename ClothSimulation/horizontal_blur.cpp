@@ -221,7 +221,7 @@ bool HorizontalBlurShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&projection));
 
 	// Lock the matrix constant buffer so it can be written to.
-	result = deviceContext->Map(_matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -236,7 +236,7 @@ bool HorizontalBlurShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
 	DirectX::XMStoreFloat4x4(&dataPtr->projection, projectionMatrix);
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_matrixBuffer.Get(), 0);
+	deviceContext->Unmap(_matrixBuffer, 0);
 
 	// Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 0;
@@ -245,7 +245,7 @@ bool HorizontalBlurShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &_matrixBuffer);
 
 	// Lock the screen size constant buffer so it can be written to.
-	result = deviceContext->Map(_screenSizeBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_screenSizeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -259,7 +259,7 @@ bool HorizontalBlurShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
 	dataPtr2->padding = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_screenSizeBuffer.Get(), 0);
+	deviceContext->Unmap(_screenSizeBuffer, 0);
 
 	// Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 1;
@@ -296,7 +296,7 @@ bool HorizontalBlurShader::Initialize()
 	ID3D11Device* device = _renderContext->GetDevice();
 	HWND windowHandle = _renderContext->GetWindowHandle();
 	// Initialize the vertex and pixel shaders.
-	bool result = InitializeShader(device, windowHandle, L"../Shaders/horizontalblur.vs", L"../Shaders/horizontalblur.ps");
+	bool result = InitializeShader(device, windowHandle, L"./Assets/Shaders/horizontalblur.vs", L"./Assets/Shaders/horizontalblur.ps");
 	if (!result)
 	{
 		return false;

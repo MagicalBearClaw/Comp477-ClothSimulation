@@ -14,7 +14,7 @@ bool TextureShader::Initialize()
 {
 	ID3D11Device* device = _renderContext->GetDevice();
 	HWND windowHandle = _renderContext->GetWindowHandle();
-	bool result = InitializeShader(device, windowHandle, L"../Engine/texture.vs", L"../Engine/texture.ps");
+	bool result = InitializeShader(device, windowHandle, L"./Assets/Shaders/texture.vs", L"./Assets/Shaders/texture.ps");
 	if (!result)
 	{
 		return false;
@@ -230,7 +230,7 @@ bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Dire
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&projection));
 
 	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(_matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
@@ -244,7 +244,7 @@ bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Dire
 	DirectX::XMStoreFloat4x4(&dataPtr->view, viewMatrix);
 	DirectX::XMStoreFloat4x4(&dataPtr->projection, projectionMatrix);
 	// Unlock the constant buffer.
-	deviceContext->Unmap(_matrixBuffer.Get(), 0);
+	deviceContext->Unmap(_matrixBuffer, 0);
 
 	// Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 0;

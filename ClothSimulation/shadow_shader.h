@@ -44,7 +44,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> _layout;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> _sampleState;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _matrixBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _lightBuffer;
+	ID3D11Buffer* _matrixBuffer;
+	ID3D11Buffer* _lightBuffer;
 
 };
