@@ -9,6 +9,9 @@ class BasicClothScene : public Scene
 	virtual void FixedUpdate(float deltaTime) override;
 	virtual void Update(float deltaTime) override;
 	virtual void Draw() override;
+
+	// Inherited via Scene
+	virtual void DrawUI() override;
 };
 
 

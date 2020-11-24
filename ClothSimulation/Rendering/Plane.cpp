@@ -3,27 +3,27 @@
 
 
 Plane::Plane(float length, float width, int numberOfLengthSegments, int numberOfWidthSegments, std::string textureFileName) :
-			length(length), width(width), numberOfWidthSegments(numberOfWidthSegments), numberOfLengthSegments(numberOfLengthSegments), textureFileName(textureFileName)
+			length(length), width(width), NumberOfWidthSegments(numberOfWidthSegments), NumberOfLengthSegments(numberOfLengthSegments), textureFileName(textureFileName)
 {
     Initialize();
 }
 
 void Plane::CreateVertexBuffer()
 {
-    vertices.resize((numberOfLengthSegments + 1)* (numberOfWidthSegments + 1));
-    for (int x = 0; x < numberOfLengthSegments + 1; x++)
+    vertices.resize((NumberOfLengthSegments + 1)* (NumberOfWidthSegments + 1));
+    for (int x = 0; x < NumberOfLengthSegments + 1; x++)
     {
-        for (int y = 0; y < numberOfWidthSegments + 1; y++)
+        for (int y = 0; y < NumberOfWidthSegments + 1; y++)
         {
-            vertices[x + y * (numberOfLengthSegments + 1)].Position = glm::vec3(x * gridWidth - length / 2, 0, -y * gridHeight + width / 2);
-            vertices[x + y * (numberOfLengthSegments + 1)].TexCoords = glm::vec2((float)x / numberOfLengthSegments, (float)y / numberOfWidthSegments);
-            vertices[x + y * (numberOfLengthSegments + 1)].Normal = glm::vec3(0, 1, 0);
+            vertices[x + y * (NumberOfLengthSegments + 1)].Position = glm::vec3(x * gridWidth - length / 2, 0, -y * gridHeight + width / 2);
+            vertices[x + y * (NumberOfLengthSegments + 1)].TexCoords = glm::vec2((float)x / NumberOfLengthSegments, (float)y / NumberOfWidthSegments);
+            vertices[x + y * (NumberOfLengthSegments + 1)].Normal = glm::vec3(0, 1, 0);
         }
     }
 
     //create the vertex mapping:
     //for plane, there are no dup vertices, so the pseudo vertex id is just the real vertex id
-    for (int i = 0; i < numVertices; i++)
+    for (int i = 0; i < NumberOfVertices; i++)
     {
         vertexMappingPseudoToReal.push_back(std::vector<int>{ i });
     }
@@ -31,32 +31,32 @@ void Plane::CreateVertexBuffer()
 
 void Plane::CreateIndexBuffer()
 {
-    indices.resize(numberOfLengthSegments * numberOfWidthSegments * 6);
-    for (int x = 0; x < numberOfLengthSegments; x++)
+    indices.resize(NumberOfLengthSegments * NumberOfWidthSegments * 6);
+    for (int x = 0; x < NumberOfLengthSegments; x++)
     {
-        for (int y = 0; y < numberOfWidthSegments; y++)
+        for (int y = 0; y < NumberOfWidthSegments; y++)
         {
             //specify the indices for the first tri
-            indices[(x + y * numberOfLengthSegments) * 6] = (x + 1) + (y + 1) * (numberOfLengthSegments + 1);
-            indices[(x + y * numberOfLengthSegments) * 6 + 1] = (x + 1) + y * (numberOfLengthSegments + 1);
-            indices[(x + y * numberOfLengthSegments) * 6 + 2] = x + y * (numberOfLengthSegments + 1);
+            indices[(x + y * NumberOfLengthSegments) * 6] = (x + 1) + (y + 1) * (NumberOfLengthSegments + 1);
+            indices[(x + y * NumberOfLengthSegments) * 6 + 1] = (x + 1) + y * (NumberOfLengthSegments + 1);
+            indices[(x + y * NumberOfLengthSegments) * 6 + 2] = x + y * (NumberOfLengthSegments + 1);
 
             //store triangle vertex info for future use
             std::vector<int> triangleVertex(3);
-            triangleVertex[0] = indices[(x + y * numberOfLengthSegments) * 6];
-            triangleVertex[1] = indices[(x + y * numberOfLengthSegments) * 6 + 1];
-            triangleVertex[2] = indices[(x + y * numberOfLengthSegments) * 6 + 2];
+            triangleVertex[0] = indices[(x + y * NumberOfLengthSegments) * 6];
+            triangleVertex[1] = indices[(x + y * NumberOfLengthSegments) * 6 + 1];
+            triangleVertex[2] = indices[(x + y * NumberOfLengthSegments) * 6 + 2];
             triangleVertexInfo.push_back(triangleVertex);
 
             //specify the indices for the second tri
-            indices[(x + y * numberOfLengthSegments) * 6 + 3] = (x + 1) + (y + 1) * (numberOfLengthSegments + 1);
-            indices[(x + y * numberOfLengthSegments) * 6 + 4] = x + y * (numberOfLengthSegments + 1);
-            indices[(x + y * numberOfLengthSegments) * 6 + 5] = x + (y + 1) * (numberOfLengthSegments + 1);
+            indices[(x + y * NumberOfLengthSegments) * 6 + 3] = (x + 1) + (y + 1) * (NumberOfLengthSegments + 1);
+            indices[(x + y * NumberOfLengthSegments) * 6 + 4] = x + y * (NumberOfLengthSegments + 1);
+            indices[(x + y * NumberOfLengthSegments) * 6 + 5] = x + (y + 1) * (NumberOfLengthSegments + 1);
 
             //store triangleVertex info for future use
-            triangleVertex[0] = indices[(x + y * numberOfLengthSegments) * 6 + 3];
-            triangleVertex[1] = indices[(x + y * numberOfLengthSegments) * 6 + 4];
-            triangleVertex[2] = indices[(x + y * numberOfLengthSegments) * 6 + 5];
+            triangleVertex[0] = indices[(x + y * NumberOfLengthSegments) * 6 + 3];
+            triangleVertex[1] = indices[(x + y * NumberOfLengthSegments) * 6 + 4];
+            triangleVertex[2] = indices[(x + y * NumberOfLengthSegments) * 6 + 5];
             triangleVertexInfo.push_back(triangleVertex);
         }
     }
@@ -106,7 +106,7 @@ void Plane::RecalculateNormals()
     int thisTriVertex3Id;
 
     //reset all vertex normals first
-    for (int i = 0; i < numVertices; i++)
+    for (int i = 0; i < NumberOfVertices; i++)
     {
         SetVertexNormal(i, glm::vec3(0,0,0));
     }
@@ -123,9 +123,6 @@ void Plane::RecalculateNormals()
         point1 = GetVertexPosition(thisTriVertex1Id);
         point2 = GetVertexPosition(thisTriVertex2Id);
         point3 = GetVertexPosition(thisTriVertex3Id);
-        //point1 = this.vertices[thisTriVertex1Id].Position;
-        //point2 = this.vertices[thisTriVertex2Id].Position;
-        //point3 = this.vertices[thisTriVertex3Id].Position;
 
         //update tri normal
         triangleNormals[i] = -glm::cross(point3 - point2, point1 - point2);
@@ -141,9 +138,6 @@ void Plane::RecalculateNormals()
         AddVertexNormal(thisTriVertex1Id, triangleNormals[i]);
         AddVertexNormal(thisTriVertex2Id, triangleNormals[i]);
         AddVertexNormal(thisTriVertex3Id, triangleNormals[i]);
-        //this.vertices[thisTriVertex1Id].Normal += triangleNormals[i];
-        //this.vertices[thisTriVertex2Id].Normal += triangleNormals[i];
-        //this.vertices[thisTriVertex3Id].Normal += triangleNormals[i];
     }
 
 
@@ -168,12 +162,12 @@ float Plane::RecalculateVolume()
 
 void Plane::Initialize()
 {
-    gridWidth = (float)length / (float)numberOfLengthSegments;
-    gridHeight = (float)width / (float)numberOfWidthSegments;
+    gridWidth = (float)length / (float)NumberOfLengthSegments;
+    gridHeight = (float)width / (float)NumberOfWidthSegments;
 
-    numRealVertices = (numberOfLengthSegments + 1) * (numberOfWidthSegments + 1);
-    numTris = numberOfLengthSegments * numberOfWidthSegments * 2;
-    numVertices = numRealVertices;
+    numRealVertices = (NumberOfLengthSegments + 1) * (NumberOfWidthSegments + 1);
+    numTris = NumberOfLengthSegments * NumberOfWidthSegments * 2;
+    NumberOfVertices = numRealVertices;
     triangleNormals.resize(numTris);
     triangleAreas.resize(numTris);
 

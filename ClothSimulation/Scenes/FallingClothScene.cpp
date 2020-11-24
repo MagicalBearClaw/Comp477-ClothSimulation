@@ -16,3 +16,7 @@ void FallingClothScene::Update(float deltaTime)
 void FallingClothScene::Draw()
 {
 }
+
+void FallingClothScene::DrawUI()
+{
+}

@@ -26,18 +26,18 @@ public:
     float RecalculateVolume();
     void Initialize();
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
-
+    int NumberOfWidthSegments;
+    int NumberOfLengthSegments;
+    int NumberOfVertices;
 private:
     void LoadTexture(const std::string& textureFileName);
 private:
     int numRealVertices;  //number of vertices in the buffer (might have dups)
     int numTris;
-    int numVertices;  //number of pseudo vertices (no dups)
 
     float width;
     float length;
-    int numberOfWidthSegments;
-    int numberOfLengthSegments;
+
     float gridWidth;
     float gridHeight;
     GLuint textureId;

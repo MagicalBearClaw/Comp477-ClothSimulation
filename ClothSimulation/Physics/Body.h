@@ -4,15 +4,8 @@
 class Body
 {
 public:
-	enum class BodyType
-	{
-		Passive,
-		Active
-	};
-
-	Body(float mass, BodyType bodyType);
+	Body(float mass);
 	float GetMass();
-	BodyType GetType();
 	glm::vec3 GetCurrentPosition();
 	void SetPosition(glm::vec3 position);
 	void SetPreviousPosition(glm::vec3 position);
@@ -24,7 +17,6 @@ public:
 	void SetAppliedForces(glm::vec3 force);
 protected:
 	float _mass;
-	BodyType _type;
 	glm::vec3 _currentPoistion;
 	glm::vec3 _previousPoistion;
 	glm::vec3 _velocity;

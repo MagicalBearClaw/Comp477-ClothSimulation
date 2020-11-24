@@ -8,4 +8,5 @@ public:
 	virtual void FixedUpdate(float deltaTime) = 0;
 	virtual void Update(float deltaTime) = 0;
 	virtual void Draw() = 0;
+	virtual void DrawUI() = 0;
 };
