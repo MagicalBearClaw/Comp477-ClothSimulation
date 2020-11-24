@@ -8,6 +8,8 @@
 
 #include "../Rendering//Camera.h"
 #include "../Rendering/Shader.h"
+#include "../Rendering/Plane.h"
+#include "../Rendering/SkyBox.h"
 
 class ClothSimulationApplication : public Application
 {
@@ -24,11 +26,6 @@ public:
 	virtual void HandleMouse(double xPosition, double yPosition) override;
 
 	void ProccessKeyboardInput(float deltaTime);
-
-private:
-	unsigned int LoadTexture(const char* path);
-	unsigned int LoadCubemap(std::vector<std::string> faces);
-
 private:
 	// camera
 	Camera camera;
@@ -37,17 +34,9 @@ private:
 	float lastX;
 	float lastY;
 	bool firstMouse;
-	unsigned int cubeVAO;
-	unsigned int cubeVBO;
 
-	unsigned int skyboxVAO;
-	unsigned int skyboxVBO;
-
-	unsigned int cubeTexture;
-	unsigned int cubemapTexture;
-
-	float cubeVertices[180];
-	float skyboxVertices[108];
+	std::unique_ptr<Plane> plane;
+	std::unique_ptr<SkyBox> skyBox;
 	bool showImguiWindow;
 	ImGuiIO* _imguiIO;
 	ImVec4 _clearColor;

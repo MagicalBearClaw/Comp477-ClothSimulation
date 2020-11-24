@@ -1,88 +1,265 @@
 #include "../stdafx.h"
 #include "Plane.h"
 
-Plane::Plane(float length, float width, int lengthSegments, int widthSegments, std::string textureFileName) : Mesh(textureFileName),
-			length(length), width(width), lengthSegments(lengthSegments), widthSegments(widthSegments)
+
+Plane::Plane(float length, float width, int numberOfLengthSegments, int numberOfWidthSegments, std::string textureFileName) :
+			length(length), width(width), numberOfWidthSegments(numberOfWidthSegments), numberOfLengthSegments(numberOfLengthSegments), textureFileName(textureFileName)
 {
-    gridWidth = (float)length / (float)lengthSegments;
-    gridHeight = (float)width / (float)widthSegments;
-
-    numberofVerticesWithDuplicates = (lengthSegments + 1) * (widthSegments + 1);
-    numberOfFaces = lengthSegments * widthSegments * 2;
-    numberOfVerticies = numberofVerticesWithDuplicates;
-
-    CreateVertexBuffer();
-    CreateIndexBuffer();
-
-    triangleNormals.resize(numberOfFaces);
-    triangleAreas = new float[numberOfFaces];
-    RecalculateNormals();
-    Update();
+    Initialize();
 }
 
 void Plane::CreateVertexBuffer()
 {
-    //vertices = new VertexPositionNormalTexture[(lengthSegments + 1) * (widthSegments + 1)];
-    //for (int x = 0; x < lengthSegments + 1; x++)
-    //{
-    //    for (int y = 0; y < widthSegments + 1; y++)
-    //    {
-    //        vertices[x + y * (lengthSegments + 1)].Position = new Vector3(x * gridWidth - length / 2, 0, -y * gridHeight + width / 2);
-    //        vertices[x + y * (lengthSegments + 1)].TextureCoordinate = new Vector2((float)x / lengthSegments, (float)y / widthSegments);
-    //        vertices[x + y * (lengthSegments + 1)].Normal = new Vector3(0, 1, 0);
-    //    }
-    //}
-    //VertexBuffer vb = new VertexBuffer(game.GraphicsDevice, sizeof(float) * 8 * (lengthSegments + 1) * (widthSegments + 1), BufferUsage.WriteOnly);
-    //vb.SetData<VertexPositionNormalTexture>(vertices);
-    //this.vertexBuffer = vb;
+    vertices.resize((numberOfLengthSegments + 1)* (numberOfWidthSegments + 1));
+    for (int x = 0; x < numberOfLengthSegments + 1; x++)
+    {
+        for (int y = 0; y < numberOfWidthSegments + 1; y++)
+        {
+            vertices[x + y * (numberOfLengthSegments + 1)].Position = glm::vec3(x * gridWidth - length / 2, 0, -y * gridHeight + width / 2);
+            vertices[x + y * (numberOfLengthSegments + 1)].TexCoords = glm::vec2((float)x / numberOfLengthSegments, (float)y / numberOfWidthSegments);
+            vertices[x + y * (numberOfLengthSegments + 1)].Normal = glm::vec3(0, 1, 0);
+        }
+    }
 
-    ////create the vertex mapping:
-    ////for plane, there are no dup vertices, so the pseudo vertex id is just the real vertex id
-    //for (int i = 0; i < numVertices; i++)
-    //{
-    //    vertexMappingPseudoToReal.Add(new List<int>{ i });
-    //}
+    //create the vertex mapping:
+    //for plane, there are no dup vertices, so the pseudo vertex id is just the real vertex id
+    for (int i = 0; i < numVertices; i++)
+    {
+        vertexMappingPseudoToReal.push_back(std::vector<int>{ i });
+    }
 }
 
 void Plane::CreateIndexBuffer()
 {
-    const int numberOfIndices = lengthSegments * widthSegments * 6;
-    std::vector<int> indices(numberOfIndices);
-
-    for (int x = 0; x < lengthSegments; x++)
+    indices.resize(numberOfLengthSegments * numberOfWidthSegments * 6);
+    for (int x = 0; x < numberOfLengthSegments; x++)
     {
-        for (int y = 0; y < widthSegments; y++)
+        for (int y = 0; y < numberOfWidthSegments; y++)
         {
             //specify the indices for the first tri
-            indices[(x + y * lengthSegments) * 6] = (x + 1) + (y + 1) * (lengthSegments + 1);
-            indices[(x + y * lengthSegments) * 6 + 1] = (x + 1) + y * (lengthSegments + 1);
-            indices[(x + y * lengthSegments) * 6 + 2] = x + y * (lengthSegments + 1);
+            indices[(x + y * numberOfLengthSegments) * 6] = (x + 1) + (y + 1) * (numberOfLengthSegments + 1);
+            indices[(x + y * numberOfLengthSegments) * 6 + 1] = (x + 1) + y * (numberOfLengthSegments + 1);
+            indices[(x + y * numberOfLengthSegments) * 6 + 2] = x + y * (numberOfLengthSegments + 1);
 
             //store triangle vertex info for future use
-            int triangleVertex[3];
-
-
-            triangleVertex[0] = indices[(x + y * lengthSegments) * 6];
-            triangleVertex[1] = indices[(x + y * lengthSegments) * 6 + 1];
-            triangleVertex[2] = indices[(x + y * lengthSegments) * 6 + 2];
-
-            //triangleVertexInfo.push_back(a);
+            std::vector<int> triangleVertex(3);
+            triangleVertex[0] = indices[(x + y * numberOfLengthSegments) * 6];
+            triangleVertex[1] = indices[(x + y * numberOfLengthSegments) * 6 + 1];
+            triangleVertex[2] = indices[(x + y * numberOfLengthSegments) * 6 + 2];
+            triangleVertexInfo.push_back(triangleVertex);
 
             //specify the indices for the second tri
-            indices[(x + y * lengthSegments) * 6 + 3] = (x + 1) + (y + 1) * (lengthSegments + 1);
-            indices[(x + y * lengthSegments) * 6 + 4] = x + y * (lengthSegments + 1);
-            indices[(x + y * lengthSegments) * 6 + 5] = x + (y + 1) * (lengthSegments + 1);
+            indices[(x + y * numberOfLengthSegments) * 6 + 3] = (x + 1) + (y + 1) * (numberOfLengthSegments + 1);
+            indices[(x + y * numberOfLengthSegments) * 6 + 4] = x + y * (numberOfLengthSegments + 1);
+            indices[(x + y * numberOfLengthSegments) * 6 + 5] = x + (y + 1) * (numberOfLengthSegments + 1);
 
             //store triangleVertex info for future use
-            //triangleVertex = new int[3];
-            //triangleVertex[0] = indices[(x + y * lengthSegments) * 6 + 3];
-            //triangleVertex[1] = indices[(x + y * lengthSegments) * 6 + 4];
-            //triangleVertex[2] = indices[(x + y * lengthSegments) * 6 + 5];
-            //triangleVertexInfo.Add(triangleVertex);
+            triangleVertex[0] = indices[(x + y * numberOfLengthSegments) * 6 + 3];
+            triangleVertex[1] = indices[(x + y * numberOfLengthSegments) * 6 + 4];
+            triangleVertex[2] = indices[(x + y * numberOfLengthSegments) * 6 + 5];
+            triangleVertexInfo.push_back(triangleVertex);
         }
     }
+}
 
-    //IndexBuffer ib = new IndexBuffer(game.GraphicsDevice, typeof(int), this.lengthSegments * this.widthSegments * 6, BufferUsage.WriteOnly);
-    //ib.SetData<int>(indices);
-    //this.indexBuffer = ib;
+void Plane::SetVertexPosition(int vertexId, glm::vec3 position)
+{
+    std::vector<int> realVertexIds = vertexMappingPseudoToReal[vertexId];
+    for (int realVertexId : realVertexIds) {
+        vertices[realVertexId].Position = position;
+    }
+}
+
+void Plane::SetVertexNormal(int vertexId, glm::vec3 normal)
+{
+    std::vector<int> realVertexIds = vertexMappingPseudoToReal[vertexId];
+    for (int realVertexId : realVertexIds) {
+        vertices[realVertexId].Normal = normal;
+    }
+}
+
+glm::vec3 Plane::GetVertexPosition(int vertexId)
+{
+    return vertices[vertexMappingPseudoToReal[vertexId][0]].Position;
+}
+
+void Plane::AddVertexNormal(int vertexId, glm::vec3 normal)
+{
+    std::vector<int> realVertexIds = vertexMappingPseudoToReal[vertexId];
+    for (int realVertexId : realVertexIds) {
+        vertices[realVertexId].Normal += normal;
+    }
+}
+
+glm::vec3 Plane::GetVertexNormal(int vertexId)
+{
+    return vertices[vertexMappingPseudoToReal[vertexId][0]].Normal;
+}
+
+void Plane::RecalculateNormals()
+{
+    glm::vec3 point1;
+    glm::vec3 point2;
+    glm::vec3 point3;
+    int thisTriVertex1Id;
+    int thisTriVertex2Id;
+    int thisTriVertex3Id;
+
+    //reset all vertex normals first
+    for (int i = 0; i < numVertices; i++)
+    {
+        SetVertexNormal(i, glm::vec3(0,0,0));
+    }
+
+    //iterate through all tris
+    for (int i = 0; i < triangleVertexInfo.size(); i++)
+    {
+        //get the vertex ids of the current triangle
+        thisTriVertex1Id = triangleVertexInfo[i][0];
+        thisTriVertex2Id = triangleVertexInfo[i][1];
+        thisTriVertex3Id = triangleVertexInfo[i][2];
+
+        //get the positions of those vertices
+        point1 = GetVertexPosition(thisTriVertex1Id);
+        point2 = GetVertexPosition(thisTriVertex2Id);
+        point3 = GetVertexPosition(thisTriVertex3Id);
+        //point1 = this.vertices[thisTriVertex1Id].Position;
+        //point2 = this.vertices[thisTriVertex2Id].Position;
+        //point3 = this.vertices[thisTriVertex3Id].Position;
+
+        //update tri normal
+        triangleNormals[i] = -glm::cross(point3 - point2, point1 - point2);
+        if (triangleNormals[i] != glm::vec3(0, 0, 0))
+        {
+            triangleNormals[i] = glm::normalize(triangleNormals[i]);
+        }
+
+        //update triangle area
+        triangleAreas[i] = triangleNormals[i].length();
+
+        //add the tri normal to the vertices that are sharing it
+        AddVertexNormal(thisTriVertex1Id, triangleNormals[i]);
+        AddVertexNormal(thisTriVertex2Id, triangleNormals[i]);
+        AddVertexNormal(thisTriVertex3Id, triangleNormals[i]);
+        //this.vertices[thisTriVertex1Id].Normal += triangleNormals[i];
+        //this.vertices[thisTriVertex2Id].Normal += triangleNormals[i];
+        //this.vertices[thisTriVertex3Id].Normal += triangleNormals[i];
+    }
+
+
+}
+
+float Plane::RecalculateVolume()
+{
+    float volume = 0;
+    glm::vec3 point1;
+    glm::vec3 point2;
+    glm::vec3 point3;
+
+    for (int i = 0; i < numTris; i++)
+    {
+        point1 = GetVertexPosition(triangleVertexInfo[i][0]);
+        point2 = GetVertexPosition(triangleVertexInfo[i][1]);
+        point3 = GetVertexPosition(triangleVertexInfo[i][2]);
+        volume += triangleAreas[i] * triangleNormals[i].x * (point1.x + point2.x + point3.x);
+    }
+    return volume / 3;
+}
+
+void Plane::Initialize()
+{
+    gridWidth = (float)length / (float)numberOfLengthSegments;
+    gridHeight = (float)width / (float)numberOfWidthSegments;
+
+    numRealVertices = (numberOfLengthSegments + 1) * (numberOfWidthSegments + 1);
+    numTris = numberOfLengthSegments * numberOfWidthSegments * 2;
+    numVertices = numRealVertices;
+    triangleNormals.resize(numTris);
+    triangleAreas.resize(numTris);
+
+    CreateVertexBuffer();
+    CreateIndexBuffer();
+
+    LoadTexture(textureFileName);
+
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+        &indices[0], GL_STATIC_DRAW);
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+    glBindVertexArray(0);
+
+
+    RecalculateNormals();
+}
+
+void Plane::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
+{
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);;
+    shader.Use();
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+    shader.SetMat4("model", model);
+    shader.SetMat4("view", view);
+    shader.SetMat4("projection", projection);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glBindVertexArray(vao);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+void Plane::LoadTexture(const std::string& textureFileName)
+{
+
+    glGenTextures(1, &textureId);
+
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(textureFileName.c_str(), &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << textureFileName << std::endl;
+        stbi_image_free(data);
+    }
 }

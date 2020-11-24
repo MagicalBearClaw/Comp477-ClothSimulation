@@ -123,9 +123,6 @@
     <ClCompile Include="Rendering\Camera.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Mesh.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\Plane.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
@@ -134,6 +131,9 @@
     </ClCompile>
     <ClCompile Include="Scenes\FallingClothScene.cpp">
       <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\SkyBox.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -218,9 +218,6 @@
     <ClInclude Include="Rendering\Camera.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Mesh.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\Plane.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
@@ -233,5 +230,22 @@
     <ClInclude Include="Scenes\FallingClothScene.h">
       <Filter>Header Files\Scenes</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\SkyBox.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Shaders\6.1.cubemaps.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Assets\Shaders\6.1.cubemaps.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Assets\Shaders\6.1.skybox.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Assets\Shaders\6.1.skybox.fs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
