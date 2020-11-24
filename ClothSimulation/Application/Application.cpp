@@ -11,25 +11,38 @@ Application::~Application()
 {
 }
 
-static void GLFWErrorCallback(int error, const char* description)
+void Application::ErrorCallback(int error, const char* description)
 {
 	fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
+void Application::WindowResizeCallback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
+void Application::MouseCallback(GLFWwindow* window, double xPosition, double yPosition)
+{
+	Application* application = (Application*)glfwGetWindowUserPointer(window);
+	application->HandleMouse(xPosition, yPosition);
+}
+
+void Application::ScrollCallBack(GLFWwindow* window, double xOffset, double yOffset)
+{
+	Application* application = (Application*)glfwGetWindowUserPointer(window);
+	application->HandleMouseScroll(xOffset, yOffset);
+}
+
 int Application::Run()
 {
-	bool isDOne = false;
-	while (!isDOne)
+	while (!glfwWindowShouldClose(_window))
 	{
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
-		{
-			isDOne = HandleWindowEvent(event);
-		}
-
-		FixedUpdate(1/60);
+		glfwPollEvents();
+		FixedUpdate(1 / 60);
 		Update(_stopWatch.ElapsedTime());
 		Draw(_stopWatch.ElapsedTime());
+		glfwSwapBuffers(_window);
+
 	}
 
 	ShutDOwn();
@@ -42,7 +55,7 @@ int Application::Run()
 
 bool Application::Initialize()
 {
-	glfwSetErrorCallback(GLFWErrorCallback);
+	glfwSetErrorCallback(ErrorCallback);
 	if (!glfwInit())
 		return false;
 
@@ -54,8 +67,19 @@ bool Application::Initialize()
 	_window = glfwCreateWindow(_windowWith, _windowHeight, _windowTitle.c_str(), nullptr, nullptr);
 	if (_window == nullptr)
 		return false;
-
 	glfwMakeContextCurrent(_window);
-	glfwSwapInterval(1); // Enable vsync
 
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return false;
+	}
+
+
+	glfwSetFramebufferSizeCallback(_window, WindowResizeCallback);
+
+	glfwSetCursorPosCallback(_window, MouseCallback);
+	glfwSetScrollCallback(_window, ScrollCallBack);
+
+	glfwSetWindowUserPointer(_window, this);
 }

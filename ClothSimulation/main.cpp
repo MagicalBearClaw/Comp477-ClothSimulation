@@ -5,8 +5,7 @@
 
 
 // Main code
-INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-    PSTR lpCmdLine, INT nCmdShow)
+int main()
 {
     ClothSimulationApplication* application = new ClothSimulationApplication("Cloth Simulation COMP 477", 1680, 1050);
     if (!application->Initialize())
