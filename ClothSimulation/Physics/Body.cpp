@@ -57,3 +57,7 @@ void Body::SetAppliedForces(glm::vec3 force)
 {
     _appliedForces = force;
 }
+
+void Body::Update(float deltaTime)
+{
+}

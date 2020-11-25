@@ -75,7 +75,8 @@ bool Application::Initialize()
 		return false;
 	}
 
-
+	// tell GLFW to capture our mouse
+	//glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetFramebufferSizeCallback(_window, WindowResizeCallback);
 
 	glfwSetCursorPosCallback(_window, MouseCallback);

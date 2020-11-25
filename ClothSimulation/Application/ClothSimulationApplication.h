@@ -9,6 +9,7 @@
 #include "../Rendering//Camera.h"
 #include "../Rendering/Shader.h"
 #include "../Rendering/Plane.h"
+#include "../Rendering/Sphere.h"
 #include "../Rendering/SkyBox.h"
 
 class ClothSimulationApplication : public Application
@@ -34,8 +35,9 @@ private:
 	float lastX;
 	float lastY;
 	bool firstMouse;
-
+	bool drawInWireframe;
 	std::unique_ptr<Plane> plane;
+	std::unique_ptr<Sphere> sphere;
 	std::unique_ptr<SkyBox> skyBox;
 	bool showImguiWindow;
 	ImGuiIO* _imguiIO;

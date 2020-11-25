@@ -4,11 +4,7 @@
 #include "Shader.h"
 #include "Camera.h"
 
-struct Vertex {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TexCoords;
-};
+
 
 class Plane
 {
@@ -30,6 +26,11 @@ public:
     int NumberOfLengthSegments;
     int NumberOfVertices;
 private:
+    struct Vertex {
+        glm::vec3 Position;
+        glm::vec3 Normal;
+        glm::vec2 TexCoords;
+    };
     void LoadTexture(const std::string& textureFileName);
 private:
     int numRealVertices;  //number of vertices in the buffer (might have dups)

@@ -34,6 +34,7 @@ bool ClothSimulationApplication::Initialize()
     skyboxShader.Load("./Assets/Shaders/6.1.skybox.vs", "./Assets/Shaders/6.1.skybox.fs");
 
     plane = std::make_unique<Plane>(10, 5, 20, 15, std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string());
+    sphere = std::make_unique<Sphere>(std::filesystem::path("./Assets/Textures/earth2048.jpg").generic_u8string(), 1);
     skyBox = std::make_unique<SkyBox>();
     cubeMapShader.Use();
     cubeMapShader.SetInt("texture1", 0);
@@ -58,8 +59,17 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.1f, 100.0f);
 
-    // draw plane
-    plane->Draw(cubeMapShader, camera, projection);
+    if (drawInWireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        plane->Draw(cubeMapShader, camera, projection);
+        sphere->Draw(cubeMapShader, camera, projection);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);;
+    }
+    else {
+        plane->Draw(cubeMapShader, camera, projection);
+        sphere->Draw(cubeMapShader, camera, projection);
+    }
     // draw skybox
     skyBox->Draw(skyboxShader, camera, projection);
 
@@ -122,6 +132,11 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
 
     if (glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(_window, true);
+
+    if (glfwGetKey(_window, GLFW_KEY_1) == GLFW_PRESS)
+    {
+        drawInWireframe = !drawInWireframe;
+    }
 
     if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(Camera::Direction::FORWARD, deltaTime);

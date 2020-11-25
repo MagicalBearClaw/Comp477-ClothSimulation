@@ -2,9 +2,14 @@
 #include "../stdafx.h"
 #include "Cloth.h"
 
-
 Cloth::Cloth()
 {
+    Initialize();
+}
+
+Cloth::~Cloth()
+{
+    Reset();
 }
 
 void Cloth::Update(float deltaTime)
@@ -16,60 +21,62 @@ void Cloth::Update(float deltaTime)
     }
 
     //sum all global forces acting on the objects
-    for(Particle& particle : _bodies)
+    for(Particle* particle : _particles)
     {
-        for (IForceGenerator& forceGenerator : _forceGenerators)
+        for (IForceGenerator* forceGenerator : _forceGenerators)
         {
-            forceGenerator.ApplyForce(&particle);
+            forceGenerator->ApplyForce(particle);
         }
     }
 
     glm::vec3 acceleration;
-    for(Particle& particle : _bodies)
+    for(Particle* particle : _particles)
     {
         //find acceleration
-        acceleration = particle.GetAppliedForces() / particle.GetMass();
+        acceleration = particle->GetAppliedForces() / particle->GetMass();
 
         //integrate
-        IntegrationMethod->Intergrate(&particle, acceleration, deltaTime);
+        IntegrationMethod->Intergrate(particle, acceleration, deltaTime);
     }
 
     //satisfy constraints
     for(int i = 0; i < ConstraintIterations; i++)
     {
-        for(IConstraint& constraint : _constraints)
+        for(IConstraint* constraint : _constraints)
         {
-            constraint.SatisfyConstraint();
+            constraint->SatisfyConstraint();
         }
     }
 
     //update object
-    for(Particle& particle : _bodies)
+    for(Particle* particle : _particles)
     {
-        //particle.Update(deltaTime);
+        _plane->SetVertexPosition(particle->VertexId, particle->GetCurrentPosition());
     }
 
     //reset forces on sim objects
-    for (Particle& particle : _bodies)
+    for (Particle* particle : _particles)
     {
-        particle.ResetAppliedForces();
+        particle->ResetAppliedForces();
     }
 }
 
 void Cloth::Initialize()
 {
 	ConstraintIterations = 30;
+    Reset();
+    CreateParticles(Mass);
 }
 
-void Cloth::CreateParticle(int vertexId, float clothMass)
+void Cloth::CreateParticles(float clothMass)
 {
     int numVertices = _plane->NumberOfVertices;
     float vertexMass = clothMass / numVertices;
     _particles.resize(numVertices);
     for (int i = 0; i < numVertices; i++)
     {
-        // TODO: fix 3 parameter and makes sure the texture plane stuff works in the particle class correctly
-        _bodies.push_back(Particle(vertexMass, i, glm::vec3(0,0,0)));
+        Particle*  p =  new Particle(vertexMass, i, _plane->GetVertexPosition(i));
+        _particles.push_back(p);
     }
 }
 
@@ -84,77 +91,92 @@ void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float
             int vertexBId = (x + 1) + y * (_plane->NumberOfLengthSegments + 1);
             AddSpring(structalStiffness, structalDamping, _particles[vertexAId], _particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(LengthConstraint(&_particles[vertexAId], &_particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
         }
     }
 
-    for (int x = 0; x <= _plane->LengthSegments; x++)
+    for (int x = 0; x <= _plane->NumberOfLengthSegments; x++)
     {
-        for (int y = 0; y < _plane->WidthSegments; y++)
+        for (int y = 0; y < _plane->NumberOfWidthSegments; y++)
         {
             //structural spring: vertical (|)
-            int vertexAId = x + y * (_plane->LengthSegments + 1);
-            int vertexBId = x + (y + 1) * (_plane->LengthSegments + 1);
+            int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
+            int vertexBId = x + (y + 1) * (_plane->NumberOfLengthSegments + 1);
             AddSpring(structalStiffness, structalDamping, _particles[vertexAId], _particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(LengthConstraint(&_particles[vertexAId], &_particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
         }
     }
 
-    for (int x = 0; x < _plane->LengthSegments; x++)
+    for (int x = 0; x < _plane->NumberOfLengthSegments; x++)
     {
-        for (int y = 0; y < _plane->WidthSegments; y++)
+        for (int y = 0; y < _plane->NumberOfWidthSegments; y++)
         {
             //shear spring: diagonal (/)
-            int vertexAId = (x + 1) + y * (_plane->LengthSegments + 1);
-            int vertexBId = x + (y + 1) * (_plane->LengthSegments + 1);
-            this.AddSpring(shearStiffness, shearDamping, simVertices[vertexAId], simVertices[vertexBId]);
+            int vertexAId = (x + 1) + y * (_plane->NumberOfLengthSegments + 1);
+            int vertexBId = x + (y + 1) * (_plane->NumberOfLengthSegments + 1);
+            AddSpring(shearStiffness, shearDamping, _particles[vertexAId], _particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(LengthConstraint(&_particles[vertexAId], &_particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
 
             //shear spring: diagonal (\)
-            vertexAId = x + y * (clothPlane.LengthSegments + 1);
-            vertexBId = (x + 1) + (y + 1) * (clothPlane.LengthSegments + 1);
-            this.AddSpring(shearStiffness, shearDamping, simVertices[vertexAId], simVertices[vertexBId]);
-            length = (clothPlane.GetVertexPosition(vertexAId) - clothPlane.GetVertexPosition(vertexBId)).Length();
-            _constraints.push_back(LengthConstraint(&_particles[vertexAId], &_particles[vertexBId], length));
+            vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
+            vertexBId = (x + 1) + (y + 1) * (_plane->NumberOfLengthSegments + 1);
+            AddSpring(shearStiffness, shearDamping, _particles[vertexAId], _particles[vertexBId]);
+            length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
+            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
         }
     }
 
-    for (int x = 0; x < clothPlane.LengthSegments - 1; x++)
+    for (int x = 0; x < _plane->NumberOfLengthSegments - 1; x++)
     {
-        for (int y = 0; y <= clothPlane.WidthSegments; y++)
+        for (int y = 0; y <= _plane->NumberOfWidthSegments; y++)
         {
             //bend spring: horizontal (--)
-            int vertexAId = x + y * (clothPlane.LengthSegments + 1);
-            int vertexBId = (x + 2) + y * (clothPlane.LengthSegments + 1);
-            this.AddSpring(bendStiffness, bendDamping, simVertices[vertexAId], simVertices[vertexBId]);
-            float length = (clothPlane.GetVertexPosition(vertexAId) - clothPlane.GetVertexPosition(vertexBId)).Length();
-            _constraints.push_back(LengthConstraint(&_particles[vertexAId], &_particles[vertexBId], length));
+            int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
+            int vertexBId = (x + 2) + y * (_plane->NumberOfLengthSegments + 1);
+            AddSpring(bendStiffness, bendDamping, _particles[vertexAId], _particles[vertexBId]);
+            float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
+            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
         }
     }
 
-    for (int x = 0; x <= clothPlane.LengthSegments; x++)
+    for (int x = 0; x <= _plane->NumberOfLengthSegments; x++)
     {
-        for (int y = 0; y < clothPlane.WidthSegments - 1; y++)
+        for (int y = 0; y < _plane->NumberOfWidthSegments - 1; y++)
         {
             //bend spring: vertical (||)
-            int vertexAId = x + y * (clothPlane.LengthSegments + 1);
-            int vertexBId = x + (y + 2) * (clothPlane.LengthSegments + 1);
-            this.AddSpring(bendStiffness, bendDamping, simVertices[vertexAId], simVertices[vertexBId]);
-            float length = (clothPlane.GetVertexPosition(vertexAId) - clothPlane.GetVertexPosition(vertexBId)).Length();
-            _constraints.push_back(LengthConstraint(&_particles[vertexAId], &_particles[vertexBId], length));
+            int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
+            int vertexBId = x + (y + 2) * (_plane->NumberOfLengthSegments + 1);
+            AddSpring(bendStiffness, bendDamping, _particles[vertexAId], _particles[vertexBId]);
+            float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
+            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
         }
     }
 }
 
-void Cloth::AddSpring(float stiffness, float damping, Particle particleA, Particle particleB)
+void Cloth::AddSpring(float stiffness, float damping, Particle* particleA, Particle* particleB)
 {
-	Spring spring(stiffness, damping, particleA, particleB);
+	Spring spring(stiffness, damping, (particleA->GetCurrentPosition() - particleB->GetCurrentPosition()).length());
 	_springs.push_back(spring);
 }
 
-void Cloth::AddForceGenerator(IForceGenerator& generator)
+void Cloth::AddForceGenerator(IForceGenerator* generator)
 {
 	_forceGenerators.push_back(generator);
+}
+
+void Cloth::Reset()
+{
+    for (Particle* particle : _particles)
+    {
+        if (particle)
+            delete particle;
+    }
+
+    for (IConstraint* constraint : _constraints)
+    {
+        if (constraint)
+            delete constraint;
+    }
 }

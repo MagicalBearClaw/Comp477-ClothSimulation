@@ -15,6 +15,7 @@ public:
 	void ResetAppliedForces();
 	glm::vec3 GetAppliedForces();
 	void SetAppliedForces(glm::vec3 force);
+	void Update(float deltaTime);
 protected:
 	float _mass;
 	glm::vec3 _currentPoistion;

@@ -135,13 +135,13 @@
     <ClCompile Include="Rendering\SkyBox.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Particle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Particle.cpp">
+    <ClCompile Include="Physics\Cloth.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\Cloth.cpp">
+    <ClCompile Include="Rendering\Sphere.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Particle.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -242,10 +242,13 @@
     <ClInclude Include="Rendering\SkyBox.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\Particle.h">
+    <ClInclude Include="Physics\Cloth.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\Cloth.h">
+    <ClInclude Include="Rendering\Sphere.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Particle.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>

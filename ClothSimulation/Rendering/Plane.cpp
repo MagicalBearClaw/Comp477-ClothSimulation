@@ -211,6 +211,8 @@ void Plane::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);;
     shader.Use();
     glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(0.5f));
     glm::mat4 view = camera.GetViewMatrix();
     shader.SetMat4("model", model);
     shader.SetMat4("view", view);
@@ -218,6 +220,9 @@ void Plane::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
+        &vertices[0], GL_DYNAMIC_DRAW);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
