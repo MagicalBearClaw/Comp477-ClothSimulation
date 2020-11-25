@@ -14,7 +14,7 @@
 #include "../Rendering/SkyBox.h"
 #include "../Physics/Forces/GravitationalForce.h"
 #include "../Physics/Constraints/PositionConstraint.h"
-#include "../Physics/Integrator/SemiImplicitEulerIntegrator.h"
+#include "../Physics/Integrator/VerletIntegrator.h"
 
 class ClothSimulationApplication : public Application
 {

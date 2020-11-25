@@ -5,11 +5,6 @@ LengthConstraint::LengthConstraint(Body* bodyA, Body* bodyB, float length) : _bo
 {
 }
 
-float LengthConstraint::GetLength()
-{
-    return 0.0f;
-}
-
 void LengthConstraint::SatisfyConstraint()
 {
     glm::vec3 bodydAPosition = _bodyA->GetCurrentPosition();
@@ -22,12 +17,12 @@ void LengthConstraint::SatisfyConstraint()
         return;
     }
 
-    glm::vec3 normalizedDirection = glm::normalize(direction);
+    direction = glm::normalize(direction);
     float scaleFactor = 0.5f * (float)(currentLength - _length);
-    glm::vec3 offsetVector = normalizedDirection * scaleFactor;
+    glm::vec3 offsetVector = direction * scaleFactor;
     glm::vec3 bodyAresultingPosition = bodydAPosition + offsetVector;
     _bodyA->SetPosition(bodyAresultingPosition);
 
-    glm::vec3 bodyBresultingPosition = bodydAPosition + (-offsetVector);
+    glm::vec3 bodyBresultingPosition = bodydBPosition + (-offsetVector);
     _bodyB->SetPosition(bodyBresultingPosition);
 }

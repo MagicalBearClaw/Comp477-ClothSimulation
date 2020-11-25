@@ -37,7 +37,7 @@ bool ClothSimulationApplication::Initialize()
     sphere = std::make_unique<Sphere>(std::filesystem::path("./Assets/Textures/earth2048.jpg").generic_u8string(), 1);
     skyBox = std::make_unique<SkyBox>();
 
-    integrator = std::make_unique<SemiImplicitEulerIntergrator>();
+    integrator = std::make_unique<VerletIntergrator>(0.01f);
     cloth = std::make_unique<Cloth>(plane.get());
     cloth->StructualStiffness = 2.0f;
     cloth->StructualDamping = 0.02f;
@@ -54,8 +54,8 @@ bool ClothSimulationApplication::Initialize()
     //constrain the two top corners of the cloth so that we can control it
     PositionConstraint* topLeftCorner = new PositionConstraint(cloth->Particles[0], cloth->Particles[0]->GetCurrentPosition());
     cloth->AddConstraint(topLeftCorner);
-    PositionConstraint* topRightCorner = new PositionConstraint(cloth->Particles[15], cloth->Particles[0]->GetCurrentPosition());
-    cloth->AddConstraint(topLeftCorner);
+    PositionConstraint* topRightCorner = new PositionConstraint(cloth->Particles[15], cloth->Particles[15]->GetCurrentPosition());
+    cloth->AddConstraint(topRightCorner);
 
 
     cubeMapShader.Use();

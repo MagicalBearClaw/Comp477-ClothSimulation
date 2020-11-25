@@ -50,6 +50,7 @@ void Cloth::Update(float deltaTime)
     //update object
     for(Particle* particle : Particles)
     {
+        glm::vec3 pos = particle->GetCurrentPosition();
         _plane->SetVertexPosition(particle->VertexId, particle->GetCurrentPosition());
     }
 
@@ -58,6 +59,8 @@ void Cloth::Update(float deltaTime)
     {
         particle->ResetAppliedForces();
     }
+
+    _plane->RecalculateNormals();
 }
 
 void Cloth::Draw(Shader& shader, Camera& cameera, glm::mat4 projection)
@@ -161,7 +164,7 @@ void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float
 
 void Cloth::AddSpring(float stiffness, float damping, Particle* particleA, Particle* particleB)
 {
-	Spring spring(stiffness, damping, (particleA->GetCurrentPosition() - particleB->GetCurrentPosition()).length());
+	Spring spring(stiffness, damping, (particleA->GetCurrentPosition() - particleB->GetCurrentPosition()).length(), particleA, particleB);
 	_springs.push_back(spring);
 }
 
@@ -180,18 +183,27 @@ void Cloth::Reset()
     for (Particle* particle : Particles)
     {
         if (particle)
+        {
             delete particle;
-    }
-
-    for (IConstraint* constraint : _constraints)
-    {
-        if (constraint)
-            delete constraint;
+            particle = nullptr;
+        }
     }
 
     for (IForceGenerator* force : _forceGenerators)
     {
         if (force)
+        {
             delete force;
+            force = nullptr;
+        }
+    }
+
+    for(int i = 0; i < _constraints.size(); i++)
+    {
+        if (_constraints[i])
+        {
+            delete _constraints[i];
+            _constraints[i] = nullptr;
+        }
     }
 }

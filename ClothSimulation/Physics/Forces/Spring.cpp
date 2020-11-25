@@ -1,14 +1,15 @@
 #include "../../stdafx.h"
 #include "Spring.h"
 
-Spring::Spring(float stiffness, float damping, float restLength) : _stiffness(stiffness), _damping(damping), _restLength(restLength)
+Spring::Spring(float stiffness, float damping, float restLength, Body* bodyA, Body* bodyB) 
+			   : _stiffness(stiffness), _damping(damping), _restLength(restLength), _bodyA(bodyA), _bodyB(bodyB)
 {
 }
 
 void Spring::ApplyForce(Body* body)
 {
-	Body& first = body[0];
-	Body& second = body[1];
+	Body& first = *_bodyA;
+	Body& second = *_bodyB;
 
 	glm::vec3 direction = first.GetCurrentPosition() - second.GetCurrentPosition();
 

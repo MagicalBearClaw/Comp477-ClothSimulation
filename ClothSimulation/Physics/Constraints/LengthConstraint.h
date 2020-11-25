@@ -7,7 +7,6 @@ class LengthConstraint : public IConstraint
 {
 public:
 	LengthConstraint(Body* bodyA, Body* bodyB, float length);
-	float GetLength();
 
 	// Inherited via IConstraint
 	virtual void SatisfyConstraint() override;

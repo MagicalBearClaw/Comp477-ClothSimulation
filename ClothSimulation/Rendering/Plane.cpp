@@ -139,25 +139,6 @@ void Plane::RecalculateNormals()
         AddVertexNormal(thisTriVertex2Id, triangleNormals[i]);
         AddVertexNormal(thisTriVertex3Id, triangleNormals[i]);
     }
-
-
-}
-
-float Plane::RecalculateVolume()
-{
-    float volume = 0;
-    glm::vec3 point1;
-    glm::vec3 point2;
-    glm::vec3 point3;
-
-    for (int i = 0; i < numTris; i++)
-    {
-        point1 = GetVertexPosition(triangleVertexInfo[i][0]);
-        point2 = GetVertexPosition(triangleVertexInfo[i][1]);
-        point3 = GetVertexPosition(triangleVertexInfo[i][2]);
-        volume += triangleAreas[i] * triangleNormals[i].x * (point1.x + point2.x + point3.x);
-    }
-    return volume / 3;
 }
 
 void Plane::Initialize()
@@ -183,7 +164,7 @@ void Plane::Initialize()
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
@@ -198,7 +179,7 @@ void Plane::Initialize()
     // vertex texture coords
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
 
@@ -217,12 +198,11 @@ void Plane::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     shader.SetMat4("model", model);
     shader.SetMat4("view", view);
     shader.SetMat4("projection", projection);
-
+    
+    glBindBuffer(GL_ARRAY_BUFFER, vao);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
-        &vertices[0], GL_DYNAMIC_DRAW);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
