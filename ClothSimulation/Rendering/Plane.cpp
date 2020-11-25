@@ -211,7 +211,7 @@ void Plane::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);;
     shader.Use();
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     model = glm::scale(model, glm::vec3(0.5f));
     glm::mat4 view = camera.GetViewMatrix();
     shader.SetMat4("model", model);

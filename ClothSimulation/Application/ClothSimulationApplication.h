@@ -10,7 +10,11 @@
 #include "../Rendering/Shader.h"
 #include "../Rendering/Plane.h"
 #include "../Rendering/Sphere.h"
+#include "../Physics/Cloth.h"
 #include "../Rendering/SkyBox.h"
+#include "../Physics/Forces/GravitationalForce.h"
+#include "../Physics/Constraints/PositionConstraint.h"
+#include "../Physics/Integrator/SemiImplicitEulerIntegrator.h"
 
 class ClothSimulationApplication : public Application
 {
@@ -38,8 +42,10 @@ private:
 	bool drawInWireframe;
 	std::unique_ptr<Plane> plane;
 	std::unique_ptr<Sphere> sphere;
+	std::unique_ptr<Cloth> cloth;
 	std::unique_ptr<SkyBox> skyBox;
 	bool showImguiWindow;
 	ImGuiIO* _imguiIO;
 	ImVec4 _clearColor;
+	std::unique_ptr<IIntegrator> integrator;
 };

@@ -2,9 +2,8 @@
 #include "../stdafx.h"
 #include "Cloth.h"
 
-Cloth::Cloth()
+Cloth::Cloth(Plane* plane) : _plane(plane)
 {
-    Initialize();
 }
 
 Cloth::~Cloth()
@@ -21,7 +20,7 @@ void Cloth::Update(float deltaTime)
     }
 
     //sum all global forces acting on the objects
-    for(Particle* particle : _particles)
+    for(Particle* particle : Particles)
     {
         for (IForceGenerator* forceGenerator : _forceGenerators)
         {
@@ -30,7 +29,7 @@ void Cloth::Update(float deltaTime)
     }
 
     glm::vec3 acceleration;
-    for(Particle* particle : _particles)
+    for(Particle* particle : Particles)
     {
         //find acceleration
         acceleration = particle->GetAppliedForces() / particle->GetMass();
@@ -49,16 +48,21 @@ void Cloth::Update(float deltaTime)
     }
 
     //update object
-    for(Particle* particle : _particles)
+    for(Particle* particle : Particles)
     {
         _plane->SetVertexPosition(particle->VertexId, particle->GetCurrentPosition());
     }
 
     //reset forces on sim objects
-    for (Particle* particle : _particles)
+    for (Particle* particle : Particles)
     {
         particle->ResetAppliedForces();
     }
+}
+
+void Cloth::Draw(Shader& shader, Camera& cameera, glm::mat4 projection)
+{
+    _plane->Draw(shader, cameera, projection);
 }
 
 void Cloth::Initialize()
@@ -66,17 +70,17 @@ void Cloth::Initialize()
 	ConstraintIterations = 30;
     Reset();
     CreateParticles(Mass);
+    ConnectSprings(StructualStiffness, StructualDamping, ShearStiffness, ShearDamping, FlexionStiffness, FlexionDamping);
 }
 
 void Cloth::CreateParticles(float clothMass)
 {
     int numVertices = _plane->NumberOfVertices;
     float vertexMass = clothMass / numVertices;
-    _particles.resize(numVertices);
     for (int i = 0; i < numVertices; i++)
     {
         Particle*  p =  new Particle(vertexMass, i, _plane->GetVertexPosition(i));
-        _particles.push_back(p);
+        Particles.push_back(p);
     }
 }
 
@@ -89,9 +93,9 @@ void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float
             //structural spring: horizontal (-)
             int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
             int vertexBId = (x + 1) + y * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(structalStiffness, structalDamping, _particles[vertexAId], _particles[vertexBId]);
+            AddSpring(structalStiffness, structalDamping, Particles[vertexAId], Particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
         }
     }
 
@@ -102,9 +106,9 @@ void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float
             //structural spring: vertical (|)
             int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
             int vertexBId = x + (y + 1) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(structalStiffness, structalDamping, _particles[vertexAId], _particles[vertexBId]);
+            AddSpring(structalStiffness, structalDamping, Particles[vertexAId], Particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
         }
     }
 
@@ -115,16 +119,16 @@ void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float
             //shear spring: diagonal (/)
             int vertexAId = (x + 1) + y * (_plane->NumberOfLengthSegments + 1);
             int vertexBId = x + (y + 1) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(shearStiffness, shearDamping, _particles[vertexAId], _particles[vertexBId]);
+            AddSpring(shearStiffness, shearDamping, Particles[vertexAId], Particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
 
             //shear spring: diagonal (\)
             vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
             vertexBId = (x + 1) + (y + 1) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(shearStiffness, shearDamping, _particles[vertexAId], _particles[vertexBId]);
+            AddSpring(shearStiffness, shearDamping, Particles[vertexAId], Particles[vertexBId]);
             length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
         }
     }
 
@@ -135,9 +139,9 @@ void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float
             //bend spring: horizontal (--)
             int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
             int vertexBId = (x + 2) + y * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(bendStiffness, bendDamping, _particles[vertexAId], _particles[vertexBId]);
+            AddSpring(bendStiffness, bendDamping, Particles[vertexAId], Particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
         }
     }
 
@@ -148,9 +152,9 @@ void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float
             //bend spring: vertical (||)
             int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
             int vertexBId = x + (y + 2) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(bendStiffness, bendDamping, _particles[vertexAId], _particles[vertexBId]);
+            AddSpring(bendStiffness, bendDamping, Particles[vertexAId], Particles[vertexBId]);
             float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(_particles[vertexAId], _particles[vertexBId], length));
+            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
         }
     }
 }
@@ -166,9 +170,14 @@ void Cloth::AddForceGenerator(IForceGenerator* generator)
 	_forceGenerators.push_back(generator);
 }
 
+void Cloth::AddConstraint(IConstraint* constraint)
+{
+    _constraints.push_back(constraint);
+}
+
 void Cloth::Reset()
 {
-    for (Particle* particle : _particles)
+    for (Particle* particle : Particles)
     {
         if (particle)
             delete particle;
@@ -178,5 +187,11 @@ void Cloth::Reset()
     {
         if (constraint)
             delete constraint;
+    }
+
+    for (IForceGenerator* force : _forceGenerators)
+    {
+        if (force)
+            delete force;
     }
 }
