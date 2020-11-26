@@ -57,12 +57,19 @@ bool Application::Initialize()
 {
 	glfwSetErrorCallback(ErrorCallback);
 	if (!glfwInit())
+	{
+		std::cout << "Failed to initialize GLDFW" << std::endl;
 		return false;
 
+	}
+
+	std::cout << "Initializing GLDFW" << std::endl;
 	_glslVersion = "#version 130";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // Important in Mac
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	_window = glfwCreateWindow(_windowWith, _windowHeight, _windowTitle.c_str(), nullptr, nullptr);
 	if (_window == nullptr)
@@ -74,13 +81,14 @@ bool Application::Initialize()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return false;
 	}
-
+	std::cout << "Initialized GLAD" << std::endl;
 	// tell GLFW to capture our mouse
 	//glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetFramebufferSizeCallback(_window, WindowResizeCallback);
-
+	std::cout << "Set window resize callback" << std::endl;
 	glfwSetCursorPosCallback(_window, MouseCallback);
 	glfwSetScrollCallback(_window, ScrollCallBack);
-
+	std::cout << "Set window mouse input callback" << std::endl;
 	glfwSetWindowUserPointer(_window, this);
+	std::cout << "Set user pointer to application framework" << std::endl;
 }

@@ -1,10 +1,15 @@
 #pragma once
 #include "../stdafx.h"
-#include "Body.h"
 
-class Particle : public Body
+struct Particle 
 {
 public:
-	Particle(float mass, int vertexId, glm::vec3 position);
-	int VertexId;
+    Particle(glm::vec3 position, glm::vec2 texcoords);
+    glm::vec3 CurrentPosition;
+    glm::vec3 PreviousPosition;
+    glm::vec2 TexCoords;
+    glm::vec3 Force;
+    bool IsPositionConstrained;
+    int VertexId;
+    glm::vec3 Acceleration;
 };

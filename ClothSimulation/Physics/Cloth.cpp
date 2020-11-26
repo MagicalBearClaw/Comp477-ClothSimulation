@@ -1,209 +1,348 @@
-#pragma once
 #include "../stdafx.h"
 #include "Cloth.h"
 
-Cloth::Cloth(Plane* plane) : _plane(plane)
+Cloth::Cloth(int width, int height)
+    : row_count(height), col_count(width)
 {
+    grid_size = 1.0f / (float)(std::max(height-1, width-1));
+    vertex_count = height * width;
+    mass = 1.0f;
+    k = 2.0f;
+    time = 0.0f;
+    wind = false;
+    
+    // Vertices initialization
+    for (int i=0; i<height; i++) {
+        for (int j=0; j<width; j++) {
+            float x = grid_size * j;
+            float y, z;
+            //if(!p) {
+            //    y = 0.0f;
+            //    z = grid_size * i;
+            //} else {
+            //    y = grid_size * i;
+            //    z = 0.0f;
+            //}
+
+            y = grid_size * i;
+            z = 0.0f;
+
+            Particle* curr_point = new Particle(glm::vec3(x, y, z), glm::vec2((float)(i / row_count), (float)(j / col_count)));
+            curr_point->VertexId = i * width + j;
+            if (i*width+j == 0 || i*width+j == col_count-1) 
+                curr_point->IsPositionConstrained = true;
+            //if (p){
+            //    if(i*c+j == (row_count-1)*col_count 
+            //       || i*c+j == vertex_count-1) 
+            //        curr_point->IsPositionConstrained = true;
+            //}
+            points.push_back(curr_point);
+        }
+    }
+
+    // Indices initialization
+    int index_count = (height - 1) * (width - 1) * 6;
+    for (int i=0; i< height-1; i++) {
+        int stride = i * (width - 1);
+        for (int j=0; j< width-1; j++) {
+            indices.push_back(i * width + j);
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j);
+
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back((i + 1) * width + j + 1);
+        }
+    }
+
+    // Ball initialization
+    ball_radius = 0.25f;
+    ball_center = glm::vec3(grid_size * width * 0.5f, grid_size * width * 1.8f,
+                            ball_radius * 2);
+
+    Initialize();
 }
 
 Cloth::~Cloth()
 {
-    Reset();
 }
 
-void Cloth::Update(float deltaTime)
-{
-    //sum all local forces
-    for(Spring& spring : _springs)
-    {
-        spring.ApplyForce(nullptr);  //no need to specify any simObj
+
+void Cloth::CreateVertexBuffer() {
+    for (int i=0; i<vertex_count; i++) {
+        vertices.push_back(points[i]->CurrentPosition.x);
+        vertices.push_back(points[i]->CurrentPosition.y);
+        vertices.push_back(points[i]->CurrentPosition.z);
+    }
+}
+
+void Cloth::wind_on() {
+    if (wind) {
+        wind = false;
+        std::cout << "Wind mode off" << std::endl;
+    }
+    else {
+        wind = true;
+        std::cout << "Wind mode on" << std::endl;
+    }
+}
+
+void Cloth::add_k() {
+    if (k < 4.7f) k += 0.1f;
+    std::cout << "Current k: " << k << std::endl;
+}
+
+void Cloth::reduce_k() {
+    if (k > 0.2f) k -= 0.1f;
+    std::cout << "Current k: " << k << std::endl;
+}
+
+void Cloth::ball_control(char input) {
+    switch(input) {
+        case 'I':
+            ball_center -= glm::vec3(0, 0.004f, 0);
+            break;
+        case 'K':
+            ball_center += glm::vec3(0, 0.004f, 0);
+            break;
+        case 'J':
+            ball_center -= glm::vec3(0.004f, 0, 0);
+            break;
+        case 'L':
+            ball_center += glm::vec3(0.004f, 0, 0);
+            break;
+        case 'U':
+            ball_center -= glm::vec3(0, 0, 0.004f);
+            break;
+        case 'O':
+            ball_center += glm::vec3(0, 0, 0.004f);
+            break;
+        case '[':
+            if(ball_radius > 0.2f) ball_radius -= 0.002f;
+            break;
+        case ']':
+            if(ball_radius < 4.0f) ball_radius += 0.002f;
+            break;
+    }
+}
+
+void Cloth::Update() {
+    glm::vec3 force;  // Force on each point
+    glm::vec3 gravity;  // The gravity vector
+    float vertex_mass = mass / vertex_count;  // Mass of each vertex
+    float timestep = 0.00015f;  // Timestep
+    float damping = 0.02f;  // Damping (air resistance)
+    glm::vec3 wind_force = glm::vec3(0);
+    gravity = 0.1f * glm::vec3(0, 9.8f, 0);
+    
+    for (int i=0; i<vertex_count; i++) {
+        Particle* curr_point = points[i];
+        curr_point->Force += vertex_mass * gravity; // Force initialization (gravity)
+
+        /* Add wind force */
+        float x_force = 0;
+        float y_force = std::abs(sin(0.1f*time) - 0.2f);
+        float z_force = std::abs(cos(sin(curr_point->CurrentPosition[0]*time) - 0.8f));
+        if (wind) {
+            wind_force = glm::vec3(x_force, -0.0005f * y_force, -0.002f * z_force);
+            curr_point->Force += wind_force;
+        }
+
+        /* Set the velocity of each point */
+        curr_point->Acceleration = (curr_point->Force / vertex_mass);
+
+        /* Reset force */
+        curr_point->Force = glm::vec3(0);
     }
 
-    //sum all global forces acting on the objects
-    for(Particle* particle : Particles)
-    {
-        for (IForceGenerator* forceGenerator : _forceGenerators)
-        {
-            forceGenerator->ApplyForce(particle);
+    /* Position update and Object collision */
+    for (int i=0; i<vertex_count; i++) {
+        glm::vec3 temp = points[i]->CurrentPosition;
+        if(!points[i]->IsPositionConstrained) {
+            points[i]->CurrentPosition = points[i]->CurrentPosition + (1.0f - damping)
+                             * (points[i]->CurrentPosition - points[i]->PreviousPosition)
+                             + points[i]->Acceleration * timestep;
+            glm::vec3 offset = points[i]->CurrentPosition - ball_center;
+            if (glm::length(offset) < ball_radius) {
+                points[i]->CurrentPosition += glm::normalize(offset)
+                                  * (ball_radius - glm::length(offset));
+            }
+                
+        }
+        points[i]->PreviousPosition = temp;
+    }
+
+    /* Satisfy constraint */
+    for (int j=0; j<10; j++) {
+        for (int i=0; i<constraints.size(); i++) {
+            Constraint* it = constraints[i];
+            Particle * a = points[it->a];
+            Particle * b = points[it->b];
+            //std::cout << it->a << "," << it->b << std::endl;
+            //getchar();
+            float rest_distance = it->rest_distance;
+            float distance = glm::length(a->CurrentPosition - b->CurrentPosition);
+            if (distance > rest_distance) {
+                float offset = (distance - rest_distance) / distance;
+                glm::vec3 correction = 0.5f * offset * (a->CurrentPosition - b->CurrentPosition);
+                if(!points[it->a]->IsPositionConstrained)
+                    a->CurrentPosition -= correction;
+                if(!points[it->b]->IsPositionConstrained)
+                    b->CurrentPosition += correction;
+            }
+
+            float tear_distance = it->rest_distance * 3.0f;
+            if (distance > tear_distance) {
+                float offset = (distance - rest_distance) / distance;
+                glm::vec3 correction = offset * (a->CurrentPosition - b->CurrentPosition);
+                if (points[it->a]->IsPositionConstrained) points[it->a]->IsPositionConstrained = false;
+                if (points[it->b]->IsPositionConstrained) points[it->b]->IsPositionConstrained = false;
+                constraints.erase(constraints.begin() + i);
+            }
         }
     }
 
-    glm::vec3 acceleration;
-    for(Particle* particle : Particles)
-    {
-        //find acceleration
-        acceleration = particle->GetAppliedForces() / particle->GetMass();
-
-        //integrate
-        IntegrationMethod->Intergrate(particle, acceleration, deltaTime);
+    for (int i=0; i<vertex_count; i++) {
+        vertices[i*3] = points[i]->CurrentPosition.x;
+        vertices[i*3+1] = points[i]->CurrentPosition.y;
+        vertices[i*3+2] = points[i]->CurrentPosition.z;
     }
 
-    //satisfy constraints
-    for(int i = 0; i < ConstraintIterations; i++)
-    {
-        for(IConstraint* constraint : _constraints)
-        {
-            constraint->SatisfyConstraint();
-        }
-    }
-
-    //update object
-    for(Particle* particle : Particles)
-    {
-        glm::vec3 pos = particle->GetCurrentPosition();
-        _plane->SetVertexPosition(particle->VertexId, particle->GetCurrentPosition());
-    }
-
-    //reset forces on sim objects
-    for (Particle* particle : Particles)
-    {
-        particle->ResetAppliedForces();
-    }
-
-    _plane->RecalculateNormals();
+    time += 0.03f;
 }
 
-void Cloth::Draw(Shader& shader, Camera& cameera, glm::mat4 projection)
+void Cloth::get_constraints() {
+    for (int i=0; i<vertex_count; i++) {
+        int row = i / col_count;
+        int col = i - row * col_count;
+        if (col < col_count-1) {
+            Constraint* right = new Constraint();
+            right->rest_distance = grid_size;
+            right->a = i;
+            right->b = i+1;
+            constraints.push_back(right);
+        }
+        if (row < row_count-1) {
+            Constraint* down = new Constraint();
+            down->rest_distance = grid_size;
+            down->a = i;
+            down->b = i+col_count;
+            constraints.push_back(down);
+        }
+        if (col < col_count-1 && row < row_count-1) {
+            Constraint* down_right = new Constraint();
+            down_right->rest_distance = grid_size * glm::sqrt(2);
+            down_right->a = i;
+            down_right->b = i+col_count+1;
+            constraints.push_back(down_right);
+        }
+        if (row > 0 && col < col_count-1) {
+            Constraint* up_right = new Constraint();
+            up_right->rest_distance = grid_size * glm::sqrt(2);
+            up_right->a = i;
+            up_right->b = i-col_count+1;
+            constraints.push_back(up_right);
+        }
+        if (col < col_count-2) {
+            Constraint* right = new Constraint();
+            right->rest_distance = grid_size * 2;
+            right->a = i;
+            right->b = i+1;
+            constraints.push_back(right);
+        }
+        if (row < row_count-2) {
+            Constraint* down = new Constraint();
+            down->rest_distance = grid_size * 2;
+            down->a = i;
+            down->b = i+col_count;
+            constraints.push_back(down);
+        }
+        if (col < col_count-2 && row < row_count-2) {
+            Constraint* down_right = new Constraint();
+            down_right->rest_distance = grid_size * glm::sqrt(2) * 2;
+            down_right->a = i;
+            down_right->b = i+col_count+1;
+            constraints.push_back(down_right);
+        }
+        if (row > 1 && col < col_count-2) {
+            Constraint* up_right = new Constraint();
+            up_right->rest_distance = grid_size * glm::sqrt(2) * 2;
+            up_right->a = i;
+            up_right->b = i-col_count+1;
+            constraints.push_back(up_right);
+        }
+    }
+}
+
+float Cloth::get_ball_radius() {
+    return ball_radius;
+}
+
+glm::vec3 Cloth::get_ball_center() {
+    return ball_center;
+}
+
+void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-    _plane->Draw(shader, cameera, projection);
+    Update();
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
+        &vertices[0], GL_DYNAMIC_DRAW);
+    view_transform(shader, grid_size,
+        row_count, col_count, projection, camera);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+
+}
+
+void Cloth::view_transform(Shader& shader_program, float grid_size,
+    int row_count, int col_count, glm::mat4 projection, Camera& camera) {
+    // Perspective projection
+    // Camera matrix
+    // Model matrix
+    glm::mat4 model;
+    float scale = 0.5f;
+    model = glm::scale(model, glm::vec3(0.5f));
+    model = glm::translate(model, glm::vec3(-grid_size * col_count / 2.0f,
+        -grid_size * row_count / 1.2f, 0));
+
+    // Put transformation matrics together
+    glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
+    GLint mvp_loc = glGetUniformLocation(shader_program.ID, "mvp");
+    GLint model_loc = glGetUniformLocation(shader_program.ID, "model");
+    glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
+    glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
 }
 
 void Cloth::Initialize()
 {
-	ConstraintIterations = 30;
-    Reset();
-    CreateParticles(Mass);
-    ConnectSprings(StructualStiffness, StructualDamping, ShearStiffness, ShearDamping, FlexionStiffness, FlexionDamping);
+    CreateVertexBuffer();
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
+        &vertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]),
+        &indices[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+        3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+        3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // Constaints initialization
+    get_constraints();
+
 }
 
-void Cloth::CreateParticles(float clothMass)
-{
-    int numVertices = _plane->NumberOfVertices;
-    float vertexMass = clothMass / numVertices;
-    for (int i = 0; i < numVertices; i++)
-    {
-        Particle*  p =  new Particle(vertexMass, i, _plane->GetVertexPosition(i));
-        Particles.push_back(p);
-    }
-}
-
-void Cloth::ConnectSprings(float structalStiffness, float structalDamping, float shearStiffness, float shearDamping, float bendStiffness, float bendDamping)
-{
-    for (int x = 0; x < _plane->NumberOfLengthSegments; x++)
-    {
-        for (int y = 0; y <= _plane->NumberOfWidthSegments; y++)
-        {
-            //structural spring: horizontal (-)
-            int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
-            int vertexBId = (x + 1) + y * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(structalStiffness, structalDamping, Particles[vertexAId], Particles[vertexBId]);
-            float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
-        }
-    }
-
-    for (int x = 0; x <= _plane->NumberOfLengthSegments; x++)
-    {
-        for (int y = 0; y < _plane->NumberOfWidthSegments; y++)
-        {
-            //structural spring: vertical (|)
-            int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
-            int vertexBId = x + (y + 1) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(structalStiffness, structalDamping, Particles[vertexAId], Particles[vertexBId]);
-            float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
-        }
-    }
-
-    for (int x = 0; x < _plane->NumberOfLengthSegments; x++)
-    {
-        for (int y = 0; y < _plane->NumberOfWidthSegments; y++)
-        {
-            //shear spring: diagonal (/)
-            int vertexAId = (x + 1) + y * (_plane->NumberOfLengthSegments + 1);
-            int vertexBId = x + (y + 1) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(shearStiffness, shearDamping, Particles[vertexAId], Particles[vertexBId]);
-            float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
-
-            //shear spring: diagonal (\)
-            vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
-            vertexBId = (x + 1) + (y + 1) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(shearStiffness, shearDamping, Particles[vertexAId], Particles[vertexBId]);
-            length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
-        }
-    }
-
-    for (int x = 0; x < _plane->NumberOfLengthSegments - 1; x++)
-    {
-        for (int y = 0; y <= _plane->NumberOfWidthSegments; y++)
-        {
-            //bend spring: horizontal (--)
-            int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
-            int vertexBId = (x + 2) + y * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(bendStiffness, bendDamping, Particles[vertexAId], Particles[vertexBId]);
-            float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
-        }
-    }
-
-    for (int x = 0; x <= _plane->NumberOfLengthSegments; x++)
-    {
-        for (int y = 0; y < _plane->NumberOfWidthSegments - 1; y++)
-        {
-            //bend spring: vertical (||)
-            int vertexAId = x + y * (_plane->NumberOfLengthSegments + 1);
-            int vertexBId = x + (y + 2) * (_plane->NumberOfLengthSegments + 1);
-            AddSpring(bendStiffness, bendDamping, Particles[vertexAId], Particles[vertexBId]);
-            float length = (_plane->GetVertexPosition(vertexAId) - _plane->GetVertexPosition(vertexBId)).length();
-            _constraints.push_back(new LengthConstraint(Particles[vertexAId], Particles[vertexBId], length));
-        }
-    }
-}
-
-void Cloth::AddSpring(float stiffness, float damping, Particle* particleA, Particle* particleB)
-{
-	Spring spring(stiffness, damping, (particleA->GetCurrentPosition() - particleB->GetCurrentPosition()).length(), particleA, particleB);
-	_springs.push_back(spring);
-}
-
-void Cloth::AddForceGenerator(IForceGenerator* generator)
-{
-	_forceGenerators.push_back(generator);
-}
-
-void Cloth::AddConstraint(IConstraint* constraint)
-{
-    _constraints.push_back(constraint);
-}
-
-void Cloth::Reset()
-{
-    for (Particle* particle : Particles)
-    {
-        if (particle)
-        {
-            delete particle;
-            particle = nullptr;
-        }
-    }
-
-    for (IForceGenerator* force : _forceGenerators)
-    {
-        if (force)
-        {
-            delete force;
-            force = nullptr;
-        }
-    }
-
-    for(int i = 0; i < _constraints.size(); i++)
-    {
-        if (_constraints[i])
-        {
-            delete _constraints[i];
-            _constraints[i] = nullptr;
-        }
-    }
-}

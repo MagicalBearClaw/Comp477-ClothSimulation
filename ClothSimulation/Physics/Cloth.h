@@ -1,46 +1,55 @@
 #pragma once
+
 #include "../stdafx.h"
-#include "../Rendering/Plane.h"
+#include "Particle.h"
 #include "../Rendering/Shader.h"
 #include "../Rendering/Camera.h"
-#include "Particle.h"
-#include "Forces/Spring.h"
-#include "Forces/IForceGenerator.h"
-#include "Integrator/IIntergrator.h"
-#include "Integrator/SemiImplicitEulerIntegrator.h"
-#include "Constraints/IConstraint.h"
-#include "Constraints/LengthConstraint.h"
 
-class Cloth
+struct Constraint {
+    int a;
+    int b;
+    float rest_distance;
+};
+
+class Cloth 
 {
 public:
-	Cloth(Plane * plane);
-	~Cloth();
-	void Update(float deltaTime);
-	void Draw(Shader& shader, Camera& cameera, glm::mat4 projection);
-	void AddForceGenerator(IForceGenerator* generator);
-	void AddConstraint(IConstraint* constraint);
-	void Initialize();
-public:
-	float Mass;
-	float StructualStiffness;
-	float StructualDamping;
-	float ShearStiffness;
-	float ShearDamping;
-	float FlexionStiffness;
-	float FlexionDamping;
-	int ConstraintIterations;
-	IIntegrator* IntegrationMethod;
-	std::vector<Particle*> Particles;
-private:
-	void CreateParticles(float clothMass);
-	void ConnectSprings(float structalStiffness, float structalDamping, float shearStiffness, float shearDamping, float bendStiffness, float bendDamping);
-	void AddSpring(float stiffness, float damping, Particle* particleA, Particle* particleB);
-	void Reset();
-private:
-	Plane* _plane;
+    Cloth(int width, int height);
+    ~Cloth();
+    void Update();
+    void wind_on();
+    void ball_control(char input);
+    void add_k();
+    void reduce_k();
+    void get_constraints();
+    float get_ball_radius();
+    glm::vec3 get_ball_center();
 
-	std::vector<IForceGenerator*> _forceGenerators;
-	std::vector<Spring> _springs;
-	std::vector<IConstraint*> _constraints;
+    void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
+    void Initialize();
+
+private:
+    void view_transform(Shader& shader_program, float grid_size,
+        int row_count, int col_count, glm::mat4 projection, Camera& camera);
+    void CreateVertexBuffer();
+
+    GLuint textureId;
+    GLuint VBO, VAO, EBO;
+
+
+    int row_count;  // Row count (for points)
+    int col_count;  // Column count (for points)
+    int vertex_count;
+    float grid_size;
+    float mass;
+    float k;
+    float time;
+    glm::vec3 ball_center;
+    float ball_radius;
+    bool wind;
+    bool pin_four;
+    std::vector<Particle*> points;  
+    std::vector<float> vertices;
+    std::vector<int> indices;
+    std::vector<Constraint*> constraints;
 };

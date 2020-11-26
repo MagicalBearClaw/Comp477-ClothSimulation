@@ -1,9 +1,11 @@
 #include "../stdafx.h"
 #include "Particle.h"
 
-Particle::Particle(float mass, int vertexId, glm::vec3 position) : Body(mass)
-{
-	_currentPoistion = position;
-	_previousPoistion = _currentPoistion;
-	VertexId = vertexId;
+
+Particle::Particle(glm::vec3 position, glm::vec2 texcoords) {
+    CurrentPosition = position;
+    PreviousPosition = CurrentPosition;
+    IsPositionConstrained = false;
+    TexCoords = texcoords;
+    VertexId = 0;
 }

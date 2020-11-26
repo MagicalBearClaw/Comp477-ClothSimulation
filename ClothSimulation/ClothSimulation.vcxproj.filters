@@ -75,38 +75,8 @@
     <ClCompile Include="Application\Application.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\Integrator\ExplicitEulerIntergrator.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Integrator\SemiImplicitEulerIntegrator.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Integrator\RK4Integrator.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Integrator\VerletIntegrator.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Body.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Constraints\LengthConstraint.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Constraints\PositionConstraint.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Forces\GravitationalForce.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Forces\DragForce.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="System\StopWatch.cpp">
       <Filter>Source Files\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Forces\Spring.cpp">
-      <Filter>Source Files\Physics</Filter>
     </ClCompile>
     <ClCompile Include="ThirdParty\glad\src\glad.c">
       <Filter>Source Files\System</Filter>
@@ -123,9 +93,6 @@
     <ClCompile Include="Rendering\Camera.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Plane.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Scenes\BasicClothScene.cpp">
       <Filter>Source Files\Scenes</Filter>
     </ClCompile>
@@ -135,13 +102,10 @@
     <ClCompile Include="Rendering\SkyBox.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\Cloth.cpp">
+    <ClCompile Include="Physics\Particle.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Sphere.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Particle.cpp">
+    <ClCompile Include="Physics\Cloth.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -170,50 +134,11 @@
     <ClInclude Include="Application\ClothSimulationApplication.h">
       <Filter>Header Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\Body.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Forces\IForceGenerator.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Forces\GravitationalForce.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Forces\DragForce.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Constraints\IConstraint.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Constraints\LengthConstraint.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Constraints\PositionConstraint.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Integrator\IIntergrator.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Integrator\ExplicitEulerIntergrator.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Integrator\SemiImplicitEulerIntegrator.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Integrator\RK4Integrator.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Integrator\VerletIntegrator.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Application\Application.h">
       <Filter>Header Files\Application</Filter>
     </ClInclude>
     <ClInclude Include="System\StopWatch.h">
       <Filter>Header Files\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Forces\Spring.h">
-      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui_impl_opengl3.h">
       <Filter>Header Files\Imgui</Filter>
@@ -225,9 +150,6 @@
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Camera.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Plane.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\Scene.h">
@@ -242,13 +164,10 @@
     <ClInclude Include="Rendering\SkyBox.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\Cloth.h">
+    <ClInclude Include="Physics\Particle.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Sphere.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Particle.h">
+    <ClInclude Include="Physics\Cloth.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>

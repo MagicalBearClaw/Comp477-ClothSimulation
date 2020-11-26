@@ -8,14 +8,8 @@
 
 #include "../Rendering//Camera.h"
 #include "../Rendering/Shader.h"
-#include "../Rendering/Plane.h"
-#include "../Rendering/Sphere.h"
-#include "../Physics/Cloth.h"
+#include "../Physics//cloth.h"
 #include "../Rendering/SkyBox.h"
-#include "../Physics/Forces/GravitationalForce.h"
-#include "../Physics/Constraints/PositionConstraint.h"
-#include "../Physics/Integrator/VerletIntegrator.h"
-
 class ClothSimulationApplication : public Application
 {
 public:
@@ -32,20 +26,19 @@ public:
 
 	void ProccessKeyboardInput(float deltaTime);
 private:
+	void draw_sphere(float r, glm::vec3 c);
 	// camera
 	Camera camera;
-	Shader cubeMapShader;
-	Shader skyboxShader;
+	Shader shaderProgram;
 	float lastX;
 	float lastY;
 	bool firstMouse;
 	bool drawInWireframe;
-	std::unique_ptr<Plane> plane;
-	std::unique_ptr<Sphere> sphere;
-	std::unique_ptr<Cloth> cloth;
-	std::unique_ptr<SkyBox> skyBox;
 	bool showImguiWindow;
 	ImGuiIO* _imguiIO;
 	ImVec4 _clearColor;
-	std::unique_ptr<IIntegrator> integrator;
+
+	GLuint lightVAO;
+	Cloth* cloth;
+	bool keys[1024];
 };

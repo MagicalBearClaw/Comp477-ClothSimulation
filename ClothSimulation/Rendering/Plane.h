@@ -8,50 +8,30 @@
 
 class Plane
 {
+    friend class Cloth;
 public: 
-    Plane(float length, float width, int numberOfWidthSegments, int numberOfLengthSegments, std::string textureFileName);
-    void CreateVertexBuffer();
-    void CreateIndexBuffer();
-    void SetVertexPosition(int vertexId, glm::vec3 position);
-    void SetVertexNormal(int vertexId, glm::vec3 normal);
-    glm::vec3 GetVertexPosition(int vertexId);
-
-    void AddVertexNormal(int vertexId, glm::vec3 normal);
-    glm::vec3 GetVertexNormal(int vertexId);
-    void RecalculateNormals();
-    float RecalculateVolume();
+    Plane(int width, int height, std::string textureFileName);
+    void CreateBuffers();
     void Initialize();
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
-    int NumberOfWidthSegments;
-    int NumberOfLengthSegments;
     int NumberOfVertices;
+    int NumberOfIndicies;
+    int Width;
+    int Height;
+    float PlaneStride;
 private:
     struct Vertex {
         glm::vec3 Position;
-        glm::vec3 Normal;
         glm::vec2 TexCoords;
     };
     void LoadTexture(const std::string& textureFileName);
 private:
-    int numRealVertices;  //number of vertices in the buffer (might have dups)
-    int numTris;
-
-    float width;
-    float length;
-
-    float gridWidth;
-    float gridHeight;
     GLuint textureId;
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
 
-
     std::vector<Vertex> vertices;
     std::vector<int> indices;
-    std::vector<std::vector<int>> vertexMappingPseudoToReal;
-    std::vector<std::vector<int>> triangleVertexInfo;
-    std::vector<float> triangleAreas;
-    std::vector<glm::vec3> triangleNormals;
-    std::string textureFileName;
+    std::string _textureFileName;
 };

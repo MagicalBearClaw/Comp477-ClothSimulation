@@ -15,58 +15,115 @@ bool ClothSimulationApplication::Initialize()
 {
     if (!Application::Initialize())
     {
+        std::cout << "failed to initialize base application" << std::endl;
         return false;
     }
-
+    std::cout << "Initialize base Application" << std::endl;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     _imguiIO = &ImGui::GetIO();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
     ImGui_ImplOpenGL3_Init(_glslVersion.c_str());
+    std::cout << "Initialized IMGUI" << std::endl;
 
     _clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     glEnable(GL_DEPTH_TEST);
+    
+    shaderProgram = Shader();
+    shaderProgram.Load("./Assets/Shaders/vs.glsl", "./Assets/Shaders/fs.glsl");
+    std::string containerTexture = std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string();
+    std::cout << "initialize shaders" << std::endl;
+    cloth = new Cloth(30, 30);
 
-    cubeMapShader = Shader();
-    cubeMapShader.Load("./Assets/Shaders/6.1.cubemaps.vs", "./Assets/Shaders/6.1.cubemaps.fs");
-    skyboxShader = Shader();
-    skyboxShader.Load("./Assets/Shaders/6.1.skybox.vs", "./Assets/Shaders/6.1.skybox.fs");
+    // Light VAO
+    GLuint lightVAO;
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+        6 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
 
-    plane = std::make_unique<Plane>(10, 5, 20, 15, std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string());
-    sphere = std::make_unique<Sphere>(std::filesystem::path("./Assets/Textures/earth2048.jpg").generic_u8string(), 1);
-    skyBox = std::make_unique<SkyBox>();
-
-    integrator = std::make_unique<VerletIntergrator>(0.01f);
-    cloth = std::make_unique<Cloth>(plane.get());
-    cloth->StructualStiffness = 2.0f;
-    cloth->StructualDamping = 0.02f;
-    cloth->ShearStiffness = 2.0f;
-    cloth->ShearDamping = 0.02f;
-    cloth->FlexionStiffness = 2.0f;
-    cloth->FlexionDamping = 0.02f;
-    cloth->IntegrationMethod = integrator.get();
-    cloth->Mass = 2.0f;
-    cloth->Initialize();
-    GravitationalForce* gravity =  new GravitationalForce(glm::vec3(0, -9.81f, 0));
-    cloth->AddForceGenerator(gravity);
-
-    //constrain the two top corners of the cloth so that we can control it
-    PositionConstraint* topLeftCorner = new PositionConstraint(cloth->Particles[0], cloth->Particles[0]->GetCurrentPosition());
-    cloth->AddConstraint(topLeftCorner);
-    PositionConstraint* topRightCorner = new PositionConstraint(cloth->Particles[15], cloth->Particles[15]->GetCurrentPosition());
-    cloth->AddConstraint(topRightCorner);
-
-
-    cubeMapShader.Use();
-    cubeMapShader.SetInt("texture1", 0);
-
-    skyboxShader.Use();
-    skyboxShader.SetInt("skybox", 0);
-
-
+    // Some attributes
+    //glPointSize(5);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
 }
+
+void ClothSimulationApplication::draw_sphere(float r, glm::vec3 c) {
+    float* sphere_vertex, * sphere_normal;
+    GLuint* sphere_indices;
+    int sphere_vertex_size, sphere_indices_size;
+    int res = 50;
+    GLuint vao, vbo, nbo, ebo;
+
+    sphere_vertex_size = 3 * (res + 1) * (res + 1);
+    sphere_indices_size = 6 * res * res;
+
+    sphere_vertex = new float[sphere_vertex_size];
+    sphere_normal = new float[sphere_vertex_size];
+    sphere_indices = new GLuint[sphere_indices_size];
+
+    for (int j = 0; j <= res; j++) {
+        for (int i = 0; i <= res; i++) {
+            int k = i + j * (res + 1);
+            sphere_vertex[3 * k] = (float)i / res;
+            sphere_vertex[3 * k + 1] = .0f;
+            sphere_vertex[3 * k + 2] = (float)j / res;
+            const float M_PI = glm::pi<float>();
+            float theta = sphere_vertex[3 * k + 0] * 2 * M_PI;
+            float phi = sphere_vertex[3 * k + 2] * M_PI;
+
+            sphere_normal[3 * k + 0] = sphere_vertex[3 * k + 0] = c.x + r * glm::cos(theta) * glm::sin(phi);
+            sphere_normal[3 * k + 1] = sphere_vertex[3 * k + 1] = c.y + r * glm::sin(theta) * glm::sin(phi);
+            sphere_normal[3 * k + 2] = sphere_vertex[3 * k + 2] = c.z + r * glm::cos(phi);
+        }
+    }
+
+    int k = 0;
+    for (int j = 0; j < res; j++) {
+        for (int i = 0; i < res; i++) {
+            sphere_indices[k++] = i + j * (res + 1);
+            sphere_indices[k++] = i + (j + 1) * (res + 1);
+            sphere_indices[k++] = i + 1 + (j + 1) * (res + 1);
+
+            sphere_indices[k++] = i + j * (res + 1);
+            sphere_indices[k++] = i + 1 + (j + 1) * (res + 1);
+            sphere_indices[k++] = i + 1 + j * (res + 1);
+        }
+    }
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sphere_vertex_size * sizeof(float), sphere_vertex, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glGenBuffers(1, &nbo);
+    glBindBuffer(GL_ARRAY_BUFFER, nbo);
+    glBufferData(GL_ARRAY_BUFFER, sphere_vertex_size * sizeof(float), sphere_normal, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere_indices_size * sizeof(GLuint), sphere_indices, GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    glBindVertexArray(vao);
+    glDrawElements(GL_TRIANGLES, sphere_indices_size, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+}
+
 
 void ClothSimulationApplication::Draw(float deltaTime)
 {
@@ -81,35 +138,49 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.1f, 100.0f);
 
-    if (drawInWireframe)
-    {
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        ////plane->Draw(cubeMapShader, camera, projection);
-        ////sphere->Draw(cubeMapShader, camera, projection);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);;
-    }
-    else {
-        //sphere->Draw(cubeMapShader, camera, projection);
-        cloth->Draw(cubeMapShader, camera, projection);
-    }
-    // draw skybox
-    skyBox->Draw(skyboxShader, camera, projection);
+    GLint object_color_loc = glGetUniformLocation(shaderProgram.ID,
+        "object_color");
+    GLint light_color_loc = glGetUniformLocation(shaderProgram.ID,
+        "light_color");
+    GLint light_pos_loc = glGetUniformLocation(shaderProgram.ID,
+        "light_pos");
+    glUniform3f(object_color_loc, 1.0f, 0.5f, 0.2f);
+    glUniform3f(light_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(light_pos_loc, 0.2f, 1.8f, 1.0f);
 
+    // Draw
+    shaderProgram.Use();
+    draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
+    cloth->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
+
+
 void ClothSimulationApplication::Update(float deltaTime)
 {
+    if (keys[GLFW_KEY_I]) cloth->ball_control('I');
+    if (keys[GLFW_KEY_K]) cloth->ball_control('K');
+    if (keys[GLFW_KEY_J]) cloth->ball_control('J');
+    if (keys[GLFW_KEY_L]) cloth->ball_control('L');
+    if (keys[GLFW_KEY_U]) cloth->ball_control('U');
+    if (keys[GLFW_KEY_O]) cloth->ball_control('O');
+    if (keys[GLFW_KEY_LEFT_BRACKET]) cloth->ball_control('[');
+    if (keys[GLFW_KEY_RIGHT_BRACKET]) cloth->ball_control(']');
     ProccessKeyboardInput(deltaTime);
 }
 
 void ClothSimulationApplication::FixedUpdate(float deltaTime)
 {
-    cloth->Update(deltaTime);
 }
 
 void ClothSimulationApplication::ShutDOwn()
 {
+    if (cloth)
+    {
+        delete cloth;
+        cloth = nullptr;
+    }
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -161,13 +232,86 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
         drawInWireframe = !drawInWireframe;
     }
 
+    if (glfwGetKey(_window, GLFW_KEY_1) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_I] = true;
+    }
+    else {
+        keys[GLFW_KEY_I] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_I) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_I] = true;
+    }
+    else {
+        keys[GLFW_KEY_I] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_K) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_K] = true;
+    }
+    else {
+        keys[GLFW_KEY_K] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_J) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_J] = true;
+    }
+    else {
+        keys[GLFW_KEY_J] = false;
+    }
+
+
+    if (glfwGetKey(_window, GLFW_KEY_L) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_L] = true;
+    }
+    else {
+        keys[GLFW_KEY_L] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_U) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_U] = true;
+    }
+    else {
+        keys[GLFW_KEY_U] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_O) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_O] = true;
+    }
+    else {
+        keys[GLFW_KEY_O] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_LEFT_BRACKET] = true;
+    }
+    else {
+        keys[GLFW_KEY_LEFT_BRACKET] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_RIGHT_BRACKET] = true;
+    }
+    else {
+        keys[GLFW_KEY_RIGHT_BRACKET] = false;
+    }
+
     if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(Camera::Direction::FORWARD, deltaTime);
     if (glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
         camera.ProcessKeyboard(Camera::Direction::BACKWARD, deltaTime);
     if (glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(Camera::Direction::LEFT, deltaTime);
-    if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(Camera::Direction::RIGHT, deltaTime);
+    if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(Camera::Direction::LEFT, deltaTime);
 }
 
