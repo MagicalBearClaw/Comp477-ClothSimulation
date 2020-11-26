@@ -108,6 +108,9 @@
     <ClCompile Include="Physics\Cloth.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\Constraint.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -168,6 +171,9 @@
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Cloth.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Constraint.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>

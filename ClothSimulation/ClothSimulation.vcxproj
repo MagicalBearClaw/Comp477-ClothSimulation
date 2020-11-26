@@ -238,6 +238,10 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
+    <ClCompile Include="Physics\Constraint.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
     <ClCompile Include="Physics\Particle.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -297,6 +301,7 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Physics\Cloth.h" />
+    <ClInclude Include="Physics\Constraint.h" />
     <ClInclude Include="Physics\Particle.h" />
     <ClInclude Include="Rendering\Camera.h" />
     <ClInclude Include="Rendering\Shader.h" />

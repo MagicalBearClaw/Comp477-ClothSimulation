@@ -172,6 +172,8 @@ void ClothSimulationApplication::Update(float deltaTime)
 
 void ClothSimulationApplication::FixedUpdate(float deltaTime)
 {
+    float timestep = 0.00015f;
+    cloth->Update(timestep);
 }
 
 void ClothSimulationApplication::ShutDOwn()

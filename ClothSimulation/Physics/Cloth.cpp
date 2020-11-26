@@ -76,27 +76,6 @@ void Cloth::CreateVertexBuffer() {
     }
 }
 
-void Cloth::wind_on() {
-    if (wind) {
-        wind = false;
-        std::cout << "Wind mode off" << std::endl;
-    }
-    else {
-        wind = true;
-        std::cout << "Wind mode on" << std::endl;
-    }
-}
-
-void Cloth::add_k() {
-    if (k < 4.7f) k += 0.1f;
-    std::cout << "Current k: " << k << std::endl;
-}
-
-void Cloth::reduce_k() {
-    if (k > 0.2f) k -= 0.1f;
-    std::cout << "Current k: " << k << std::endl;
-}
-
 void Cloth::ball_control(char input) {
     switch(input) {
         case 'I':
@@ -126,11 +105,10 @@ void Cloth::ball_control(char input) {
     }
 }
 
-void Cloth::Update() {
+void Cloth::Update(float deltaTime) {
     glm::vec3 force;  // Force on each point
     glm::vec3 gravity;  // The gravity vector
     float vertex_mass = mass / vertex_count;  // Mass of each vertex
-    float timestep = 0.00015f;  // Timestep
     float damping = 0.02f;  // Damping (air resistance)
     glm::vec3 wind_force = glm::vec3(0);
     gravity = 0.1f * glm::vec3(0, 9.8f, 0);
@@ -161,7 +139,7 @@ void Cloth::Update() {
         if(!points[i]->IsPositionConstrained) {
             points[i]->CurrentPosition = points[i]->CurrentPosition + (1.0f - damping)
                              * (points[i]->CurrentPosition - points[i]->PreviousPosition)
-                             + points[i]->Acceleration * timestep;
+                             + points[i]->Acceleration * deltaTime;
             glm::vec3 offset = points[i]->CurrentPosition - ball_center;
             if (glm::length(offset) < ball_radius) {
                 points[i]->CurrentPosition += glm::normalize(offset)
@@ -211,7 +189,7 @@ void Cloth::Update() {
     time += 0.03f;
 }
 
-void Cloth::get_constraints() {
+void Cloth::CreateConstraints() {
     for (int i=0; i<vertex_count; i++) {
         int row = i / col_count;
         int col = i - row * col_count;
@@ -284,22 +262,10 @@ glm::vec3 Cloth::get_ball_center() {
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-    Update();
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
         &vertices[0], GL_DYNAMIC_DRAW);
-    view_transform(shader, grid_size,
-        row_count, col_count, projection, camera);
 
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-
-
-}
-
-void Cloth::view_transform(Shader& shader_program, float grid_size,
-    int row_count, int col_count, glm::mat4 projection, Camera& camera) {
     // Perspective projection
     // Camera matrix
     // Model matrix
@@ -311,10 +277,14 @@ void Cloth::view_transform(Shader& shader_program, float grid_size,
 
     // Put transformation matrics together
     glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
-    GLint mvp_loc = glGetUniformLocation(shader_program.ID, "mvp");
-    GLint model_loc = glGetUniformLocation(shader_program.ID, "model");
+    GLint mvp_loc = glGetUniformLocation(shader.ID, "mvp");
+    GLint model_loc = glGetUniformLocation(shader.ID, "model");
     glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 void Cloth::Initialize()
@@ -342,7 +312,7 @@ void Cloth::Initialize()
     glBindVertexArray(0);
 
     // Constaints initialization
-    get_constraints();
+    CreateConstraints();
 
 }
 

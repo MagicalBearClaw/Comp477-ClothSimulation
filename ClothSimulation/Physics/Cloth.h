@@ -16,12 +16,8 @@ class Cloth
 public:
     Cloth(int width, int height);
     ~Cloth();
-    void Update();
-    void wind_on();
+    void Update(float deltaTime);
     void ball_control(char input);
-    void add_k();
-    void reduce_k();
-    void get_constraints();
     float get_ball_radius();
     glm::vec3 get_ball_center();
 
@@ -29,10 +25,8 @@ public:
     void Initialize();
 
 private:
-    void view_transform(Shader& shader_program, float grid_size,
-        int row_count, int col_count, glm::mat4 projection, Camera& camera);
     void CreateVertexBuffer();
-
+    void CreateConstraints();
     GLuint textureId;
     GLuint VBO, VAO, EBO;
 
