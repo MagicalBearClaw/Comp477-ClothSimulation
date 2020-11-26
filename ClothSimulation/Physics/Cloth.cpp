@@ -154,29 +154,9 @@ void Cloth::Update(float deltaTime) {
     for (int j=0; j<10; j++) {
         for (int i=0; i<constraints.size(); i++) {
             Constraint* it = constraints[i];
-            Particle * a = points[it->a];
-            Particle * b = points[it->b];
-            //std::cout << it->a << "," << it->b << std::endl;
-            //getchar();
-            float rest_distance = it->rest_distance;
-            float distance = glm::length(a->CurrentPosition - b->CurrentPosition);
-            if (distance > rest_distance) {
-                float offset = (distance - rest_distance) / distance;
-                glm::vec3 correction = 0.5f * offset * (a->CurrentPosition - b->CurrentPosition);
-                if(!points[it->a]->IsPositionConstrained)
-                    a->CurrentPosition -= correction;
-                if(!points[it->b]->IsPositionConstrained)
-                    b->CurrentPosition += correction;
-            }
-
-            float tear_distance = it->rest_distance * 3.0f;
-            if (distance > tear_distance) {
-                float offset = (distance - rest_distance) / distance;
-                glm::vec3 correction = offset * (a->CurrentPosition - b->CurrentPosition);
-                if (points[it->a]->IsPositionConstrained) points[it->a]->IsPositionConstrained = false;
-                if (points[it->b]->IsPositionConstrained) points[it->b]->IsPositionConstrained = false;
-                constraints.erase(constraints.begin() + i);
-            }
+            Particle * a = points[it->VertexIdA];
+            Particle * b = points[it->VertexIdB];
+            it->SatisfyConstraints(a, b);
         }
     }
 
@@ -190,64 +170,49 @@ void Cloth::Update(float deltaTime) {
 }
 
 void Cloth::CreateConstraints() {
-    for (int i=0; i<vertex_count; i++) {
+    for (int i=0; i<vertex_count; i++) 
+    {
         int row = i / col_count;
         int col = i - row * col_count;
-        if (col < col_count-1) {
-            Constraint* right = new Constraint();
-            right->rest_distance = grid_size;
-            right->a = i;
-            right->b = i+1;
-            constraints.push_back(right);
+        if (col < col_count-1) 
+        {
+            Constraint* c = new Constraint(i, i+1, grid_size);
+            constraints.push_back(c);
         }
-        if (row < row_count-1) {
-            Constraint* down = new Constraint();
-            down->rest_distance = grid_size;
-            down->a = i;
-            down->b = i+col_count;
-            constraints.push_back(down);
+        if (row < row_count-1) 
+        {
+            Constraint* c = new Constraint(i, i + col_count, grid_size);
+            constraints.push_back(c);
         }
-        if (col < col_count-1 && row < row_count-1) {
-            Constraint* down_right = new Constraint();
-            down_right->rest_distance = grid_size * glm::sqrt(2);
-            down_right->a = i;
-            down_right->b = i+col_count+1;
-            constraints.push_back(down_right);
+        if (col < col_count-1 && row < row_count-1) 
+        {
+            Constraint* c = new Constraint(i, i + col_count + 1, grid_size * glm::sqrt(2));
+            constraints.push_back(c);
         }
-        if (row > 0 && col < col_count-1) {
-            Constraint* up_right = new Constraint();
-            up_right->rest_distance = grid_size * glm::sqrt(2);
-            up_right->a = i;
-            up_right->b = i-col_count+1;
-            constraints.push_back(up_right);
+        if (row > 0 && col < col_count-1) 
+        {
+            Constraint* c = new Constraint(i, i - col_count + 1, grid_size * glm::sqrt(2));
+            constraints.push_back(c);
         }
-        if (col < col_count-2) {
-            Constraint* right = new Constraint();
-            right->rest_distance = grid_size * 2;
-            right->a = i;
-            right->b = i+1;
-            constraints.push_back(right);
+        if (col < col_count-2) 
+        {
+            Constraint* c = new Constraint(i, i + 1, grid_size * 2);
+            constraints.push_back(c);
         }
-        if (row < row_count-2) {
-            Constraint* down = new Constraint();
-            down->rest_distance = grid_size * 2;
-            down->a = i;
-            down->b = i+col_count;
-            constraints.push_back(down);
+        if (row < row_count-2) 
+        {
+            Constraint* c = new Constraint(i, i + col_count, grid_size * 2);
+            constraints.push_back(c);
         }
-        if (col < col_count-2 && row < row_count-2) {
-            Constraint* down_right = new Constraint();
-            down_right->rest_distance = grid_size * glm::sqrt(2) * 2;
-            down_right->a = i;
-            down_right->b = i+col_count+1;
-            constraints.push_back(down_right);
+        if (col < col_count-2 && row < row_count-2) 
+        {
+            Constraint* c = new Constraint(i, i + col_count + 1, grid_size * glm::sqrt(2) * 2);
+            constraints.push_back(c);
         }
-        if (row > 1 && col < col_count-2) {
-            Constraint* up_right = new Constraint();
-            up_right->rest_distance = grid_size * glm::sqrt(2) * 2;
-            up_right->a = i;
-            up_right->b = i-col_count+1;
-            constraints.push_back(up_right);
+        if (row > 1 && col < col_count-2) 
+        {
+            Constraint* c = new Constraint(i, i - col_count + 1, grid_size * glm::sqrt(2) * 2);
+            constraints.push_back(c);
         }
     }
 }

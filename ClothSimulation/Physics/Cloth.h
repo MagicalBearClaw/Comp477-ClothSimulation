@@ -4,12 +4,7 @@
 #include "Particle.h"
 #include "../Rendering/Shader.h"
 #include "../Rendering/Camera.h"
-
-struct Constraint {
-    int a;
-    int b;
-    float rest_distance;
-};
+#include "Constraint.h"
 
 class Cloth 
 {

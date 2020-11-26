@@ -3,9 +3,9 @@
 
 Constraint::Constraint(int vertexIdA, int vertexIdB, float restLength)
 {
-    VertexIdA = vertexIdA;
-    VertexIdB = vertexIdB;
-    restLength = restLength;
+    this->VertexIdA = vertexIdA;
+    this->VertexIdB = vertexIdB;
+    this->restLength = restLength;
 }
 
 void Constraint::SatisfyConstraints(Particle* particleA, Particle* particleB)
