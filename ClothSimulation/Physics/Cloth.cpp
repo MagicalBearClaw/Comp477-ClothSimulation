@@ -1,6 +1,3 @@
-/**************************************
- * cloth.cpp
- */
 #include "../stdafx.h"
 #include "cloth.h"
 
@@ -16,90 +13,30 @@ Cloth::Cloth(int width, int height, const std::string& textureFileName)
     Stiffness = 2.0f;
     elapsedTime = 0.0f;
     IsWindForceEnabled = false;
-    bool p = false;
-    int m = 0;
-    // Vertices initialization
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            float x = SegmentLength * j;
-            float y, z;
-            if (!p) {
-                y = 0.0f;
-                z = SegmentLength * i;
-            }
-            else {
-                y = SegmentLength * i;
-                z = 0.0f;
-            }
-            Particle* curr_point = new Particle(x, y, z);
-            curr_point->VertexId = i * width + j;
-            if (i * width + j == 0 || i * width + j == width - 1)
-                curr_point->IsPositionConstrained = true;
-            if (p) {
-                if (i * width + j == (height - 1) * width
-                    || i * width + j == vertexCount - 1)
-                    curr_point->IsPositionConstrained = true;
-            }
-            points.push_back(curr_point);
-        }
-    }
-
-    // Indices initialization
-    //int index_count = (r - 1) * (c - 1) * 6;
-    for (int i = 0; i < height - 1; i++) {
-        //int stride = i * (c - 1);
-        for (int j = 0; j < width - 1; j++) {
-            indices.push_back(i * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j + 1);
-        }
-    }
 
     // Ball initialization
     ball_radius = 0.25f;
     ball_center = glm::vec3(SegmentLength * width * 0.5f, SegmentLength * height * 1.8f,
         ball_radius * 2);
-    CreateVertexBuffer();
-    // Constaints initialization
-    CreateConstraints();
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glBindVertexArray(VAO);
+    Initialize();
+}
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
-        &vertices[0], GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]),
-        &indices[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-        3 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-        3 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
+Cloth::~Cloth()
+{
+    Reset();
 }
 
 void Cloth::Update(float deltaTime)
 {
-    update_points();
-    //update_points_constraint();
+    //update_points();
+    update_points_constraint();
 }
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
         &vertices[0], GL_DYNAMIC_DRAW);
 
@@ -116,7 +53,7 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
@@ -131,6 +68,112 @@ void Cloth::CreateVertexBuffer() {
         vertices.push_back(points[i]->Position.x);
         vertices.push_back(points[i]->Position.y);
         vertices.push_back(points[i]->Position.z);
+    }
+}
+
+void Cloth::CreateIndexBuffer()
+{
+    for (int i = 0; i < height - 1; i++) 
+    {
+        for (int j = 0; j < width - 1; j++) 
+        {
+            indices.push_back(i * width + j);
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j);
+
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back((i + 1) * width + j + 1);
+        }
+    }
+}
+
+void Cloth::CreateParticles()
+{
+    // Vertices initialization
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            float x = SegmentLength * j;
+            float y, z;
+            //if (!p) {
+
+            //}
+            //else {
+            //    y = SegmentLength * i;
+            //    z = 0.0f;
+            //}
+            y = 0.0f;
+            z = SegmentLength * i;
+            Particle* curr_point = new Particle(x, y, z);
+            curr_point->VertexId = i * width + j;
+            if (i * width + j == 0 || i * width + j == width - 1)
+                curr_point->IsPositionConstrained = true;
+            //if (p) {
+            //    if (i * width + j == (height - 1) * width
+            //        || i * width + j == vertexCount - 1)
+            //        curr_point->IsPositionConstrained = true;
+            //}
+            points.push_back(curr_point);
+        }
+    }
+}
+
+void Cloth::Initialize()
+{
+    Reset();
+    CreateParticles();
+    CreateVertexBuffer();
+    CreateIndexBuffer();
+    CreateConstraints();
+
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
+        &vertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]),
+        &indices[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+        3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+        3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void Cloth::Reset()
+{
+    //for (Particle* particle : particles)
+    //{
+    //    if (particle)
+    //    {
+    //        delete particle;
+    //        particle = nullptr;
+    //    }
+    //}
+
+    for (Constraint* constraint : constraints)
+    {
+        if (constraint)
+        {
+            delete constraint;
+            constraint = nullptr;
+        }
+    }
+
+    if (vertices.size() >= 0 && indices.size() >= 0)
+    {
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
+        glDeleteBuffers(1, &ebo);
+        //glDeleteTextures(1, &textureId);
     }
 }
 

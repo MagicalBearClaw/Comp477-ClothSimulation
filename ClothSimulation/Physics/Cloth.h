@@ -14,6 +14,7 @@ struct Constraint {
 class Cloth {
 public:
     Cloth(int width, int height, const std::string& textureFileName);
+    ~Cloth();
     void Update(float deltaTime);
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
     void AddCollisionHandler(std::function<void(Particle* particle)> handler);
@@ -28,18 +29,22 @@ public:
     bool IsWindForceEnabled;
 
 private:
+    void Initialize();
+    void Reset();
     bool update_points();
     bool update_points_constraint();
-
     void CreateConstraints();
     void CreateVertexBuffer();
+    void CreateIndexBuffer();
+    void CreateParticles();
 private:
     int vertexCount;
     float elapsedTime;
 
-    GLuint VBO;
-    GLuint VAO;
-    GLuint EBO;
+    GLuint vbo;
+    GLuint vao;
+    GLuint ebo;
+
     int width;
     int height;
 
