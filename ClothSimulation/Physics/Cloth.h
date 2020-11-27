@@ -12,31 +12,33 @@ public:
     Cloth(int width, int height);
     ~Cloth();
     void Update(float deltaTime);
-    void ball_control(char input);
-    float get_ball_radius();
-    glm::vec3 get_ball_center();
-
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
     void Initialize();
+
+public:
+    int NumberOfConstraintIterations;
+    float Mass;
+    float Stiffness;
+    float Damping;
+    bool IsWindForceEnabled;
+    float SegmentLength;
 
 private:
     void CreateVertexBuffer();
     void CreateConstraints();
+    glm::vec3 CalculateWindForce();
+
+private:
     GLuint textureId;
-    GLuint VBO, VAO, EBO;
+    GLuint vbo;
+    GLuint vao;
+    GLuint ebo;
 
-
-    int row_count;  // Row count (for points)
-    int col_count;  // Column count (for points)
-    int vertex_count;
-    float grid_size;
-    float mass;
-    float k;
-    float time;
-    glm::vec3 ball_center;
-    float ball_radius;
-    bool wind;
-    bool pin_four;
+    int height;
+    int width; 
+    int vertexCount;
+    float elapsedTime;
+    
     std::vector<Particle*> points;  
     std::vector<float> vertices;
     std::vector<int> indices;

@@ -150,7 +150,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     // Draw
     shaderProgram.Use();
-    draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
+    //draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
     cloth->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -159,14 +159,14 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
 void ClothSimulationApplication::Update(float deltaTime)
 {
-    if (keys[GLFW_KEY_I]) cloth->ball_control('I');
-    if (keys[GLFW_KEY_K]) cloth->ball_control('K');
-    if (keys[GLFW_KEY_J]) cloth->ball_control('J');
-    if (keys[GLFW_KEY_L]) cloth->ball_control('L');
-    if (keys[GLFW_KEY_U]) cloth->ball_control('U');
-    if (keys[GLFW_KEY_O]) cloth->ball_control('O');
-    if (keys[GLFW_KEY_LEFT_BRACKET]) cloth->ball_control('[');
-    if (keys[GLFW_KEY_RIGHT_BRACKET]) cloth->ball_control(']');
+    //if (keys[GLFW_KEY_I]) cloth->ball_control('I');
+    //if (keys[GLFW_KEY_K]) cloth->ball_control('K');
+    //if (keys[GLFW_KEY_J]) cloth->ball_control('J');
+    //if (keys[GLFW_KEY_L]) cloth->ball_control('L');
+    //if (keys[GLFW_KEY_U]) cloth->ball_control('U');
+    //if (keys[GLFW_KEY_O]) cloth->ball_control('O');
+    //if (keys[GLFW_KEY_LEFT_BRACKET]) cloth->ball_control('[');
+    //if (keys[GLFW_KEY_RIGHT_BRACKET]) cloth->ball_control(']');
     ProccessKeyboardInput(deltaTime);
 }
 

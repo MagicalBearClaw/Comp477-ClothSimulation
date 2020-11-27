@@ -2,38 +2,39 @@
 #include "Cloth.h"
 
 Cloth::Cloth(int width, int height)
-    : row_count(height), col_count(width)
+    : height(height), width(width)
 {
-    grid_size = 1.0f / (float)(std::max(height-1, width-1));
-    vertex_count = height * width;
-    mass = 1.0f;
-    k = 2.0f;
-    time = 0.0f;
-    wind = false;
-    
+    SegmentLength = 1.0f / (float)(std::max(height-1, width-1));
+    vertexCount = height * width;
+    Mass = 1.0f;
+    Stiffness = 2.0f;
+    elapsedTime = 0.0f;
+    IsWindForceEnabled = false;
+    NumberOfConstraintIterations = 10;
+
     // Vertices initialization
     for (int i=0; i<height; i++) {
         for (int j=0; j<width; j++) {
-            float x = grid_size * j;
+            float x = SegmentLength * j;
             float y, z;
             //if(!p) {
             //    y = 0.0f;
-            //    z = grid_size * i;
+            //    z = SegmentLength * i;
             //} else {
-            //    y = grid_size * i;
+            //    y = SegmentLength * i;
             //    z = 0.0f;
             //}
 
-            y = grid_size * i;
+            y = SegmentLength * i;
             z = 0.0f;
 
-            Particle* curr_point = new Particle(glm::vec3(x, y, z), glm::vec2((float)(i / row_count), (float)(j / col_count)));
+            Particle* curr_point = new Particle(glm::vec3(x, y, z), glm::vec2((float)(i / height), (float)(j / width)));
             curr_point->VertexId = i * width + j;
-            if (i*width+j == 0 || i*width+j == col_count-1) 
+            if (i*width+j == 0 || i*width+j == width-1) 
                 curr_point->IsPositionConstrained = true;
             //if (p){
-            //    if(i*c+j == (row_count-1)*col_count 
-            //       || i*c+j == vertex_count-1) 
+            //    if(i*c+j == (height-1)*width 
+            //       || i*c+j == vertexCount-1) 
             //        curr_point->IsPositionConstrained = true;
             //}
             points.push_back(curr_point);
@@ -55,11 +56,6 @@ Cloth::Cloth(int width, int height)
         }
     }
 
-    // Ball initialization
-    ball_radius = 0.25f;
-    ball_center = glm::vec3(grid_size * width * 0.5f, grid_size * width * 1.8f,
-                            ball_radius * 2);
-
     Initialize();
 }
 
@@ -67,61 +63,34 @@ Cloth::~Cloth()
 {
 }
 
-
 void Cloth::CreateVertexBuffer() {
-    for (int i=0; i<vertex_count; i++) {
+    for (int i=0; i<vertexCount; i++) {
         vertices.push_back(points[i]->CurrentPosition.x);
         vertices.push_back(points[i]->CurrentPosition.y);
         vertices.push_back(points[i]->CurrentPosition.z);
     }
 }
 
-void Cloth::ball_control(char input) {
-    switch(input) {
-        case 'I':
-            ball_center -= glm::vec3(0, 0.004f, 0);
-            break;
-        case 'K':
-            ball_center += glm::vec3(0, 0.004f, 0);
-            break;
-        case 'J':
-            ball_center -= glm::vec3(0.004f, 0, 0);
-            break;
-        case 'L':
-            ball_center += glm::vec3(0.004f, 0, 0);
-            break;
-        case 'U':
-            ball_center -= glm::vec3(0, 0, 0.004f);
-            break;
-        case 'O':
-            ball_center += glm::vec3(0, 0, 0.004f);
-            break;
-        case '[':
-            if(ball_radius > 0.2f) ball_radius -= 0.002f;
-            break;
-        case ']':
-            if(ball_radius < 4.0f) ball_radius += 0.002f;
-            break;
-    }
-}
+
 
 void Cloth::Update(float deltaTime) {
-    glm::vec3 force;  // Force on each point
-    glm::vec3 gravity;  // The gravity vector
-    float vertex_mass = mass / vertex_count;  // Mass of each vertex
+    glm::vec3 force;
+
+    float vertex_mass = Mass / vertexCount;  // Mass of each vertex
     float damping = 0.02f;  // Damping (air resistance)
-    glm::vec3 wind_force = glm::vec3(0);
-    gravity = 0.1f * glm::vec3(0, 9.8f, 0);
     
-    for (int i=0; i<vertex_count; i++) {
+    glm::vec3 wind_force = glm::vec3(0);
+    glm::vec3 gravity = 0.1f * glm::vec3(0, 9.8f, 0);
+    
+    for (int i=0; i<vertexCount; i++) {
         Particle* curr_point = points[i];
         curr_point->Force += vertex_mass * gravity; // Force initialization (gravity)
 
         /* Add wind force */
         float x_force = 0;
-        float y_force = std::abs(sin(0.1f*time) - 0.2f);
-        float z_force = std::abs(cos(sin(curr_point->CurrentPosition[0]*time) - 0.8f));
-        if (wind) {
+        float y_force = std::abs(sin(0.1f*elapsedTime) - 0.2f);
+        float z_force = std::abs(cos(sin(curr_point->CurrentPosition[0]* elapsedTime) - 0.8f));
+        if (IsWindForceEnabled) {
             wind_force = glm::vec3(x_force, -0.0005f * y_force, -0.002f * z_force);
             curr_point->Force += wind_force;
         }
@@ -134,17 +103,22 @@ void Cloth::Update(float deltaTime) {
     }
 
     /* Position update and Object collision */
-    for (int i=0; i<vertex_count; i++) {
+    for (int i=0; i<vertexCount; i++) 
+    {
+        
+        // preform verlet intergration
         glm::vec3 temp = points[i]->CurrentPosition;
         if(!points[i]->IsPositionConstrained) {
             points[i]->CurrentPosition = points[i]->CurrentPosition + (1.0f - damping)
                              * (points[i]->CurrentPosition - points[i]->PreviousPosition)
                              + points[i]->Acceleration * deltaTime;
-            glm::vec3 offset = points[i]->CurrentPosition - ball_center;
-            if (glm::length(offset) < ball_radius) {
-                points[i]->CurrentPosition += glm::normalize(offset)
-                                  * (ball_radius - glm::length(offset));
-            }
+
+            // give function here to handle collision
+            //glm::vec3 offset = points[i]->CurrentPosition - ball_center;
+            //if (glm::length(offset) < ball_radius) {
+            //    points[i]->CurrentPosition += glm::normalize(offset)
+            //                      * (ball_radius - glm::length(offset));
+            //}
                 
         }
         points[i]->PreviousPosition = temp;
@@ -160,74 +134,73 @@ void Cloth::Update(float deltaTime) {
         }
     }
 
-    for (int i=0; i<vertex_count; i++) {
+    for (int i=0; i<vertexCount; i++) {
         vertices[i*3] = points[i]->CurrentPosition.x;
         vertices[i*3+1] = points[i]->CurrentPosition.y;
         vertices[i*3+2] = points[i]->CurrentPosition.z;
     }
 
-    time += 0.03f;
+    elapsedTime += 0.03f;
 }
 
 void Cloth::CreateConstraints() {
-    for (int i=0; i<vertex_count; i++) 
+    for (int i=0; i<vertexCount; i++) 
     {
-        int row = i / col_count;
-        int col = i - row * col_count;
-        if (col < col_count-1) 
+        int row = i / width;
+        int col = i - row * width;
+        if (col < width-1) 
         {
-            Constraint* c = new Constraint(i, i+1, grid_size);
+            Constraint* c = new Constraint(i, i+1, SegmentLength);
             constraints.push_back(c);
         }
-        if (row < row_count-1) 
+        if (row < height-1) 
         {
-            Constraint* c = new Constraint(i, i + col_count, grid_size);
+            Constraint* c = new Constraint(i, i + width, SegmentLength);
             constraints.push_back(c);
         }
-        if (col < col_count-1 && row < row_count-1) 
+        if (col < width-1 && row < height-1) 
         {
-            Constraint* c = new Constraint(i, i + col_count + 1, grid_size * glm::sqrt(2));
+            Constraint* c = new Constraint(i, i + width + 1, SegmentLength * glm::sqrt(2));
             constraints.push_back(c);
         }
-        if (row > 0 && col < col_count-1) 
+        if (row > 0 && col < width-1) 
         {
-            Constraint* c = new Constraint(i, i - col_count + 1, grid_size * glm::sqrt(2));
+            Constraint* c = new Constraint(i, i - width + 1, SegmentLength * glm::sqrt(2));
             constraints.push_back(c);
         }
-        if (col < col_count-2) 
+        if (col < width-2) 
         {
-            Constraint* c = new Constraint(i, i + 1, grid_size * 2);
+            Constraint* c = new Constraint(i, i + 1, SegmentLength * 2);
             constraints.push_back(c);
         }
-        if (row < row_count-2) 
+        if (row < height-2) 
         {
-            Constraint* c = new Constraint(i, i + col_count, grid_size * 2);
+            Constraint* c = new Constraint(i, i + width, SegmentLength * 2);
             constraints.push_back(c);
         }
-        if (col < col_count-2 && row < row_count-2) 
+        if (col < width-2 && row < height-2) 
         {
-            Constraint* c = new Constraint(i, i + col_count + 1, grid_size * glm::sqrt(2) * 2);
+            Constraint* c = new Constraint(i, i + width + 1, SegmentLength * glm::sqrt(2) * 2);
             constraints.push_back(c);
         }
-        if (row > 1 && col < col_count-2) 
+        if (row > 1 && col < width-2) 
         {
-            Constraint* c = new Constraint(i, i - col_count + 1, grid_size * glm::sqrt(2) * 2);
+            Constraint* c = new Constraint(i, i - width + 1, SegmentLength * glm::sqrt(2) * 2);
             constraints.push_back(c);
         }
     }
 }
 
-float Cloth::get_ball_radius() {
-    return ball_radius;
+glm::vec3 Cloth::CalculateWindForce()
+{
+    return glm::vec3();
 }
 
-glm::vec3 Cloth::get_ball_center() {
-    return ball_center;
-}
+
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
         &vertices[0], GL_DYNAMIC_DRAW);
 
@@ -237,8 +210,8 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     glm::mat4 model;
     float scale = 0.5f;
     model = glm::scale(model, glm::vec3(0.5f));
-    model = glm::translate(model, glm::vec3(-grid_size * col_count / 2.0f,
-        -grid_size * row_count / 1.2f, 0));
+    model = glm::translate(model, glm::vec3(-SegmentLength * width / 2.0f,
+        -SegmentLength * height / 1.2f, 0));
 
     // Put transformation matrics together
     glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
@@ -247,7 +220,7 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
@@ -255,13 +228,13 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 void Cloth::Initialize()
 {
     CreateVertexBuffer();
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glBindVertexArray(VAO);
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    glBindVertexArray(vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
         &vertices[0], GL_DYNAMIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]),
