@@ -1,59 +1,55 @@
 #pragma once
 
 #include "../stdafx.h"
-#include <stb_image.h>
 #include "Particle.h"
-#include "Constraint.h"
 #include "../Rendering/Shader.h"
 #include "../Rendering/Camera.h"
 
-class Cloth 
-{
+struct Constraint {
+    int a;
+    int b;
+    float rest_distance;
+};
+
+class Cloth {
 public:
     Cloth(int width, int height, const std::string& textureFileName);
-    ~Cloth();
-    void Update(float deltaTime);
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
-    void AddParticlPositionConstraint(unsigned int id);
     void AddCollisionHandler(std::function<void(Particle* particle)> handler);
+    void ball_control(char input);
+    float get_ball_radius();
+    glm::vec3 get_ball_center();
 public:
-    int NumberOfConstraintIterations;
+    float SegmentLength;
     float Mass;
     float Stiffness;
     float Damping;
     bool IsWindForceEnabled;
-    float SegmentLength;
 
 private:
-    struct Vertex
-    {
-        glm::vec3 Position;
-        glm::vec2 TexCoords;
-    };
-    void LoadTexture(const std::string& textureFileName);
-    void Initialize();
-    void CreateVertexBuffer();
-    void CreateIndexBuffer();
-    void CreateParticles();
+    bool update_points(std::vector<float>& vertices);
+    bool update_points_constraint(std::vector<float>& vertices);
+
     void CreateConstraints();
-    glm::vec3 CalculateWindForce();
-    void Reset();
-
+    void CreateVertexBuffer();
 private:
-    GLuint textureId;
-    GLuint vbo;
-    GLuint vao;
-    GLuint ebo;
-
-    int height;
-    int width; 
     int vertexCount;
     float elapsedTime;
-    
+
+    GLuint VBO;
+    GLuint VAO;
+    GLuint EBO;
+    int width;
+    int height;
+
+    glm::vec3 ball_center;
+    float ball_radius;
+
+    std::vector<float> vertices;
     std::string textureFileName;
-    std::vector<Particle*> particles;  
-    std::vector<Vertex> vertices;
-    std::vector<GLuint> indices;
+    std::vector<Particle*> points;
+    std::vector<int> indices;
     std::vector<Constraint*> constraints;
     std::vector<std::function<void(Particle* particle)>> collisionHandlers;
 };
+

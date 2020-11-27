@@ -7,7 +7,7 @@ class Constraint
 public:
     Constraint() {};
     Constraint(int vertexIdA, int vertexIdB, float restLength);
-    void SatisfyConstraints(Particle* particleA, Particle* particleB);
+    //void SatisfyConstraints(Particle* particleA, Particle* particleB);
 public:
     int VertexIdA;
     int VertexIdB;

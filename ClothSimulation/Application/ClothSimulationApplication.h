@@ -29,8 +29,8 @@ public:
 
 private:
 	void ProccessKeyboardInput(float deltaTime);
+	void draw_sphere(float r, glm::vec3 c);
 private:
-
 	Camera camera;
 	Shader shaderProgram;
 	float lastX;
@@ -40,8 +40,11 @@ private:
 	bool showImguiWindow;
 	ImGuiIO* _imguiIO;
 	ImVec4 _clearColor;
-
+	GLuint VBO, VAO, EBO;
 	GLuint lightVAO;
+	int m;
+	std::vector<GLfloat> vertices;
+	std::vector<int> indices;
 	std::unique_ptr<Cloth> cloth;
 	std::unique_ptr<MoveableSphere> moveableSphere;
 	bool keys[1024];
