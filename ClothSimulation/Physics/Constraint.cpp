@@ -22,11 +22,11 @@ void Constraint::SatisfyConstraints(Particle* particleA, Particle* particleB)
     }
 
     float tear_distance = restLength * 3.0f;
-    if (distance > tear_distance) {
-        float offset = (distance - rest_distance) / distance;
-        glm::vec3 correction = offset * (particleA->Position - particleB->Position);
-        if (particleA->IsPositionConstrained) particleA->IsPositionConstrained = false;
-        if (particleB->IsPositionConstrained) particleB->IsPositionConstrained = false;
-        //constraints.erase(constraints.begin() + i);
-    }
+    //if (distance > tear_distance) {
+    //    float offset = (distance - rest_distance) / distance;
+    //    glm::vec3 correction = offset * (particleA->Position - particleB->Position);
+    //    if (particleA->IsPositionConstrained) particleA->IsPositionConstrained = false;
+    //    if (particleB->IsPositionConstrained) particleB->IsPositionConstrained = false;
+    //    //constraints.erase(constraints.begin() + i);
+    //}
 }

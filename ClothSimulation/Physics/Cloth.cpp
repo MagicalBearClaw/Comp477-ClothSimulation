@@ -1,9 +1,6 @@
 #include "../stdafx.h"
 #include "cloth.h"
 
-#define SQRT_2 1.4142135f
-
-
 Cloth::Cloth(int width, int height, const std::string& textureFileName)
     : height(height), width(width)
 {
@@ -13,7 +10,7 @@ Cloth::Cloth(int width, int height, const std::string& textureFileName)
     Stiffness = 2.0f;
     elapsedTime = 0.0f;
     IsWindForceEnabled = false;
-    NumberOfConstraintIterations = 10;
+    NumberOfConstraintIterations = 15;
 
     // Ball initialization
     ball_radius = 0.25f;
@@ -36,8 +33,98 @@ void Cloth::AddParticlPositionConstraint(int id)
 
 void Cloth::Update(float deltaTime)
 {
-    //update_points();
-    update_points_constraint();
+    glm::vec3 force;  // Force on each point
+    glm::vec3 gravity;  // The gravity vector
+    float vertex_mass = Mass / vertexCount;  // Mass of each vertex
+    float timestep = 0.00015f;  // Timestep
+    Damping = 0.001f;  // Damping (air resistance)
+    glm::vec3 wind_force = glm::vec3(0);
+    gravity = glm::vec3(0, 0.98f, 0);
+
+    for (int i = 0; i < vertexCount; i++) {
+        Particle* curr_point = particles[i];
+        // Force initialization (gravity)
+        curr_point->Force += vertex_mass * gravity;
+        /* Get the neighbors on straight directions
+         * (up/down/left/right) */
+        std::vector<int> s_neighbors = curr_point->get_s_neighbors(i, width,
+            height);
+        /* Get the neighbors on diagonal directions
+         * (up_left/up_right/down_left/down_right) */
+        std::vector<int> d_neighbors = curr_point->get_d_neighbors(i, width,
+            height);
+        // Spring force accumulation 
+        for (int j = 0; j < s_neighbors.size(); j++) {
+            Particle* neighbor_point = particles[s_neighbors[j]];
+            glm::vec3 x = neighbor_point->Position - curr_point->Position;
+            curr_point->Force += glm::normalize(x)
+                * (glm::length(x) - SegmentLength)
+                * Stiffness;
+        }
+        for (int j = 0; j < d_neighbors.size(); j++) {
+            Particle* neighbor_point = particles[d_neighbors[j]];
+            glm::vec3 x = neighbor_point->Position - curr_point->Position;
+            curr_point->Force += glm::normalize(x)
+                * (glm::length(x) - SegmentLength * (float)glm::sqrt(2))
+                * Stiffness;
+        }
+
+        /* Add wind force */
+        float x_force = 0; // cos(0.8f*elapsedTime) * (rand()/RAND_MAX-0.5f);
+        float y_force = std::abs(sin(0.1f * elapsedTime) - 0.2f);
+        float z_force = std::abs(cos(sin(curr_point->Position[0] * elapsedTime) - 0.8f));
+        if (IsWindForceEnabled) {
+            wind_force = glm::vec3(x_force,
+                -0.0005f * y_force,
+                -0.002f * z_force);
+            curr_point->Force += wind_force;
+        }
+
+        /* Set the velocity of each point */
+        curr_point->Acceleration = curr_point->Force / vertex_mass;
+
+        /* Reset force */
+        curr_point->Force = glm::vec3(0);
+    }
+
+    /* Position update and Object collision */
+    for (int i = 0; i < vertexCount; i++) {
+        glm::vec3 temp = particles[i]->Position;
+        if (!particles[i]->IsPositionConstrained) {
+            particles[i]->Position = particles[i]->Position + (1.0f - Damping)
+                * (particles[i]->Position - particles[i]->PreviousPosition)
+                + particles[i]->Acceleration * timestep;
+            //particles[i]->Velocity += particles[i]->Acceleration * timestep;
+            //particles[i]->Position += particles[i]->Velocity * timestep;
+
+            glm::vec3 offset = particles[i]->Position - ball_center;
+            if (glm::length(offset) < ball_radius) {
+                particles[i]->Position += glm::normalize(offset)
+                    * (ball_radius - glm::length(offset));
+            }
+
+        }
+        particles[i]->PreviousPosition = temp;
+
+        // vertices[i].Position = particles[i]->Position;
+    }
+
+    /* Satisfy constraint */
+    for (int j = 0; j < NumberOfConstraintIterations; j++) {
+        for (int i = 0; i < constraints.size(); i++) {
+            Constraint* it = constraints[i];
+            Particle* a = particles[it->VertexIdA];
+            Particle* b = particles[it->VertexIdB];
+            it->SatisfyConstraints(a, b);
+        }
+    }
+
+    for (int i = 0; i < vertexCount; i++)
+    {
+        vertices[i].Position = particles[i]->Position;
+    }
+
+    elapsedTime += 0.03f;
 }
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
@@ -164,83 +251,6 @@ void Cloth::Reset()
     }
 }
 
-bool Cloth::update_points() {
-    glm::vec3 force;  // Force on each point
-    glm::vec3 gravity;  // The gravity vector
-    float vertex_mass = Mass / vertexCount;  // Mass of each vertex
-    float timestep = 0.00015f;  // Timestep
-    Damping = 0.01f;  // Damping (air resistance)
-    glm::vec3 wind_force = glm::vec3(0);
-    gravity = 0.1f * glm::vec3(0, 9.8f, 0);
-
-    for (int i = 0; i < vertexCount; i++) {
-        Particle* curr_point = particles[i];
-        // Force initialization (gravity)
-        curr_point->Force += vertex_mass * gravity;
-        /* Get the neighbors on straight directions
-         * (up/down/left/right) */
-        std::vector<int> s_neighbors = curr_point->get_s_neighbors(i, width,
-            height);
-        /* Get the neighbors on diagonal directions
-         * (up_left/up_right/down_left/down_right) */
-        std::vector<int> d_neighbors = curr_point->get_d_neighbors(i, width,
-            height);
-        // Spring force accumulation 
-        for (int j = 0; j < s_neighbors.size(); j++) {
-            Particle* neighbor_point = particles[s_neighbors[j]];
-            glm::vec3 x = neighbor_point->Position - curr_point->Position;
-            curr_point->Force += glm::normalize(x)
-                * (glm::length(x) - SegmentLength)
-                * Stiffness;
-        }
-        for (int j = 0; j < d_neighbors.size(); j++) {
-            Particle* neighbor_point = particles[d_neighbors[j]];
-            glm::vec3 x = neighbor_point->Position - curr_point->Position;
-            curr_point->Force += glm::normalize(x)
-                * (glm::length(x) - SegmentLength * SQRT_2)
-                * Stiffness;
-        }
-
-        /* Add wind force */
-        float x_force = 0; // cos(0.8f*elapsedTime) * (rand()/RAND_MAX-0.5f);
-        float y_force = std::abs(sin(0.1f * elapsedTime) - 0.2f);
-        float z_force = std::abs(cos(sin(curr_point->Position[0] * elapsedTime) - 0.8f));
-        if (IsWindForceEnabled) {
-            wind_force = glm::vec3(x_force,
-                -0.0005f * y_force,
-                -0.002f * z_force);
-            curr_point->Force += wind_force;
-        }
-
-        /* Set the velocity of each point */
-        curr_point->Acceleration = curr_point->Force / vertex_mass;
-
-        /* Reset force */
-        curr_point->Force = glm::vec3(0);
-    }
-
-    /* Position update and Object collision */
-    for (int i = 0; i < vertexCount; i++) {
-        glm::vec3 temp = particles[i]->Position;
-        if (!particles[i]->IsPositionConstrained) {
-            particles[i]->Position = particles[i]->Position + (1.0f - Damping)
-                * (particles[i]->Position - particles[i]->PreviousPosition)
-                + particles[i]->Acceleration * timestep;
-            glm::vec3 offset = particles[i]->Position - ball_center;
-            if (glm::length(offset) < ball_radius) {
-                particles[i]->Position += glm::normalize(offset)
-                    * (ball_radius - glm::length(offset));
-            }
-
-        }
-        particles[i]->PreviousPosition = temp;
-
-        vertices[i].Position = particles[i]->Position;
-    }
-    elapsedTime += 0.03f;
-    return true;
-}
-
 void Cloth::ball_control(char input) {
     switch (input) {
     case 'I':
@@ -270,73 +280,8 @@ void Cloth::ball_control(char input) {
     }
 }
 
-bool Cloth::update_points_constraint() {
-    glm::vec3 force;  // Force on each point
-    glm::vec3 gravity;  // The gravity vector
-    float vertex_mass = Mass / vertexCount;  // Mass of each vertex
-    float timestep = 0.00015f;  // Timestep
-    Damping = 0.02f;  // Damping (air resistance)
-    glm::vec3 wind_force = glm::vec3(0);
-    gravity = 0.1f * glm::vec3(0, 9.8f, 0);
-
-    for (int i = 0; i < vertexCount; i++) {
-        Particle* curr_point = particles[i];
-        curr_point->Force += vertex_mass * gravity; // Force initialization (gravity)
-
-        /* Add wind force */
-        float x_force = 0;
-        float y_force = std::abs(sin(0.1f * elapsedTime) - 0.2f);
-        float z_force = std::abs(cos(sin(curr_point->Position[0] * elapsedTime) - 0.8f));
-        if (IsWindForceEnabled) {
-            wind_force = glm::vec3(x_force, -0.0005f * y_force, -0.002f * z_force);
-            curr_point->Force += wind_force;
-        }
-
-        /* Set the velocity of each point */
-        curr_point->Acceleration = curr_point->Force / vertex_mass;
-
-        /* Reset force */
-        curr_point->Force = glm::vec3(0);
-    }
-
-    /* Position update and Object collision */
-    for (int i = 0; i < vertexCount; i++) {
-        glm::vec3 temp = particles[i]->Position;
-        if (!particles[i]->IsPositionConstrained) {
-            particles[i]->Position = particles[i]->Position + (1.0f - Damping)
-                * (particles[i]->Position - particles[i]->PreviousPosition)
-                + particles[i]->Acceleration * timestep;
-            glm::vec3 offset = particles[i]->Position - ball_center;
-            if (glm::length(offset) < ball_radius) {
-                particles[i]->Position += glm::normalize(offset)
-                    * (ball_radius - glm::length(offset));
-            }
-
-        }
-        particles[i]->PreviousPosition = temp;
-    }
-
-    /* Satisfy constraint */
-    for (int j = 0; j < NumberOfConstraintIterations; j++) {
-        for (int i = 0; i < constraints.size(); i++) {
-            Constraint* it = constraints[i];
-            Particle* a = particles[it->VertexIdA];
-            Particle* b = particles[it->VertexIdB];
-            it->SatisfyConstraints(a, b);
-        }
-    }
-
-    for (int i = 0; i < vertexCount; i++) 
-    {
-        vertices[i].Position = particles[i]->Position;
-    }
-
-    elapsedTime += 0.03f;
-
-    return true;
-}
-
-void Cloth::CreateConstraints() {
+void Cloth::CreateConstraints() 
+{
     for (int i = 0; i < vertexCount; i++) 
     {
         int row = i / width;
