@@ -37,8 +37,8 @@ bool ClothSimulationApplication::Initialize()
     
     moveableSphere = std::make_unique<MoveableSphere>(1.0, glm::vec3(0, 0, 10), 5.2f, containerTexture);
     cloth = std::make_unique<Cloth>(30, 30, containerTexture);
-    //cloth->AddParticlPositionConstraint(0);
-    //cloth->AddParticlPositionConstraint(29);
+    cloth->AddParticlPositionConstraint(0);
+    cloth->AddParticlPositionConstraint(29);
     std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
     cloth->AddCollisionHandler(collisionHandler);
 

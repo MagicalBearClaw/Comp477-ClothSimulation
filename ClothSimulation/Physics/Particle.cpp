@@ -1,16 +1,13 @@
 #include "../stdafx.h"
 #include "Particle.h"
 
-Particle::Particle() {
-}
-
-Particle::Particle(float x, float y, float z) 
+Particle::Particle(int vertexId, glm::vec3 position, float mass)
 {
-    Position = glm::vec3(x, y, z);
-    PreviousPosition = glm::vec3(x, y, z);
+    Position = position;
+    PreviousPosition = Position;
     IsPositionConstrained = false;
-    VertexId = 0;
-
+    VertexId = vertexId;
+    Mass = mass;
 }
 std::vector<int> Particle::get_s_neighbors(int i, int col_count, int row_count) 
 {
