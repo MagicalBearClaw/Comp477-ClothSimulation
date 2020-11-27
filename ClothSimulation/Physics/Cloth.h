@@ -1,15 +1,16 @@
 #pragma once
 
 #include "../stdafx.h"
+#include <stb_image.h>
 #include "Particle.h"
+#include "Constraint.h"
 #include "../Rendering/Shader.h"
 #include "../Rendering/Camera.h"
-#include "Constraint.h"
 
 class Cloth 
 {
 public:
-    Cloth(int width, int height);
+    Cloth(int width, int height, const std::string& textureFileName);
     ~Cloth();
     void Update(float deltaTime);
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
@@ -28,12 +29,14 @@ private:
         glm::vec3 Position;
         glm::vec2 TexCoords;
     };
+    void LoadTexture(const std::string& textureFileName);
     void Initialize();
     void CreateVertexBuffer();
     void CreateIndexBuffer();
     void CreateParticles();
     void CreateConstraints();
     glm::vec3 CalculateWindForce();
+    void Reset();
 
 private:
     GLuint textureId;
@@ -46,6 +49,7 @@ private:
     int vertexCount;
     float elapsedTime;
     
+    std::string textureFileName;
     std::vector<Particle*> particles;  
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;

@@ -1,8 +1,8 @@
 #include "../stdafx.h"
 #include "Cloth.h"
 
-Cloth::Cloth(int width, int height)
-    : height(height), width(width)
+Cloth::Cloth(int width, int height, const std::string& textureFileName)
+    : height(height), width(width), textureFileName(textureFileName)
 {
     SegmentLength = 1.0f / (float)(std::max(height-1, width-1));
     vertexCount = height * width;
@@ -12,38 +12,30 @@ Cloth::Cloth(int width, int height)
     IsWindForceEnabled = false;
     NumberOfConstraintIterations = 10;
 
-    // Vertices initialization
-    for (int i = 0; i < height; i++) 
-    {
-        for (int j = 0; j < width; j++) 
-        {
-            float x = SegmentLength * j;
-            float y = SegmentLength * i;
-            float z = 0.0f;
-
-            Particle* curr_point = new Particle(glm::vec3(x, y, z), i * width + j);
-            particles.push_back(curr_point);
-        }
-    }
-
     Initialize();
 }
 
 Cloth::~Cloth()
 {
+    Reset();
 }
 
-void Cloth::CreateVertexBuffer() {
-    for (int i=0; i<vertexCount; i++) {
-        Vertex v;
-        v.Position = particles[i]->CurrentPosition;
-        vertices.push_back(v);
+void Cloth::CreateVertexBuffer() 
+{
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            Vertex vertex;
+            vertex.Position = glm::vec3(SegmentLength * j, SegmentLength * i, 0);
+            vertex.TexCoords = glm::vec2((float)i / height, (float)j / width);
+            vertices.push_back(vertex);
+        }
     }
 }
 
 void Cloth::CreateIndexBuffer()
 {
-    // Indices initialization
     int index_count = (height - 1) * (width - 1) * 6;
     for (int i = 0; i < height - 1; i++) {
         int stride = i * (width - 1);
@@ -61,6 +53,10 @@ void Cloth::CreateIndexBuffer()
 
 void Cloth::CreateParticles()
 {
+    for (int i = 0; i < vertexCount; i++) 
+    {
+        particles.push_back(new Particle(vertices[i].Position, i));
+    }
 }
 
 void Cloth::Update(float deltaTime) {
@@ -184,30 +180,51 @@ glm::vec3 Cloth::CalculateWindForce()
     return glm::vec3();
 }
 
+void Cloth::Reset()
+{
+    for(Particle* particle : particles)
+    {
+        if (particle)
+        {
+            delete particle;
+            particle = nullptr;
+        }
+    }
 
+    for(Constraint* constraint : constraints)
+    {
+        if (constraint)
+        {
+            delete constraint;
+            constraint = nullptr;
+        }
+    }
+
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
+}
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
-        &vertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
 
-    // Perspective projection
-    // Camera matrix
-    // Model matrix
-    glm::mat4 model;
     float scale = 0.5f;
-    model = glm::scale(model, glm::vec3(0.5f));
-    model = glm::translate(model, glm::vec3(-SegmentLength * width / 2.0f,
-        -SegmentLength * height / 1.2f, 0));
 
-    // Put transformation matrics together
+    glm::mat4 model;
+    model = glm::scale(model, glm::vec3(scale));
+    model = glm::translate(model, glm::vec3(-SegmentLength * width / 2.0f, -SegmentLength * height / 1.2f, 0));
+
     glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
+    
     GLint mvp_loc = glGetUniformLocation(shader.ID, "mvp");
     GLint model_loc = glGetUniformLocation(shader.ID, "model");
+    GLint diffuse_loc = glGetUniformLocation(shader.ID, "diffuse");
+    glUniform1i(diffuse_loc, textureId);
     glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
-
+    shader.Use();
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -220,8 +237,10 @@ void Cloth::AddParticlPositionConstraint(unsigned int id)
 
 void Cloth::Initialize()
 {
+    Reset();
     CreateVertexBuffer();
     CreateIndexBuffer();
+    LoadTexture(textureFileName);
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
@@ -229,23 +248,54 @@ void Cloth::Initialize()
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
-        &vertices[0], GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]),
-        &indices[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (GLvoid*)0);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(Vertex), &indices[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (GLvoid*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(1);
-
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+    glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     CreateParticles();
-    // Constaints initialization
     CreateConstraints();
 
 }
 
+
+void Cloth::LoadTexture(const std::string& textureFileName)
+{
+
+    glGenTextures(1, &textureId);
+
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(textureFileName.c_str(), &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << textureFileName << std::endl;
+        stbi_image_free(data);
+    }
+}

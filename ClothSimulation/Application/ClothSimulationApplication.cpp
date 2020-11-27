@@ -31,10 +31,10 @@ bool ClothSimulationApplication::Initialize()
     glEnable(GL_DEPTH_TEST);
     
     shaderProgram = Shader();
-    shaderProgram.Load("./Assets/Shaders/vs.glsl", "./Assets/Shaders/fs.glsl");
+    shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
     std::string containerTexture = std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string();
     std::cout << "initialize shaders" << std::endl;
-    cloth = new Cloth(30, 30);
+    cloth = new Cloth(30, 30, containerTexture);
     cloth->AddParticlPositionConstraint(0);
     cloth->AddParticlPositionConstraint(29);
     // Light VAO
@@ -145,12 +145,11 @@ void ClothSimulationApplication::Draw(float deltaTime)
         "light_color");
     GLint light_pos_loc = glGetUniformLocation(shaderProgram.ID,
         "light_pos");
+
     glUniform3f(object_color_loc, 1.0f, 0.5f, 0.2f);
     glUniform3f(light_color_loc, 1.0f, 1.0f, 1.0f);
     glUniform3f(light_pos_loc, 0.2f, 1.8f, 1.0f);
 
-    // Draw
-    shaderProgram.Use();
     //draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
     cloth->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

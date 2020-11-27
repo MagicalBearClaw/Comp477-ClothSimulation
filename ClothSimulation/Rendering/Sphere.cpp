@@ -9,8 +9,6 @@ Sphere::Sphere(const std::string textureFileName, float radius, int sectorCount,
 
 void Sphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-
-
     shader.Use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::scale(model, glm::vec3(0.5f));
@@ -24,7 +22,6 @@ void Sphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-
 }
 
 void Sphere::Initialize()
