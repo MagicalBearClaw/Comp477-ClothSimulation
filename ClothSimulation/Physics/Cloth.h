@@ -13,8 +13,7 @@ public:
     ~Cloth();
     void Update(float deltaTime);
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
-    void Initialize();
-
+    void AddParticlPositionConstraint(unsigned int id);
 public:
     int NumberOfConstraintIterations;
     float Mass;
@@ -24,7 +23,15 @@ public:
     float SegmentLength;
 
 private:
+    struct Vertex
+    {
+        glm::vec3 Position;
+        glm::vec2 TexCoords;
+    };
+    void Initialize();
     void CreateVertexBuffer();
+    void CreateIndexBuffer();
+    void CreateParticles();
     void CreateConstraints();
     glm::vec3 CalculateWindForce();
 
@@ -39,8 +46,8 @@ private:
     int vertexCount;
     float elapsedTime;
     
-    std::vector<Particle*> points;  
-    std::vector<float> vertices;
-    std::vector<int> indices;
+    std::vector<Particle*> particles;  
+    std::vector<Vertex> vertices;
+    std::vector<GLuint> indices;
     std::vector<Constraint*> constraints;
 };

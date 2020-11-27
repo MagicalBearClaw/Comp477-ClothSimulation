@@ -4,10 +4,9 @@
 struct Particle 
 {
 public:
-    Particle(glm::vec3 position, glm::vec2 texcoords);
+    Particle(glm::vec3 position, unsigned int vertexId);
     glm::vec3 CurrentPosition;
     glm::vec3 PreviousPosition;
-    glm::vec2 TexCoords;
     glm::vec3 Force;
     bool IsPositionConstrained;
     int VertexId;

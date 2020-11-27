@@ -2,10 +2,9 @@
 #include "Particle.h"
 
 
-Particle::Particle(glm::vec3 position, glm::vec2 texcoords) {
+Particle::Particle(glm::vec3 position, unsigned int vertexId) {
     CurrentPosition = position;
     PreviousPosition = CurrentPosition;
     IsPositionConstrained = false;
-    TexCoords = texcoords;
-    VertexId = 0;
+    VertexId = vertexId;
 }

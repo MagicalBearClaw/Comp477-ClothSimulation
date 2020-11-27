@@ -35,7 +35,8 @@ bool ClothSimulationApplication::Initialize()
     std::string containerTexture = std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string();
     std::cout << "initialize shaders" << std::endl;
     cloth = new Cloth(30, 30);
-
+    cloth->AddParticlPositionConstraint(0);
+    cloth->AddParticlPositionConstraint(29);
     // Light VAO
     GLuint lightVAO;
     glGenVertexArrays(1, &lightVAO);
