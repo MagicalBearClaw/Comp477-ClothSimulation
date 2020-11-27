@@ -2,14 +2,9 @@
 
 #include "../stdafx.h"
 #include "Particle.h"
+#include "Constraint.h"
 #include "../Rendering/Shader.h"
 #include "../Rendering/Camera.h"
-
-struct Constraint {
-    int a;
-    int b;
-    float rest_distance;
-};
 
 class Cloth {
 public:

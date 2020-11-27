@@ -320,29 +320,9 @@ bool Cloth::update_points_constraint() {
     for (int j = 0; j < NumberOfConstraintIterations; j++) {
         for (int i = 0; i < constraints.size(); i++) {
             Constraint* it = constraints[i];
-            Particle* a = particles[it->a];
-            Particle* b = particles[it->b];
-            //std::cout << it->a << "," << it->b << std::endl;
-            //getchar();
-            float rest_distance = it->rest_distance;
-            float distance = glm::length(a->Position - b->Position);
-            if (distance > rest_distance) {
-                float offset = (distance - rest_distance) / distance;
-                glm::vec3 correction = 0.5f * offset * (a->Position - b->Position);
-                if (!particles[it->a]->IsPositionConstrained)
-                    a->Position -= correction;
-                if (!particles[it->b]->IsPositionConstrained)
-                    b->Position += correction;
-            }
-
-            float tear_distance = it->rest_distance * 3.0f;
-            if (distance > tear_distance) {
-                float offset = (distance - rest_distance) / distance;
-                glm::vec3 correction = offset * (a->Position - b->Position);
-                if (particles[it->a]->IsPositionConstrained) particles[it->a]->IsPositionConstrained = false;
-                if (particles[it->b]->IsPositionConstrained) particles[it->b]->IsPositionConstrained = false;
-                constraints.erase(constraints.begin() + i);
-            }
+            Particle* a = particles[it->VertexIdA];
+            Particle* b = particles[it->VertexIdB];
+            it->SatisfyConstraints(a, b);
         }
     }
 
@@ -357,64 +337,49 @@ bool Cloth::update_points_constraint() {
 }
 
 void Cloth::CreateConstraints() {
-    for (int i = 0; i < vertexCount; i++) {
+    for (int i = 0; i < vertexCount; i++) 
+    {
         int row = i / width;
         int col = i - row * width;
-        if (col < width - 1) {
-            Constraint* right = new Constraint();
-            right->rest_distance = SegmentLength;
-            right->a = i;
-            right->b = i + 1;
-            constraints.push_back(right);
+        if (col < width - 1)
+        {
+            Constraint* c = new Constraint(i, i + 1, SegmentLength);
+            constraints.push_back(c);
         }
-        if (row < height - 1) {
-            Constraint* down = new Constraint();
-            down->rest_distance = SegmentLength;
-            down->a = i;
-            down->b = i + width;
-            constraints.push_back(down);
+        if (row < height - 1)
+        {
+            Constraint* c = new Constraint(i, i + width, SegmentLength);
+            constraints.push_back(c);
         }
-        if (col < width - 1 && row < height - 1) {
-            Constraint* down_right = new Constraint();
-            down_right->rest_distance = SegmentLength * SQRT_2;
-            down_right->a = i;
-            down_right->b = i + width + 1;
-            constraints.push_back(down_right);
+        if (col < width - 1 && row < height - 1)
+        {
+            Constraint* c = new Constraint(i, i + width + 1, SegmentLength * glm::sqrt(2));
+            constraints.push_back(c);
         }
-        if (row > 0 && col < width - 1) {
-            Constraint* up_right = new Constraint();
-            up_right->rest_distance = SegmentLength * SQRT_2;
-            up_right->a = i;
-            up_right->b = i - width + 1;
-            constraints.push_back(up_right);
+        if (row > 0 && col < width - 1)
+        {
+            Constraint* c = new Constraint(i, i - width + 1, SegmentLength * glm::sqrt(2));
+            constraints.push_back(c);
         }
-        if (col < width - 2) {
-            Constraint* right = new Constraint();
-            right->rest_distance = SegmentLength * 2;
-            right->a = i;
-            right->b = i + 1;
-            constraints.push_back(right);
+        if (col < width - 2)
+        {
+            Constraint* c = new Constraint(i, i + 1, SegmentLength * 2);
+            constraints.push_back(c);
         }
-        if (row < height - 2) {
-            Constraint* down = new Constraint();
-            down->rest_distance = SegmentLength * 2;
-            down->a = i;
-            down->b = i + width;
-            constraints.push_back(down);
+        if (row < height - 2)
+        {
+            Constraint* c = new Constraint(i, i + width, SegmentLength * 2);
+            constraints.push_back(c);
         }
-        if (col < width - 2 && row < height - 2) {
-            Constraint* down_right = new Constraint();
-            down_right->rest_distance = SegmentLength * SQRT_2 * 2;
-            down_right->a = i;
-            down_right->b = i + width + 1;
-            constraints.push_back(down_right);
+        if (col < width - 2 && row < height - 2)
+        {
+            Constraint* c = new Constraint(i, i + width + 1, SegmentLength * glm::sqrt(2) * 2);
+            constraints.push_back(c);
         }
-        if (row > 1 && col < width - 2) {
-            Constraint* up_right = new Constraint();
-            up_right->rest_distance = SegmentLength * SQRT_2 * 2;
-            up_right->a = i;
-            up_right->b = i - width + 1;
-            constraints.push_back(up_right);
+        if (row > 1 && col < width - 2)
+        {
+            Constraint* c = new Constraint(i, i - width + 1, SegmentLength * glm::sqrt(2) * 2);
+            constraints.push_back(c);
         }
     }
 }
