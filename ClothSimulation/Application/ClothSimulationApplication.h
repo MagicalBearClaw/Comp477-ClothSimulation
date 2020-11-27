@@ -10,6 +10,9 @@
 #include "../Rendering/Shader.h"
 #include "../Physics//cloth.h"
 #include "../Rendering/SkyBox.h"
+
+#include "../Scenes/MoveAbleSphere.h"
+
 class ClothSimulationApplication : public Application
 {
 public:
@@ -24,10 +27,10 @@ public:
 	virtual void HandleMouseScroll(double xoffset, double yoffset) override;
 	virtual void HandleMouse(double xPosition, double yPosition) override;
 
+private:
 	void ProccessKeyboardInput(float deltaTime);
 private:
-	void draw_sphere(float r, glm::vec3 c);
-	// camera
+
 	Camera camera;
 	Shader shaderProgram;
 	float lastX;
@@ -39,6 +42,7 @@ private:
 	ImVec4 _clearColor;
 
 	GLuint lightVAO;
-	Cloth* cloth;
+	std::unique_ptr<Cloth> cloth;
+	std::unique_ptr<MoveableSphere> moveableSphere;
 	bool keys[1024];
 };

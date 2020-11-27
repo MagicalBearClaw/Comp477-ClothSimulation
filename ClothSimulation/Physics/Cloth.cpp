@@ -94,18 +94,17 @@ void Cloth::Update(float deltaTime) {
         
         // preform verlet intergration
         glm::vec3 temp = particles[i]->CurrentPosition;
-        if(!particles[i]->IsPositionConstrained) {
+        if(!particles[i]->IsPositionConstrained) 
+        {
             particles[i]->CurrentPosition = particles[i]->CurrentPosition + (1.0f - damping)
                              * (particles[i]->CurrentPosition - particles[i]->PreviousPosition)
                              + particles[i]->Acceleration * deltaTime;
 
-            // give function here to handle collision
-            //glm::vec3 offset = particles[i]->CurrentPosition - ball_center;
-            //if (glm::length(offset) < ball_radius) {
-            //    particles[i]->CurrentPosition += glm::normalize(offset)
-            //                      * (ball_radius - glm::length(offset));
-            //}
-                
+            for (auto& handler : collisionHandlers)
+            {
+                handler(particles[i]);
+            }
+
         }
         particles[i]->PreviousPosition = temp;
     }
@@ -200,15 +199,18 @@ void Cloth::Reset()
         }
     }
 
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ebo);
+    if (vertices.size() >= 0 && indices.size() >= 0)
+    {
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
+        glDeleteBuffers(1, &ebo);
+        glDeleteTextures(1, &textureId);
+    }
 }
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
+
 
     float scale = 0.5f;
 
@@ -225,6 +227,8 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
     shader.Use();
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -233,6 +237,11 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 void Cloth::AddParticlPositionConstraint(unsigned int id)
 {
     particles[id]->IsPositionConstrained = true;
+}
+
+void Cloth::AddCollisionHandler(std::function<void(Particle* particle)> handler)
+{
+    collisionHandlers.push_back(handler);
 }
 
 void Cloth::Initialize()
@@ -248,14 +257,19 @@ void Cloth::Initialize()
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(Vertex), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+    
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(0);
+    
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-    glEnableVertexAttribArray(2);
+    
+    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+    //glEnableVertexAttribArray(2);
+    
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 

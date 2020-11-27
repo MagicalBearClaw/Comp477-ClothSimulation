@@ -14,7 +14,8 @@ class Sphere
 {
 public:
     Sphere(const std::string textureFileName, float radius = 1.0f, int sectorCount = 36, int stackCount = 18);
-    void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
+    ~Sphere();
+    void Draw(Shader& shader, Camera& camera, glm::mat4 model, glm::mat4 projection);
 private:
     void LoadTexture(const std::string& textureFileName);
     void Initialize();
@@ -22,7 +23,7 @@ private:
 private:
     float radius;
     int sectorCount;
-    int stackCount;   
+    int stackCount;
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::string textureFileName;

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include <unordered_map>
+#include <functional>
 #include <queue>
 #include <bitset>
 #include <optional>

@@ -7,18 +7,26 @@ Sphere::Sphere(const std::string textureFileName, float radius, int sectorCount,
     Initialize();
 }
 
-void Sphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
+Sphere::~Sphere()
+{
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
+    glDeleteTextures(1, &textureId);
+}
+
+void Sphere::Draw(Shader& shader, Camera& camera, glm::mat4 model, glm::mat4 projection)
 {
     shader.Use();
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(0.5f));
     glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
     shader.SetMat4("model", model);
-    shader.SetMat4("view", view);
+    shader.SetMat4("mvp", mvp);
     shader.SetMat4("projection", projection);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -39,7 +47,7 @@ void Sphere::Initialize()
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);

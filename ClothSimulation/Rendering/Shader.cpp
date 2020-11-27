@@ -1,6 +1,11 @@
 #include "../stdafx.h"
 #include "Shader.h"
 
+Shader::~Shader()
+{
+    glDeleteProgram(ID);
+}
+
 void Shader::Load(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {
     std::string vertexCode;

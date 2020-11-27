@@ -114,6 +114,9 @@
     <ClCompile Include="Rendering\Sphere.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="Scenes\MoveableSphere.cpp">
+      <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -181,6 +184,9 @@
     </ClInclude>
     <ClInclude Include="Rendering\Sphere.h">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MoveableSphere.h">
+      <Filter>Header Files\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

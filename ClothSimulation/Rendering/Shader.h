@@ -5,7 +5,7 @@ class Shader
 {
 public:
     unsigned int ID;
-
+    ~Shader();
 public:
     void Load(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
     void Use();

@@ -15,6 +15,7 @@ public:
     void Update(float deltaTime);
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
     void AddParticlPositionConstraint(unsigned int id);
+    void AddCollisionHandler(std::function<void(Particle* particle)> handler);
 public:
     int NumberOfConstraintIterations;
     float Mass;
@@ -54,4 +55,5 @@ private:
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
     std::vector<Constraint*> constraints;
+    std::vector<std::function<void(Particle* particle)>> collisionHandlers;
 };

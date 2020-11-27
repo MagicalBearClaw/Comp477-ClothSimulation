@@ -34,9 +34,15 @@ bool ClothSimulationApplication::Initialize()
     shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
     std::string containerTexture = std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string();
     std::cout << "initialize shaders" << std::endl;
-    cloth = new Cloth(30, 30, containerTexture);
+    
+    moveableSphere = std::make_unique<MoveableSphere>(1.0, glm::vec3(0, 0, 10), 5.2f, containerTexture);
+    cloth = std::make_unique<Cloth>(30, 30, containerTexture);
+
     cloth->AddParticlPositionConstraint(0);
     cloth->AddParticlPositionConstraint(29);
+    std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
+    cloth->AddCollisionHandler(collisionHandler);
+    
     // Light VAO
     GLuint lightVAO;
     glGenVertexArrays(1, &lightVAO);
@@ -53,79 +59,6 @@ bool ClothSimulationApplication::Initialize()
     return true;
 }
 
-void ClothSimulationApplication::draw_sphere(float r, glm::vec3 c) {
-    float* sphere_vertex, * sphere_normal;
-    GLuint* sphere_indices;
-    int sphere_vertex_size, sphere_indices_size;
-    int res = 50;
-    GLuint vao, vbo, nbo, ebo;
-
-    sphere_vertex_size = 3 * (res + 1) * (res + 1);
-    sphere_indices_size = 6 * res * res;
-
-    sphere_vertex = new float[sphere_vertex_size];
-    sphere_normal = new float[sphere_vertex_size];
-    sphere_indices = new GLuint[sphere_indices_size];
-
-    for (int j = 0; j <= res; j++) {
-        for (int i = 0; i <= res; i++) {
-            int k = i + j * (res + 1);
-            sphere_vertex[3 * k] = (float)i / res;
-            sphere_vertex[3 * k + 1] = .0f;
-            sphere_vertex[3 * k + 2] = (float)j / res;
-            const float M_PI = glm::pi<float>();
-            float theta = sphere_vertex[3 * k + 0] * 2 * M_PI;
-            float phi = sphere_vertex[3 * k + 2] * M_PI;
-
-            sphere_normal[3 * k + 0] = sphere_vertex[3 * k + 0] = c.x + r * glm::cos(theta) * glm::sin(phi);
-            sphere_normal[3 * k + 1] = sphere_vertex[3 * k + 1] = c.y + r * glm::sin(theta) * glm::sin(phi);
-            sphere_normal[3 * k + 2] = sphere_vertex[3 * k + 2] = c.z + r * glm::cos(phi);
-        }
-    }
-
-    int k = 0;
-    for (int j = 0; j < res; j++) {
-        for (int i = 0; i < res; i++) {
-            sphere_indices[k++] = i + j * (res + 1);
-            sphere_indices[k++] = i + (j + 1) * (res + 1);
-            sphere_indices[k++] = i + 1 + (j + 1) * (res + 1);
-
-            sphere_indices[k++] = i + j * (res + 1);
-            sphere_indices[k++] = i + 1 + (j + 1) * (res + 1);
-            sphere_indices[k++] = i + 1 + j * (res + 1);
-        }
-    }
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sphere_vertex_size * sizeof(float), sphere_vertex, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glGenBuffers(1, &nbo);
-    glBindBuffer(GL_ARRAY_BUFFER, nbo);
-    glBufferData(GL_ARRAY_BUFFER, sphere_vertex_size * sizeof(float), sphere_normal, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere_indices_size * sizeof(GLuint), sphere_indices, GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
-
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, sphere_indices_size, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-
-}
-
-
 void ClothSimulationApplication::Draw(float deltaTime)
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -137,7 +70,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.1f, 10000.0f);
 
     GLint object_color_loc = glGetUniformLocation(shaderProgram.ID,
         "object_color");
@@ -152,6 +85,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     //draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
     cloth->Draw(shaderProgram, camera, projection);
+    moveableSphere->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
@@ -159,14 +93,6 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
 void ClothSimulationApplication::Update(float deltaTime)
 {
-    //if (keys[GLFW_KEY_I]) cloth->ball_control('I');
-    //if (keys[GLFW_KEY_K]) cloth->ball_control('K');
-    //if (keys[GLFW_KEY_J]) cloth->ball_control('J');
-    //if (keys[GLFW_KEY_L]) cloth->ball_control('L');
-    //if (keys[GLFW_KEY_U]) cloth->ball_control('U');
-    //if (keys[GLFW_KEY_O]) cloth->ball_control('O');
-    //if (keys[GLFW_KEY_LEFT_BRACKET]) cloth->ball_control('[');
-    //if (keys[GLFW_KEY_RIGHT_BRACKET]) cloth->ball_control(']');
     ProccessKeyboardInput(deltaTime);
 }
 
@@ -178,11 +104,6 @@ void ClothSimulationApplication::FixedUpdate(float deltaTime)
 
 void ClothSimulationApplication::ShutDOwn()
 {
-    if (cloth)
-    {
-        delete cloth;
-        cloth = nullptr;
-    }
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -234,77 +155,26 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
         drawInWireframe = !drawInWireframe;
     }
 
-    if (glfwGetKey(_window, GLFW_KEY_1) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_I] = true;
-    }
-    else {
-        keys[GLFW_KEY_I] = false;
-    }
-
-    if (glfwGetKey(_window, GLFW_KEY_I) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_I] = true;
-    }
-    else {
-        keys[GLFW_KEY_I] = false;
-    }
-
-    if (glfwGetKey(_window, GLFW_KEY_K) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_K] = true;
-    }
-    else {
-        keys[GLFW_KEY_K] = false;
-    }
-
-    if (glfwGetKey(_window, GLFW_KEY_J) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_J] = true;
-    }
-    else {
-        keys[GLFW_KEY_J] = false;
-    }
 
 
-    if (glfwGetKey(_window, GLFW_KEY_L) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        keys[GLFW_KEY_L] = true;
-    }
-    else {
-        keys[GLFW_KEY_L] = false;
+        moveableSphere->Update(MoveableSphere::Direction::FORWARD, deltaTime);
     }
 
-    if (glfwGetKey(_window, GLFW_KEY_U) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        keys[GLFW_KEY_U] = true;
-    }
-    else {
-        keys[GLFW_KEY_U] = false;
+        moveableSphere->Update(MoveableSphere::Direction::BACKWARD, deltaTime);
     }
 
-    if (glfwGetKey(_window, GLFW_KEY_O) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-        keys[GLFW_KEY_O] = true;
-    }
-    else {
-        keys[GLFW_KEY_O] = false;
+        moveableSphere->Update(MoveableSphere::Direction::LEFT, deltaTime);
     }
 
-    if (glfwGetKey(_window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
+    if (glfwGetKey(_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-        keys[GLFW_KEY_LEFT_BRACKET] = true;
-    }
-    else {
-        keys[GLFW_KEY_LEFT_BRACKET] = false;
-    }
-
-    if (glfwGetKey(_window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_RIGHT_BRACKET] = true;
-    }
-    else {
-        keys[GLFW_KEY_RIGHT_BRACKET] = false;
+        moveableSphere->Update(MoveableSphere::Direction::RIGHT, deltaTime);
     }
 
     if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
