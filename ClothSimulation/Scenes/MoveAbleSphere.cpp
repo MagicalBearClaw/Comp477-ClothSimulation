@@ -29,9 +29,9 @@ void MoveableSphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 
 void MoveableSphere::ClothCollisionHandler(Particle* particle)
 {
-    glm::vec3 offset = particle->pos - Position;
+    glm::vec3 offset = particle->Position - Position;
     if (glm::length(offset) < Radius)
     {
-        particle->pos += glm::normalize(offset) * (Radius - glm::length(offset));
+        particle->Position += glm::normalize(offset) * (Radius - glm::length(offset));
     }
 }

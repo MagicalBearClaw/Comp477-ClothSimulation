@@ -4,25 +4,16 @@
 Particle::Particle() {
 }
 
-Particle::Particle(float x, float y, float z) {
-    pos = glm::vec3(x, y, z);
-    old_pos = glm::vec3(x, y, z);
-    pined = false;
-}
+Particle::Particle(float x, float y, float z) 
+{
+    Position = glm::vec3(x, y, z);
+    PreviousPosition = glm::vec3(x, y, z);
+    IsPositionConstrained = false;
+    VertexId = 0;
 
-void Particle::set_index(int i) {
-    index = i;
 }
-
-void Particle::set_acc(glm::vec3 acc) {
-    acceleration = acc;
-}
-
-glm::vec3 Particle::get_acc() {
-    return acceleration;
-}
-
-std::vector<int> Particle::get_s_neighbors(int i, int col_count, int row_count) {
+std::vector<int> Particle::get_s_neighbors(int i, int col_count, int row_count) 
+{
     std::vector<int> s_neighbors;
     int row = i / col_count;
     int col = i - row * col_count;
@@ -37,7 +28,8 @@ std::vector<int> Particle::get_s_neighbors(int i, int col_count, int row_count) 
     return s_neighbors;
 }
 
-std::vector<int> Particle::get_d_neighbors(int i, int col_count, int row_count) {
+std::vector<int> Particle::get_d_neighbors(int i, int col_count, int row_count) 
+{
     std::vector<int> d_neighbors;
     int row = i / col_count;
     int col = i - row * col_count;
