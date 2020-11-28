@@ -41,12 +41,12 @@ bool ClothSimulationApplication::Initialize()
     cloth->AddParticlPositionConstraint(29);
 
 
-    verletIntergration = std::make_unique<VerletIntergrator>(0.01f);
+    verletIntergration = std::make_unique<VerletIntergrator>(0.001f);
     semiEulerIntergration = std::make_unique<SemiImplicitEulerIntergrator>();
     gravitationalForce = std::make_unique<GravitationalForce>(glm::vec3(0, 0.98f, 0));
     springForce = std::make_unique<SpringForce>(30, 30, cloth->SegmentLength, cloth->Stiffness);
     windForce = std::make_unique<WindForce>(0.0005f, 0.002f);
-    windForce->IsEnabled = true;
+    windForce->IsEnabled = false;
     cloth->IntergrationMethod = verletIntergration.get();
 
     std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
@@ -103,6 +103,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
     {
         draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
     }
+    glUniform3f(object_color_loc, cloth->Color.x, cloth->Color.y, cloth->Color.z);
     cloth->Draw(shaderProgram, camera, projection);
     //moveableSphere->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -196,8 +197,9 @@ void ClothSimulationApplication::Update(float deltaTime)
 
 void ClothSimulationApplication::FixedUpdate(float deltaTime)
 {
-    float timestep = (float)1/60.0f;
-    cloth->Update(timestep, cloth->get_ball_center(), cloth->get_ball_radius());
+    //float timeStep = (float)1/60.0f;
+    float timeStep = 0.00015f;
+    cloth->Update(timeStep, cloth->get_ball_center(), cloth->get_ball_radius());
 }
 
 void ClothSimulationApplication::ShutDOwn()

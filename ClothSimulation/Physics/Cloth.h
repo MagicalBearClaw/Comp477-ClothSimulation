@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../stdafx.h"
+#include <stb_image.h>
+
 #include "Particle.h"
 #include "Constraint.h"
 #include "Integrators/IIntergrator.h"
@@ -8,7 +10,9 @@
 #include "../Rendering/Shader.h"
 #include "../Rendering/Camera.h"
 
-class Cloth {
+class Cloth 
+{
+
 public:
     Cloth(int width, int height, const std::string& textureFileName);
     ~Cloth();
@@ -30,8 +34,9 @@ public:
     bool IsWindForceEnabled;
     int NumberOfConstraintIterations;
     IIntegrator* IntergrationMethod;
-
+    glm::vec3 Color;
 private:
+    void LoadTexture(const std::string& textureFileName);
     void Initialize();
     void Reset();
     void CreateConstraints();
@@ -44,13 +49,14 @@ private:
         glm::vec3 Position;
         glm::vec2 TexCoords;
     };
+
     int vertexCount;
     float elapsedTime;
 
     GLuint vbo;
     GLuint vao;
     GLuint ebo;
-
+    GLuint textureId;
     int width;
     int height;
 
