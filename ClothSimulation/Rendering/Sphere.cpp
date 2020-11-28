@@ -20,9 +20,10 @@ void Sphere::Draw(Shader& shader, Camera& camera, glm::mat4 model, glm::mat4 pro
     shader.Use();
     glm::mat4 view = camera.GetViewMatrix();
     glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
-    shader.SetMat4("model", model);
-    shader.SetMat4("mvp", mvp);
-    shader.SetMat4("projection", projection);
+
+    shader.Set("model", model);
+    shader.Set("mvp", mvp);
+    shader.Set("projection", projection);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
