@@ -8,6 +8,7 @@
 
 #include "../Rendering//Camera.h"
 #include "../Rendering/Shader.h"
+#include "../Rendering/Light.h"
 #include "../Physics//cloth.h"
 #include "../Physics/Integrators/IIntergrator.h"
 #include "../Physics/Integrators/VerletIntegrator.h"
@@ -49,6 +50,8 @@ private:
 	ImGuiIO* _imguiIO;
 	ImVec4 _clearColor;
 
+	std::unique_ptr<Light> light;
+
 	std::unique_ptr<VerletIntergrator> verletIntergration;
 	std::unique_ptr<SemiImplicitEulerIntergrator> semiEulerIntergration;
 
@@ -57,7 +60,6 @@ private:
 	std::unique_ptr<WindForce> windForce;
 
 	bool drawSphere;
-	GLuint lightVAO;
 	int m;
 	std::vector<GLfloat> vertices;
 	std::vector<int> indices;

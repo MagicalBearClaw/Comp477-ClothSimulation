@@ -103,7 +103,9 @@ void Cloth::Update(float deltaTime, glm::vec3 ballPosition, float ballRadius)
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-
+    GLint object_color_loc = glGetUniformLocation(shader.ID,
+        "object_color");
+    glUniform3f(object_color_loc, Color.x, Color.y, Color.z);
     GLint diffuse_loc = glGetUniformLocation(shader.ID,
         "diffuse");
     glUniform1i(diffuse_loc, textureId);
@@ -263,7 +265,7 @@ void Cloth::Reset()
         glDeleteVertexArrays(1, &vao);
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ebo);
-        //glDeleteTextures(1, &textureId);
+        glDeleteTextures(1, &textureId);
     }
 }
 

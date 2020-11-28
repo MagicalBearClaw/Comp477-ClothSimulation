@@ -147,6 +147,9 @@
     <ClCompile Include="Physics\ForceGenerators\WindForce.cpp">
       <Filter>Source Files\Physics\ForceGenerators</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\Light.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -241,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="Physics\ForceGenerators\IForceGenerator.h">
       <Filter>Header Files\Physics\ForceGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Light.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
