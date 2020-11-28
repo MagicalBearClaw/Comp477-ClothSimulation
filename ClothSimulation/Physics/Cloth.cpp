@@ -9,9 +9,9 @@ Cloth::Cloth(int width, int height, const std::string& textureFileName)
     Mass = 1.0f;
     Stiffness = 2.0f;
     elapsedTime = 0.0f;
-    IsWindForceEnabled = false;
+    IsWindForceEnabled = true;
     NumberOfConstraintIterations = 15;
-
+    Damping = 0.001f;
     // Ball initialization
     ball_radius = 0.25f;
     ball_center = glm::vec3(SegmentLength * width * 0.5f, SegmentLength * height * 1.8f,
@@ -30,88 +30,57 @@ void Cloth::AddParticlPositionConstraint(int id)
     particles[id]->IsPositionConstrained = true;
 }
 
-
-void Cloth::Update(float deltaTime)
+void Cloth::AddForceGenerator(IForceGenerator* forceGenerator)
 {
-    glm::vec3 force;  // Force on each point
-    glm::vec3 gravity;  // The gravity vector
-    float vertex_mass = Mass / vertexCount;  // Mass of each vertex
-    float timestep = 0.00015f;  // Timestep
-    Damping = 0.001f;  // Damping (air resistance)
-    glm::vec3 wind_force = glm::vec3(0);
-    gravity = glm::vec3(0, 0.98f, 0);
+    forceGenerators.push_back(forceGenerator);
+}
 
-    for (int i = 0; i < vertexCount; i++) {
-        Particle* curr_point = particles[i];
-        // Force initialization (gravity)
-        curr_point->Force += vertex_mass * gravity;
-        /* Get the neighbors on straight directions
-         * (up/down/left/right) */
-        std::vector<int> s_neighbors = curr_point->get_s_neighbors(i, width,
-            height);
-        /* Get the neighbors on diagonal directions
-         * (up_left/up_right/down_left/down_right) */
-        std::vector<int> d_neighbors = curr_point->get_d_neighbors(i, width,
-            height);
-        // Spring force accumulation 
-        for (int j = 0; j < s_neighbors.size(); j++) {
-            Particle* neighbor_point = particles[s_neighbors[j]];
-            glm::vec3 x = neighbor_point->Position - curr_point->Position;
-            curr_point->Force += glm::normalize(x)
-                * (glm::length(x) - SegmentLength)
-                * Stiffness;
-        }
-        for (int j = 0; j < d_neighbors.size(); j++) {
-            Particle* neighbor_point = particles[d_neighbors[j]];
-            glm::vec3 x = neighbor_point->Position - curr_point->Position;
-            curr_point->Force += glm::normalize(x)
-                * (glm::length(x) - SegmentLength * (float)glm::sqrt(2))
-                * Stiffness;
+
+void Cloth::Update(float deltaTime, glm::vec3 ballPosition, float ballRadius)
+{
+    int particleCount = particles.size();
+    glm::vec3 windForce(0);
+    for (int i = 0; i < particleCount; i++)
+    {
+        Particle* particle = particles[i];
+
+        for (IForceGenerator* forceGenerator : forceGenerators)
+        {
+            forceGenerator->ApplyForce(particle, particles, deltaTime);
         }
 
-        /* Add wind force */
-        float x_force = 0; // cos(0.8f*elapsedTime) * (rand()/RAND_MAX-0.5f);
-        float y_force = std::abs(sin(0.1f * elapsedTime) - 0.2f);
-        float z_force = std::abs(cos(sin(curr_point->Position[0] * elapsedTime) - 0.8f));
-        if (IsWindForceEnabled) {
-            wind_force = glm::vec3(x_force,
-                -0.0005f * y_force,
-                -0.002f * z_force);
-            curr_point->Force += wind_force;
-        }
+        particle->Acceleration = particle->Force / particle->Mass;
 
-        /* Set the velocity of each point */
-        curr_point->Acceleration = curr_point->Force / vertex_mass;
-
-        /* Reset force */
-        curr_point->Force = glm::vec3(0);
+        particle->Force = glm::vec3(0);
     }
 
-    /* Position update and Object collision */
-    for (int i = 0; i < vertexCount; i++) {
-        glm::vec3 temp = particles[i]->Position;
-        if (!particles[i]->IsPositionConstrained) {
-            particles[i]->Position = particles[i]->Position + (1.0f - Damping)
-                * (particles[i]->Position - particles[i]->PreviousPosition)
-                + particles[i]->Acceleration * timestep;
-            //particles[i]->Velocity += particles[i]->Acceleration * timestep;
-            //particles[i]->Position += particles[i]->Velocity * timestep;
+    for (int i = 0; i < particleCount; i++)
+    {
+        glm::vec3 previousPosition = particles[i]->Position;
+        
+        if (!particles[i]->IsPositionConstrained) 
+        {
+            IntergrationMethod->Intergrate(particles[i], deltaTime);
 
-            glm::vec3 offset = particles[i]->Position - ball_center;
-            if (glm::length(offset) < ball_radius) {
+            glm::vec3 offset = particles[i]->Position - ballPosition;
+            if (glm::length(offset) < ballRadius) {
                 particles[i]->Position += glm::normalize(offset)
-                    * (ball_radius - glm::length(offset));
+                    * (ballRadius - glm::length(offset));
             }
 
+            //for (auto& handler : collisionHandlers)
+            //{
+            //    handler(part)
+            //}
         }
-        particles[i]->PreviousPosition = temp;
 
-        // vertices[i].Position = particles[i]->Position;
+        particles[i]->PreviousPosition = previousPosition;
     }
 
-    /* Satisfy constraint */
-    for (int j = 0; j < NumberOfConstraintIterations; j++) {
-        for (int i = 0; i < constraints.size(); i++) {
+    for (int j = 0; j < NumberOfConstraintIterations; j++) 
+    {
+        for (int i = 0; i < constraints.size(); i++) 
+        {
             Constraint* it = constraints[i];
             Particle* a = particles[it->VertexIdA];
             Particle* b = particles[it->VertexIdB];
@@ -124,7 +93,10 @@ void Cloth::Update(float deltaTime)
         vertices[i].Position = particles[i]->Position;
     }
 
-    elapsedTime += 0.03f;
+    for (IForceGenerator* forceGenerator : forceGenerators)
+    {
+        forceGenerator->ElapsedTime += 0.03f;
+    }
 }
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
@@ -136,11 +108,11 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 
     glm::mat4 model;
     float scale = 0.5f;
-    model = glm::scale(model, glm::vec3(0.5f));
+    model = glm::scale(model, glm::vec3(scale));
     model = glm::translate(model, glm::vec3(-SegmentLength * width / 2.0f,
         -SegmentLength * height / 1.2f, 0));
 
-    // Put transformation matrics together
+
     glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
     GLint mvp_loc = glGetUniformLocation(shader.ID, "mvp");
     GLint model_loc = glGetUniformLocation(shader.ID, "model");
@@ -251,25 +223,27 @@ void Cloth::Reset()
     }
 }
 
-void Cloth::ball_control(char input) {
+void Cloth::ball_control(char input) 
+{
+    float speed = 0.05f;
     switch (input) {
     case 'I':
-        ball_center -= glm::vec3(0, 0.004f, 0);
+        ball_center -= glm::vec3(0, speed, 0);
         break;
     case 'K':
-        ball_center += glm::vec3(0, 0.004f, 0);
+        ball_center += glm::vec3(0, speed, 0);
         break;
     case 'J':
-        ball_center -= glm::vec3(0.004f, 0, 0);
+        ball_center -= glm::vec3(speed, 0, 0);
         break;
     case 'L':
-        ball_center += glm::vec3(0.004f, 0, 0);
+        ball_center += glm::vec3(speed, 0, 0);
         break;
     case 'U':
-        ball_center -= glm::vec3(0, 0, 0.004f);
+        ball_center -= glm::vec3(0, 0, speed);
         break;
     case 'O':
-        ball_center += glm::vec3(0, 0, 0.004f);
+        ball_center += glm::vec3(0, 0, speed);
         break;
     case '[':
         if (ball_radius > 0.2f) ball_radius -= 0.002f;

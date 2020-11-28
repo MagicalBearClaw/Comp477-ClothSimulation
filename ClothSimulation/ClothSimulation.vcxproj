@@ -242,6 +242,34 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
+    <ClCompile Include="Physics\ForceGenerators\GravitationalForce.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Physics\ForceGenerators\SpringForce.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Physics\ForceGenerators\WindForce.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\ExplicitEulerIntergrator.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\RK4Integrator.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\SemiImplicitEulerIntegrator.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\VerletIntegrator.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
     <ClCompile Include="Physics\Particle.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -255,10 +283,6 @@
     <ClCompile Include="Rendering\Shader.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-    </ClCompile>
-    <ClCompile Include="Rendering\SkyBox.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
@@ -310,10 +334,18 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Physics\Cloth.h" />
     <ClInclude Include="Physics\Constraint.h" />
+    <ClInclude Include="Physics\ForceGenerators\GravitationalForce.h" />
+    <ClInclude Include="Physics\ForceGenerators\IForceGenerator.h" />
+    <ClInclude Include="Physics\ForceGenerators\SpringForce.h" />
+    <ClInclude Include="Physics\ForceGenerators\WindForce.h" />
+    <ClInclude Include="Physics\Integrators\ExplicitEulerIntergrator.h" />
+    <ClInclude Include="Physics\Integrators\IIntergrator.h" />
+    <ClInclude Include="Physics\Integrators\RK4Integrator.h" />
+    <ClInclude Include="Physics\Integrators\SemiImplicitEulerIntegrator.h" />
+    <ClInclude Include="Physics\Integrators\VerletIntegrator.h" />
     <ClInclude Include="Physics\Particle.h" />
     <ClInclude Include="Rendering\Camera.h" />
     <ClInclude Include="Rendering\Shader.h" />
-    <ClInclude Include="Rendering\SkyBox.h" />
     <ClInclude Include="Rendering\Sphere.h" />
     <ClInclude Include="Scenes\BasicClothScene.h" />
     <ClInclude Include="Scenes\FallingClothScene.h" />
@@ -321,12 +353,6 @@
     <ClInclude Include="Scenes\Scene.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="System\StopWatch.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\6.1.cubemaps.fs" />
-    <None Include="Assets\Shaders\6.1.cubemaps.vs" />
-    <None Include="Assets\Shaders\6.1.skybox.fs" />
-    <None Include="Assets\Shaders\6.1.skybox.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

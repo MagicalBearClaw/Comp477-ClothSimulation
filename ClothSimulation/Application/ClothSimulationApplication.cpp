@@ -29,22 +29,32 @@ bool ClothSimulationApplication::Initialize()
 
     _clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     glEnable(GL_DEPTH_TEST);
-    
+
     shaderProgram = Shader();
     shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
     std::string containerTexture = std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string();
     std::cout << "initialize shaders" << std::endl;
-    
+
     moveableSphere = std::make_unique<MoveableSphere>(1.0, glm::vec3(0, 0, 10), 5.2f, containerTexture);
     cloth = std::make_unique<Cloth>(30, 30, containerTexture);
     cloth->AddParticlPositionConstraint(0);
     cloth->AddParticlPositionConstraint(29);
+
+
+    verletIntergration = std::make_unique<VerletIntergrator>(0.01f);
+    semiEulerIntergration = std::make_unique<SemiImplicitEulerIntergrator>();
+    gravitationalForce = std::make_unique<GravitationalForce>(glm::vec3(0, 0.98f, 0));
+    springForce = std::make_unique<SpringForce>(30, 30, cloth->SegmentLength, cloth->Stiffness);
+    windForce = std::make_unique<WindForce>(0.0005f, 0.002f);
+    windForce->IsEnabled = true;
+    cloth->IntergrationMethod = verletIntergration.get();
+
     std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
     cloth->AddCollisionHandler(collisionHandler);
-
-
-    // Vertex buffer objects, Vertex array objects
-
+    cloth->AddForceGenerator(gravitationalForce.get());
+    cloth->AddForceGenerator(springForce.get());
+    cloth->AddForceGenerator(windForce.get());
+    drawSphere = true;
     // Light VAO
     GLuint lightVAO;
     glGenVertexArrays(1, &lightVAO);
@@ -54,9 +64,6 @@ bool ClothSimulationApplication::Initialize()
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
-    //// Some attributes
-    //glPointSize(5);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
 }
@@ -81,20 +88,22 @@ void ClothSimulationApplication::Draw(float deltaTime)
         "light_color");
     GLint light_pos_loc = glGetUniformLocation(shaderProgram.ID,
         "light_pos");
-    if (m == 0)
-        glUniform3f(object_color_loc, 0.0f, 0.5f, 0.2f);
-    if (m == 1)
-        glUniform3f(object_color_loc, 1.0f, 0.5f, 0.2f);
+
+    glUniform3f(object_color_loc, 1.0f, 0.5f, 0.2f);
     glUniform3f(light_color_loc, 1.0f, 1.0f, 1.0f);
     glUniform3f(light_pos_loc, 0.2f, 1.8f, 1.0f);
 
     // Draw
     shaderProgram.Use();
-    draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
+    if (glfwGetKey(_window, GLFW_KEY_G) == GLFW_PRESS)
+    {
+        drawSphere = !drawSphere;
+    }
+    if (drawSphere)
+    {
+        draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
+    }
     cloth->Draw(shaderProgram, camera, projection);
-
-    //draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
-    //cloth->Draw(shaderProgram, camera, projection);
     //moveableSphere->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -187,8 +196,8 @@ void ClothSimulationApplication::Update(float deltaTime)
 
 void ClothSimulationApplication::FixedUpdate(float deltaTime)
 {
-    float timestep = 0.00015f;
-    cloth->Update(timestep);
+    float timestep = (float)1/60.0f;
+    cloth->Update(timestep, cloth->get_ball_center(), cloth->get_ball_radius());
 }
 
 void ClothSimulationApplication::ShutDOwn()

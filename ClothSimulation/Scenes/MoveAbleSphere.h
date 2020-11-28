@@ -11,7 +11,9 @@ public:
         FORWARD,
         BACKWARD,
         LEFT,
-        RIGHT
+        RIGHT,
+		Up,
+		Down,
     };
 	MoveableSphere(float radius, glm::vec3 position, float speed, const std::string& textureFileName);
 	void Update(Direction direction, float deltaTime);

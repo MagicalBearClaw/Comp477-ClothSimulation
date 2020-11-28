@@ -9,34 +9,67 @@ Particle::Particle(int vertexId, glm::vec3 position, float mass)
     VertexId = vertexId;
     Mass = mass;
 }
-std::vector<int> Particle::get_s_neighbors(int i, int col_count, int row_count) 
+std::vector<int> Particle::GetAjcentParticles(int gridWidth, int gridHeight) 
 {
-    std::vector<int> s_neighbors;
-    int row = i / col_count;
-    int col = i - row * col_count;
-    int up = (row - 1) * col_count + col;
-    if (row > 0) s_neighbors.push_back(up);
-    int down = (row + 1) * col_count + col;
-    if (row < row_count - 1) s_neighbors.push_back(down);
-    int left = row * col_count + col - 1;
-    if (col > 0) s_neighbors.push_back(left);
-    int right = row * col_count + col + 1;
-    if (col < col_count - 1) s_neighbors.push_back(right);
-    return s_neighbors;
+    std::vector<int> particles;
+
+    int row = VertexId / gridWidth;
+    int column = VertexId - row * gridWidth;
+
+    int up = (row - 1) * gridWidth + column;
+    if (row > 0)
+    {
+        particles.push_back(up);
+    }
+    
+    int down = (row + 1) * gridWidth + column;
+    if (row < gridHeight - 1)
+    {
+        particles.push_back(down);
+    }
+    
+    int left = row * gridWidth + column - 1;
+    if (column > 0)
+    {
+        particles.push_back(left);
+    }
+
+    int right = row * gridWidth + column + 1;
+    if (column < gridWidth - 1)
+    {
+        particles.push_back(right);
+    }
+    
+    return particles;
 }
 
-std::vector<int> Particle::get_d_neighbors(int i, int col_count, int row_count) 
+std::vector<int> Particle::GetDiagonalParticles(int gridWidth, int gridHeight)
 {
-    std::vector<int> d_neighbors;
-    int row = i / col_count;
-    int col = i - row * col_count;
-    int up_left = (row - 1) * col_count + col - 1;
-    if (row > 0 && col > 0) d_neighbors.push_back(up_left);
-    int down_right = (row + 1) * col_count + col + 1;
-    if (row < row_count - 1 && col < col_count - 1) d_neighbors.push_back(down_right);
-    int up_right = (row - 1) * col_count + col + 1;
-    if (row > 0 && col < col_count - 1) d_neighbors.push_back(up_right);
-    int down_left = (row + 1) * col_count + col - 1;
-    if (col > 0 && row < row_count - 1) d_neighbors.push_back(down_left);
-    return d_neighbors;
+    std::vector<int> particles;
+
+    int row = VertexId / gridWidth;
+    int column = VertexId - row * gridWidth;
+    
+    int up_left = (row - 1) * gridWidth + column - 1;
+    if (row > 0 && column > 0)
+    {
+        particles.push_back(up_left);
+    }
+    
+    int down_right = (row + 1) * gridWidth + column + 1;
+    if (row < gridHeight - 1 && column < gridWidth - 1)
+    {
+        particles.push_back(down_right);
+    }
+    int up_right = (row - 1) * gridWidth + column + 1;
+    if (row > 0 && column < gridWidth - 1)
+    {
+        particles.push_back(up_right);
+    }
+    int down_left = (row + 1) * gridWidth + column - 1;
+    if (column > 0 && row < gridHeight - 1)
+    {
+        particles.push_back(down_left);
+    }
+    return particles;
 }

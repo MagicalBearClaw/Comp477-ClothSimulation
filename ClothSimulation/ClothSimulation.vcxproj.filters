@@ -49,6 +49,18 @@
     <Filter Include="Source Files\Scenes">
       <UniqueIdentifier>{12ce2e02-a43e-4390-9ab0-d1591a739e3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics\Integrators">
+      <UniqueIdentifier>{e5fe903e-2655-4368-9c11-b88df84e8eeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics\Integrators">
+      <UniqueIdentifier>{169c60e4-0175-41ee-b253-f2b4dabb047f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics\ForceGenerators">
+      <UniqueIdentifier>{489ded19-5bc6-48de-b7e0-a0bccbb4d4bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics\ForceGenerators">
+      <UniqueIdentifier>{eea92f98-10f9-422e-8155-c61d503aa5b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -99,9 +111,6 @@
     <ClCompile Include="Scenes\FallingClothScene.cpp">
       <Filter>Source Files\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\SkyBox.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Physics\Particle.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
@@ -116,6 +125,27 @@
     </ClCompile>
     <ClCompile Include="Scenes\MoveableSphere.cpp">
       <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\RK4Integrator.cpp">
+      <Filter>Source Files\Physics\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\ExplicitEulerIntergrator.cpp">
+      <Filter>Source Files\Physics\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\SemiImplicitEulerIntegrator.cpp">
+      <Filter>Source Files\Physics\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Integrators\VerletIntegrator.cpp">
+      <Filter>Source Files\Physics\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\ForceGenerators\GravitationalForce.cpp">
+      <Filter>Source Files\Physics\ForceGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\ForceGenerators\SpringForce.cpp">
+      <Filter>Source Files\Physics\ForceGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\ForceGenerators\WindForce.cpp">
+      <Filter>Source Files\Physics\ForceGenerators</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -170,9 +200,6 @@
     <ClInclude Include="Scenes\FallingClothScene.h">
       <Filter>Header Files\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\SkyBox.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Physics\Particle.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -188,19 +215,32 @@
     <ClInclude Include="Scenes\MoveableSphere.h">
       <Filter>Header Files\Scenes</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\6.1.cubemaps.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Assets\Shaders\6.1.cubemaps.fs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Assets\Shaders\6.1.skybox.vs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Assets\Shaders\6.1.skybox.fs">
-      <Filter>Resource Files</Filter>
-    </None>
+    <ClInclude Include="Physics\Integrators\RK4Integrator.h">
+      <Filter>Header Files\Physics\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Integrators\ExplicitEulerIntergrator.h">
+      <Filter>Header Files\Physics\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Integrators\VerletIntegrator.h">
+      <Filter>Header Files\Physics\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Integrators\SemiImplicitEulerIntegrator.h">
+      <Filter>Header Files\Physics\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Integrators\IIntergrator.h">
+      <Filter>Header Files\Physics\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\ForceGenerators\GravitationalForce.h">
+      <Filter>Header Files\Physics\ForceGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\ForceGenerators\SpringForce.h">
+      <Filter>Header Files\Physics\ForceGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\ForceGenerators\WindForce.h">
+      <Filter>Header Files\Physics\ForceGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\ForceGenerators\IForceGenerator.h">
+      <Filter>Header Files\Physics\ForceGenerators</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

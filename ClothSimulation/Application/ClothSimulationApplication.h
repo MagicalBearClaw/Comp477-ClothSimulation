@@ -9,7 +9,14 @@
 #include "../Rendering//Camera.h"
 #include "../Rendering/Shader.h"
 #include "../Physics//cloth.h"
-#include "../Rendering/SkyBox.h"
+#include "../Physics/Integrators/IIntergrator.h"
+#include "../Physics/Integrators/VerletIntegrator.h"
+#include "../Physics/Integrators/SemiImplicitEulerIntegrator.h"
+#include "../Physics/Integrators/ExplicitEulerIntergrator.h"
+
+#include "../Physics/ForceGenerators/GravitationalForce.h"
+#include "../Physics/ForceGenerators/WindForce.h"
+#include "../Physics/ForceGenerators/SpringForce.h"
 
 #include "../Scenes/MoveAbleSphere.h"
 
@@ -29,6 +36,7 @@ public:
 
 private:
 	void ProccessKeyboardInput(float deltaTime);
+	void draw_sphere(Shader& shader, Camera& camera, glm::mat4 projection, glm::vec3 position);
 	void draw_sphere(float r, glm::vec3 c);
 private:
 	Camera camera;
@@ -40,7 +48,15 @@ private:
 	bool showImguiWindow;
 	ImGuiIO* _imguiIO;
 	ImVec4 _clearColor;
-	GLuint VBO, VAO, EBO;
+
+	std::unique_ptr<VerletIntergrator> verletIntergration;
+	std::unique_ptr<SemiImplicitEulerIntergrator> semiEulerIntergration;
+
+	std::unique_ptr<GravitationalForce> gravitationalForce;
+	std::unique_ptr<SpringForce> springForce;
+	std::unique_ptr<WindForce> windForce;
+
+	bool drawSphere;
 	GLuint lightVAO;
 	int m;
 	std::vector<GLfloat> vertices;

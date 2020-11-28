@@ -8,21 +8,24 @@ MoveableSphere::MoveableSphere(float radius, glm::vec3 position, float speed, co
 
 void MoveableSphere::Update(Direction direction, float deltaTime)
 {
-    float velocity = Speed * deltaTime;
+    float speed = 0.05f;
     if (direction == Direction::FORWARD)
-        Position.z -= velocity;
+        Position.z -= speed;
     if (direction == Direction::BACKWARD)
-        Position.z += velocity;
+        Position.z += speed;
     if (direction == Direction::LEFT)
-        Position.x += velocity;
+        Position.x += speed;
     if (direction == Direction::RIGHT)
-        Position.x -= velocity;
+        Position.x -= speed;
+    if (direction == Direction::Up)
+        Position.y -= speed;
+    if (direction == Direction::Down)
+        Position.y += speed;
 }
 
 void MoveableSphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(0.05f));
     model = glm::translate(model, Position);
     sphere->Draw(shader, camera, model, projection);
 }

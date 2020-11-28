@@ -13,6 +13,6 @@ public:
     float Mass;
     bool IsPositionConstrained;
     int VertexId;
-    std::vector<int> get_s_neighbors(int i, int col_count, int row_count);
-    std::vector<int> get_d_neighbors(int i, int col_count, int row_count);
+    std::vector<int> GetAjcentParticles(int row, int column);
+    std::vector<int> GetDiagonalParticles(int row, int column);
 };
