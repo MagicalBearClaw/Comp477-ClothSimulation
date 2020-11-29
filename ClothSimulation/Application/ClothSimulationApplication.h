@@ -19,7 +19,9 @@
 #include "../Physics/ForceGenerators/WindForce.h"
 #include "../Physics/ForceGenerators/SpringForce.h"
 
+#include "../Scenes/BasicClothScene.h"
 #include "../Scenes/MoveAbleSphere.h"
+
 
 class ClothSimulationApplication : public Application
 {
@@ -67,5 +69,10 @@ private:
 
 	std::unique_ptr<Cloth> cloth;
 	std::unique_ptr<MoveableSphere> moveableSphere;
+
+
+	std::unique_ptr<BasicClothScene> basicClothScene;
+
+
 	bool keys[1024];
 };

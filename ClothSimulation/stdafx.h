@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <functional>
 #include <queue>
+#include <deque>
 #include <bitset>
 #include <optional>
 #include <stdio.h>

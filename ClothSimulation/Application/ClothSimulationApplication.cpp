@@ -64,7 +64,7 @@ bool ClothSimulationApplication::Initialize()
     cloth->AddForceGenerator(gravitationalForce.get());
     cloth->AddForceGenerator(springForce.get());
     cloth->AddForceGenerator(windForce.get());
-
+    basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
 }
@@ -74,18 +74,15 @@ void ClothSimulationApplication::Draw(float deltaTime)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    // do imgui Rendering here
+    basicClothScene->DrawUI(deltaTime);
     ImGui::Render();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.001f, 10000.0f);
-
-    light->Draw(shaderProgram);
-    // Draw
     shaderProgram.Use();
-
+    light->Draw(shaderProgram);
     cloth->Draw(shaderProgram, camera, projection);
     moveableSphere->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

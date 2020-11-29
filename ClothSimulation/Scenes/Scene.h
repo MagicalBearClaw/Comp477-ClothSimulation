@@ -1,5 +1,10 @@
 #pragma once
 #include "../stdafx.h"
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../imgui/imgui_impl_opengl3.h"
+
+
 #include "../Rendering/Light.h"
 #include "../Physics//cloth.h"
 #include "../Physics/Integrators/IIntergrator.h"
@@ -14,17 +19,18 @@
 class Scene
 {
 public:
-	virtual void Initialize() = 0;
+	Scene(const std::string& windowTitle, int applicationWindowWidth, int applicationWindowHeight);
+	virtual void Initialize();
 	virtual void FixedUpdate(float deltaTime) = 0;
 	virtual void Update(float deltaTime) = 0;
 	virtual void Draw() = 0;
-	void DrawUI();
+	void DrawUI(float deltaTime);
 
 
 protected:
 	virtual void Reset();
 protected:
-	enum class IntegratorType
+	enum IntegratorType
 	{
 		ExplicitEuler,
 		Verlet,
@@ -33,10 +39,10 @@ protected:
 	};
 
 	// wind force properties
-	float MinWindSpeed;
-	float MaxWindSpeed;
-	float DefaultMinWindSpeed;
-	float DefaultMaxWindSpeed;
+	glm::vec3 WindSpeed;
+	glm::vec3 DefaultWindSpeed;
+	bool IsWindEnabled;
+
 	// gravity force properties
 	glm::vec3 Gravity;
 	glm::vec3 DefaultGravity;
@@ -79,21 +85,26 @@ protected:
 	float DefaultRk4TimeStep;
 	float DefaultRk4tCollisionOffset;
 
+	float TimeStep;
+	float CollisionOffset;
+
+
 	// cloth properties
-	glm::vec3 Color;
-	glm::vec3 DefaultColor;
+	glm::vec3 ClothColor;
+	glm::vec3 DefaultClothColor;
 
-	int Width;
-	int Height;
+	glm::vec2 ClothSize;
 	int NumberOfConstraintIterations;
-	int Stiffness;
-	int Mass;
+	float Stiffness;
+	float Mass;
 
-	int DefaultWidth;
-	int DefaultHeight;
+	glm::vec2 DefaultWindowSize;
 	int DefaultNumberOfConstraintIterations;
-	int DefaultStiffness;
-	int DefaultMass;
+	float DefaultStiffness;
+	float DefaultMass;
+	bool IsSimulationUIOpen;
+
+
 
 protected:
 	std::unique_ptr<Light> light;
@@ -106,6 +117,14 @@ protected:
 	std::unique_ptr<GravitationalForce> gravitationalForce;
 	std::unique_ptr<SpringForce> springForce;
 	std::unique_ptr<WindForce> windForce;
-
+	std::deque<float> deltaTimes;
+	const int maxDeltaTimes = 1000;
 	std::unique_ptr<Cloth> cloth;
+
+
+	int applicationWindowWidth;
+	int applicationWindowHeight;
+	int integrationMethodType;
+	const char* intergrationMethodNames[4] = { "Explicit Euler", "Verlet", "Semi Implicit Euler", "RK4" };
+	std::string windowTitle;
 };
