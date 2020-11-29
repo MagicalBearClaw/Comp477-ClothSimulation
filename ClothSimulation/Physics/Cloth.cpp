@@ -34,7 +34,7 @@ void Cloth::AddForceGenerator(IForceGenerator* forceGenerator)
 }
 
 
-void Cloth::Update(float deltaTime, glm::vec3 ballPosition, float ballRadius)
+void Cloth::Update(float deltaTime)
 {
     int particleCount = particles.size();
     glm::vec3 windForce(0);
@@ -59,13 +59,6 @@ void Cloth::Update(float deltaTime, glm::vec3 ballPosition, float ballRadius)
         if (!particles[i]->IsPositionConstrained) 
         {
             IntergrationMethod->Intergrate(particles[i], deltaTime);
-
-            //glm::vec3 offset = particles[i]->Position - ballPosition;
-            //if (glm::length(offset) < ballRadius + 0.19f) {
-            //    particles[i]->Position += glm::normalize(offset)
-            //        * (ballRadius + 0.19f - glm::length(offset));
-            //}
-
             for (auto& handler : collisionHandlers)
             {
                 handler(particles[i]);
@@ -86,7 +79,7 @@ void Cloth::Update(float deltaTime, glm::vec3 ballPosition, float ballRadius)
         }
     }
 
-    for (int i = 0; i < vertexCount; i++)
+    for (int i = 0; i < particleCount; i++)
     {
         vertices[i].Position = particles[i]->Position;
     }
@@ -152,13 +145,102 @@ void Cloth::CreateIndexBuffer()
     {
         for (int j = 0; j < width - 1; j++) 
         {
-            indices.push_back(i * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j);
+            int currentVertex = i * width + j;
+            indices.push_back(currentVertex);
+            
+            auto it = vertexToIndexMapping.find(currentVertex);
+            if (it != vertexToIndexMapping.end())
+            {
+                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
+                vertexIndices.push_back(indices.size() - 1);
+                vertexToIndexMapping[currentVertex] = vertexIndices;
+            }
+            else 
+            {
+                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
+                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
+            }
 
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j + 1);
+            currentVertex = i * width + j + 1;
+            indices.push_back(currentVertex);
+
+            it = vertexToIndexMapping.find(currentVertex);
+            if (it != vertexToIndexMapping.end())
+            {
+                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
+                vertexIndices.push_back(indices.size() - 1);
+                vertexToIndexMapping[currentVertex] = vertexIndices;
+            }
+            else
+            {
+                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
+                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
+            }
+            
+            currentVertex = (i + 1) * width + j;
+            indices.push_back(currentVertex);
+
+            it = vertexToIndexMapping.find(currentVertex);
+            if (it != vertexToIndexMapping.end())
+            {
+                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
+                vertexIndices.push_back(indices.size() - 1);
+                vertexToIndexMapping[currentVertex] = vertexIndices;
+            }
+            else
+            {
+                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
+                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
+            }
+
+            currentVertex = i * width + j + 1;
+            indices.push_back(currentVertex);
+            
+            it = vertexToIndexMapping.find(currentVertex);
+            if (it != vertexToIndexMapping.end())
+            {
+                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
+                vertexIndices.push_back(indices.size() - 1);
+                vertexToIndexMapping[currentVertex] = vertexIndices;
+            }
+            else
+            {
+                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
+                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
+            }
+
+            currentVertex = (i + 1) * width + j;
+            indices.push_back(currentVertex);
+            
+            it = vertexToIndexMapping.find(currentVertex);
+            if (it != vertexToIndexMapping.end())
+            {
+                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
+                vertexIndices.push_back(indices.size() - 1);
+                vertexToIndexMapping[currentVertex] = vertexIndices;
+            }
+            else
+            {
+                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
+                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
+            }
+
+            currentVertex = (i + 1) * width + j + 1;
+            indices.push_back(currentVertex);
+
+            it = vertexToIndexMapping.find(currentVertex);
+            if (it != vertexToIndexMapping.end())
+            {
+                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
+                vertexIndices.push_back(indices.size() - 1);
+                vertexToIndexMapping[currentVertex] = vertexIndices;
+            }
+            else
+            {
+                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
+                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
+            }
+
         }
     }
 }
@@ -180,6 +262,7 @@ void Cloth::Initialize()
     CreateParticles();
     CreateConstraints();
     LoadTexture(textureFileName);
+
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
@@ -267,10 +350,12 @@ void Cloth::Reset()
 
 void Cloth::CreateConstraints() 
 {
-    for (int i = 0; i < vertexCount; i++) 
+    int particleCount = particles.size();
+    for (int i = 0; i < particleCount; i++)
     {
         int row = i / width;
         int col = i - row * width;
+
         if (col < width - 1)
         {
             Constraint* c = new Constraint(i, i + 1, SegmentLength);
@@ -313,12 +398,3 @@ void Cloth::CreateConstraints()
         }
     }
 }
-
-float Cloth::get_ball_radius() {
-    return ball_radius;
-}
-
-glm::vec3 Cloth::get_ball_center() {
-    return ball_center;
-}
-

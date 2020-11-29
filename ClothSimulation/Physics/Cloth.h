@@ -16,16 +16,11 @@ class Cloth
 public:
     Cloth(int width, int height, const std::string& textureFileName);
     ~Cloth();
-    void Update(float deltaTime, glm::vec3 position, float raidus);
+    void Update(float deltaTime);
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
     void AddCollisionHandler(std::function<void(Particle* particle)> handler);
     void AddParticlPositionConstraint(int id);
     void AddForceGenerator(IForceGenerator* forceGenerator);
-
-    void ball_control(char input);
-    float get_ball_radius();
-    glm::vec3 get_ball_center();
-
 public:
     float SegmentLength;
     float Mass;
@@ -70,5 +65,6 @@ private:
     std::vector<Constraint*> constraints;
     std::vector<IForceGenerator*> forceGenerators;
     std::vector<std::function<void(Particle* particle)>> collisionHandlers;
+    std::unordered_map<int, std::vector<int>> vertexToIndexMapping;
 };
 

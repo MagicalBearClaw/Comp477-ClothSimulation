@@ -42,7 +42,6 @@ bool ClothSimulationApplication::Initialize()
 
     cloth = std::make_unique<Cloth>(30, 30, catTexture);
 
-    // Ball initialization
     ballRadius = 0.25f;
     ballCenter = glm::vec3(cloth->SegmentLength * 30 * 0.5f, cloth->SegmentLength * 30 * 1.8f, ballRadius * 2);
 
@@ -101,7 +100,7 @@ void ClothSimulationApplication::FixedUpdate(float deltaTime)
 {
     float timeStep = (float)1/60.0f;
     //float timeStep = 0.00015f;
-    cloth->Update(timeStep, cloth->get_ball_center(), cloth->get_ball_radius());
+    cloth->Update(timeStep);
 }
 
 void ClothSimulationApplication::ShutDOwn()

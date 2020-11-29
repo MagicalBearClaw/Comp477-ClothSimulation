@@ -11,7 +11,10 @@ public:
 public:
     int VertexIdA;
     int VertexIdB;
-    float restLength;
+    float TearDistanceThreshold;
 private:
-
+    std::vector<Constraint*>* constraints;
+    float restLength;
+    int constraintIndex;
+    bool isEnabled;
 };
