@@ -39,15 +39,20 @@ private:
 	void ProccessKeyboardInput(float deltaTime);
 private:
 	Camera camera;
+	
 	Shader shaderProgram;
+	
 	float lastX;
 	float lastY;
 	bool firstMouse;
+	
 	bool drawInWireframe;
 	bool showImguiWindow;
-	ImGuiIO* _imguiIO;
-	ImVec4 _clearColor;
 
+	ImGuiIO* imguiIO;
+	ImVec4 clearColor;
+
+	// todo move these into the scene;
 	glm::vec3 ballCenter;
 	float ballRadius;
 
@@ -60,8 +65,6 @@ private:
 	std::unique_ptr<SpringForce> springForce;
 	std::unique_ptr<WindForce> windForce;
 
-	std::vector<GLfloat> vertices;
-	std::vector<int> indices;
 	std::unique_ptr<Cloth> cloth;
 	std::unique_ptr<MoveableSphere> moveableSphere;
 	bool keys[1024];

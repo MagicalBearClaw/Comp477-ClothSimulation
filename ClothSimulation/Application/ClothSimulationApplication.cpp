@@ -21,13 +21,13 @@ bool ClothSimulationApplication::Initialize()
     std::cout << "Initialize base Application" << std::endl;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    _imguiIO = &ImGui::GetIO();
+    imguiIO = &ImGui::GetIO();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
     ImGui_ImplOpenGL3_Init(_glslVersion.c_str());
     std::cout << "Initialized IMGUI" << std::endl;
 
-    _clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     glEnable(GL_DEPTH_TEST);
 
     shaderProgram = Shader();
@@ -112,7 +112,7 @@ void ClothSimulationApplication::ShutDOwn()
 
 void ClothSimulationApplication::HandleMouseScroll(double xoffset, double yoffset)
 {
-    if (_imguiIO->WantCaptureMouse)
+    if (imguiIO->WantCaptureMouse)
     {
         return;
     }
@@ -121,7 +121,7 @@ void ClothSimulationApplication::HandleMouseScroll(double xoffset, double yoffse
 
 void ClothSimulationApplication::HandleMouse(double xPosition, double yPosition)
 {
-    if (_imguiIO->WantCaptureMouse)
+    if (imguiIO->WantCaptureMouse)
     {
         return;
     }
@@ -143,7 +143,7 @@ void ClothSimulationApplication::HandleMouse(double xPosition, double yPosition)
 
 void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
 {
-    if (_imguiIO->WantCaptureKeyboard)
+    if (imguiIO->WantCaptureKeyboard)
     {
         return;
     }
@@ -155,51 +155,6 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     {
         drawInWireframe = !drawInWireframe;
     }
-
-    //if (glfwGetKey(_window, GLFW_KEY_I) == GLFW_PRESS)
-    //{
-    //    keys[GLFW_KEY_I] = true;
-    //}
-    //else {
-    //    keys[GLFW_KEY_I] = false;
-    //}
-    //if (glfwGetKey(_window, GLFW_KEY_J) == GLFW_PRESS)
-    //{
-    //    keys[GLFW_KEY_J] = true;
-    //}
-    //else {
-    //    keys[GLFW_KEY_J] = false;
-    //}
-    //if (glfwGetKey(_window, GLFW_KEY_K) == GLFW_PRESS)
-    //{
-    //    keys[GLFW_KEY_K] = true;
-    //}
-    //else {
-    //    keys[GLFW_KEY_K] = false;
-    //}
-    //if (glfwGetKey(_window, GLFW_KEY_L) == GLFW_PRESS)
-    //{
-    //    keys[GLFW_KEY_L] = true;
-    //}
-    //else {
-    //    keys[GLFW_KEY_L] = false;
-    //}
-    //if (glfwGetKey(_window, GLFW_KEY_O) == GLFW_PRESS)
-    //{
-    //    keys[GLFW_KEY_O] = true;
-    //}
-    //else {
-    //    keys[GLFW_KEY_O] = false;
-    //}
-    //if (glfwGetKey(_window, GLFW_KEY_U) == GLFW_PRESS)
-    //{
-    //    keys[GLFW_KEY_U] = true;
-    //}
-    //else {
-    //    keys[GLFW_KEY_U] = false;
-    //}
-
-
 
     if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_PRESS)
     {

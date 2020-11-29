@@ -16,7 +16,3 @@ void BasicClothScene::Update(float deltaTime)
 void BasicClothScene::Draw()
 {
 }
-
-void BasicClothScene::DrawUI()
-{
-}
