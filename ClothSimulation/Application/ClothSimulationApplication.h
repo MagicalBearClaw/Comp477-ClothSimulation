@@ -10,6 +10,7 @@
 #include "../Rendering/Shader.h"
 
 #include "../Scenes/BasicClothScene.h"
+#include "../Scenes/FallingClothScene.h"
 
 
 class ClothSimulationApplication : public Application
@@ -36,10 +37,8 @@ private:
 	float lastY;
 	bool firstMouse;
 	
-	bool drawInWireframe;
-	bool showImguiWindow;
-
 	std::unique_ptr<BasicClothScene> basicClothScene;
+	std::unique_ptr<FallingClothScene> fallingClothScene;
 
 	ImGuiIO* imguiIO;
 	ImVec4 clearColor;

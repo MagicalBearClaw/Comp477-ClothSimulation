@@ -19,37 +19,9 @@ void BasicClothScene::Initialize()
 
 void BasicClothScene::Update(bool keyState[], float deltaTime)
 {
+	Scene::Update(keyState, deltaTime);
 
-	float timeStep = 0.0f;
-	float collisionOffset = 0.0f;
-	switch (integrationMethodType)
-	{
-		case IntegratorType::ExplicitEuler:
-		{
-			timeStep = ExplicitEulerTimeStep;
-			collisionOffset = ExplicitEulerCollisionOffset;
-			break;
-		}
-		case IntegratorType::Verlet:
-		{
-			timeStep = VerletTimeStep;
-			collisionOffset = VerletCollisionOffset;
-			break;
-		}
-		case IntegratorType::SemiImplicitEuler:
-		{
-			timeStep = SemiImplicitTimeStep;
-			collisionOffset = SemiImplicitCollisionOffset;
-			break;
-		}
-		case IntegratorType::RK4:
-		{
-			timeStep = Rk4TimeStep;
-			collisionOffset = Rk4tCollisionOffset;
-			break;
-		}
-	}
-	moveableSphere->CollisionOffset = collisionOffset;
+	moveableSphere->CollisionOffset = CurrentCollisionOffset;
 
 	if (keyState[GLFW_KEY_UP])
 	{
@@ -76,7 +48,7 @@ void BasicClothScene::Update(bool keyState[], float deltaTime)
 		moveableSphere->Update(MoveableSphere::Direction::DOWN, deltaTime);
 	}
 
-	cloth->Update(timeStep);
+	cloth->Update(CurrentTimeStep);
 }
 
 void BasicClothScene::Draw(Shader& shader, Camera& camera, glm::mat4 projection)

@@ -21,7 +21,7 @@ class Scene
 public:
 	Scene(const std::string& windowTitle, int applicationWindowWidth, int applicationWindowHeight);
 	virtual void Initialize();
-	virtual void Update(bool keyState[], float deltaTime) = 0;
+	virtual void Update(bool keyState[], float deltaTime);
 	virtual void Draw(Shader& shader, Camera& camera, glm::mat4 projection) = 0;
 	void DrawUI(float deltaTime);
 
@@ -103,6 +103,10 @@ protected:
 	float DefaultMass;
 
 	bool IsSimulationUIOpen;
+
+	float CurrentTimeStep;
+	float CurrentCollisionOffset;
+
 protected:
 	std::unique_ptr<Light> light;
 

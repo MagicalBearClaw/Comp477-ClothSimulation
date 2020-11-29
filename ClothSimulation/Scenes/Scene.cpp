@@ -30,7 +30,7 @@ Scene::Scene(const std::string& windowTitle , int applicationWindowWidth, int ap
     VerletDrag = DefaultVerletDrag = 0.01f;
 
     ExplicitEulerCollisionOffset = DefaultExplicitEulerTimeStep = 0.17f;
-    VerletCollisionOffset = DefaultVerletCollisionOffset = 0.17f;
+    VerletCollisionOffset = DefaultVerletCollisionOffset = 0.07f;
     SemiImplicitCollisionOffset = DefaultSemiImplicitCollisionOffset = 0.17f;
     Rk4tCollisionOffset = DefaultRk4tCollisionOffset = 0.17f;
 
@@ -49,7 +49,7 @@ void Scene::Initialize()
     light->Color = LightColor;
     light->Position = LightPosition;
 
-    std::string catTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
+    std::string catTexture = std::filesystem::path("./Assets/Textures/cat2.jpg").generic_u8string();
     cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexture);
 
     explicitEulerInegrator = std::make_unique<ExplicitEulerIntegrator>();
@@ -71,8 +71,51 @@ void Scene::Initialize()
 
 }
 
+void Scene::Update(bool keyState[], float deltaTime)
+{
+    if (keyState[GLFW_KEY_F1])
+    {
+        IsSimulationUIOpen = !IsSimulationUIOpen;
+    }
+
+    light->Color = LightColor;
+    light->Position = LightPosition;
+
+    switch (integrationMethodType)
+    {
+        case IntegratorType::ExplicitEuler:
+        {
+            CurrentTimeStep = ExplicitEulerTimeStep;
+            CurrentCollisionOffset = ExplicitEulerCollisionOffset;
+            break;
+        }
+        case IntegratorType::Verlet:
+        {
+            CurrentTimeStep = VerletTimeStep;
+            CurrentCollisionOffset = VerletCollisionOffset;
+            break;
+        }
+        case IntegratorType::SemiImplicitEuler:
+        {
+            CurrentTimeStep = SemiImplicitTimeStep;
+            CurrentCollisionOffset = SemiImplicitCollisionOffset;
+            break;
+        }
+        case IntegratorType::RK4:
+        {
+            CurrentTimeStep = Rk4TimeStep;
+            CurrentCollisionOffset = Rk4tCollisionOffset;
+            break;
+        }
+    }
+
+}
+
 void Scene::DrawUI(float deltaTime)
 {
+    if (!IsSimulationUIOpen)
+        return;
+
     ImGui::Begin(windowTitle.c_str(), &IsSimulationUIOpen);
     ImGui::SetWindowPos(windowTitle.c_str(), ImVec2(applicationWindowWidth - 420, 50), ImGuiCond_Once);
 

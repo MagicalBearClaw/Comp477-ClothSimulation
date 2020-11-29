@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../stdafx.h"
 #include "../Rendering/Sphere.h"
 #include "../Rendering/Camera.h"

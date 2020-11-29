@@ -37,6 +37,7 @@ bool ClothSimulationApplication::Initialize()
     std::cout << "initialize shaders" << std::endl;
 
     basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
+    //fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
 }
@@ -96,7 +97,7 @@ void ClothSimulationApplication::HandleMouse(double xPosition, double yPosition)
     }
 
     float xoffset = xPosition - lastX;
-    float yoffset = lastY - yPosition; // reversed since y-coordinates go from bottom to top
+    float yoffset = lastY - yPosition;
 
     lastX = xPosition;
     lastY = yPosition;
