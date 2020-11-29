@@ -14,10 +14,6 @@ Cloth::Cloth(int width, int height, const std::string& textureFileName)
     Damping = 0.001f;
     Color = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    // Ball initialization
-    ball_radius = 0.25f;
-    ball_center = glm::vec3(SegmentLength * width * 0.5f, SegmentLength * height * 1.8f,
-        ball_radius * 2);
 
     Initialize();
 }
@@ -64,16 +60,16 @@ void Cloth::Update(float deltaTime, glm::vec3 ballPosition, float ballRadius)
         {
             IntergrationMethod->Intergrate(particles[i], deltaTime);
 
-            glm::vec3 offset = particles[i]->Position - ballPosition;
-            if (glm::length(offset) < ballRadius) {
-                particles[i]->Position += glm::normalize(offset)
-                    * (ballRadius - glm::length(offset));
-            }
-
-            //for (auto& handler : collisionHandlers)
-            //{
-            //    handler(part)
+            //glm::vec3 offset = particles[i]->Position - ballPosition;
+            //if (glm::length(offset) < ballRadius + 0.19f) {
+            //    particles[i]->Position += glm::normalize(offset)
+            //        * (ballRadius + 0.19f - glm::length(offset));
             //}
+
+            for (auto& handler : collisionHandlers)
+            {
+                handler(particles[i]);
+            }
         }
 
         particles[i]->PreviousPosition = previousPosition;
@@ -266,37 +262,6 @@ void Cloth::Reset()
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ebo);
         glDeleteTextures(1, &textureId);
-    }
-}
-
-void Cloth::ball_control(char input) 
-{
-    float speed = 0.05f;
-    switch (input) {
-    case 'I':
-        ball_center -= glm::vec3(0, speed, 0);
-        break;
-    case 'K':
-        ball_center += glm::vec3(0, speed, 0);
-        break;
-    case 'J':
-        ball_center -= glm::vec3(speed, 0, 0);
-        break;
-    case 'L':
-        ball_center += glm::vec3(speed, 0, 0);
-        break;
-    case 'U':
-        ball_center -= glm::vec3(0, 0, speed);
-        break;
-    case 'O':
-        ball_center += glm::vec3(0, 0, speed);
-        break;
-    case '[':
-        if (ball_radius > 0.2f) ball_radius -= 0.002f;
-        break;
-    case ']':
-        if (ball_radius < 4.0f) ball_radius += 0.002f;
-        break;
     }
 }
 

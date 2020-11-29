@@ -32,15 +32,21 @@ bool ClothSimulationApplication::Initialize()
 
     shaderProgram = Shader();
     shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
-    std::string containerTexture = std::filesystem::path("./Assets/Textures/container.jpg").generic_u8string();
+    std::string containerTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
     std::cout << "initialize shaders" << std::endl;
 
     light = std::make_unique<Light>();
     light->Color = glm::vec3(1.0f, 1.0f, 1.0f);
     light->Position = glm::vec3(0.2f, 1.8f, 1.0f);
 
-    moveableSphere = std::make_unique<MoveableSphere>(1.0, glm::vec3(0, 0, 10), 5.2f, containerTexture);
+
     cloth = std::make_unique<Cloth>(30, 30, containerTexture);
+
+    // Ball initialization
+    ballRadius = 0.25f;
+    ballCenter = glm::vec3(cloth->SegmentLength * 30 * 0.5f, cloth->SegmentLength * 30 * 1.8f, ballRadius * 2);
+
+    moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballCenter, .2f, containerTexture);
     cloth->AddParticlPositionConstraint(0);
     cloth->AddParticlPositionConstraint(29);
 
@@ -51,14 +57,14 @@ bool ClothSimulationApplication::Initialize()
     springForce = std::make_unique<SpringForce>(30, 30, cloth->SegmentLength, cloth->Stiffness);
     windForce = std::make_unique<WindForce>(0.0005f, 0.002f);
     windForce->IsEnabled = false;
-    cloth->IntergrationMethod = verletIntergration.get();
+    cloth->IntergrationMethod = semiEulerIntergration.get();
 
     std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
     cloth->AddCollisionHandler(collisionHandler);
     cloth->AddForceGenerator(gravitationalForce.get());
     cloth->AddForceGenerator(springForce.get());
     cloth->AddForceGenerator(windForce.get());
-    drawSphere = true;
+
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
 }
@@ -74,7 +80,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.1f, 10000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.001f, 10000.0f);
 
     // Color input
     GLint object_color_loc = glGetUniformLocation(shaderProgram.ID,
@@ -86,110 +92,45 @@ void ClothSimulationApplication::Draw(float deltaTime)
     light->Draw(shaderProgram);
     // Draw
     shaderProgram.Use();
-    if (glfwGetKey(_window, GLFW_KEY_G) == GLFW_PRESS)
-    {
-        drawSphere = !drawSphere;
-    }
-    if (drawSphere)
-    {
-        draw_sphere(cloth->get_ball_radius(), cloth->get_ball_center());
-    }
 
     cloth->Draw(shaderProgram, camera, projection);
-    //moveableSphere->Draw(shaderProgram, camera, projection);
+    moveableSphere->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-
-void ClothSimulationApplication::draw_sphere(float r, glm::vec3 c) {
-    float* sphere_vertex, * sphere_normal;
-    GLuint* sphere_indices;
-    int sphere_vertex_size, sphere_indices_size;
-    int res = 50;
-    GLuint vao, vbo, nbo, ebo;
-
-    sphere_vertex_size = 3 * (res + 1) * (res + 1);
-    sphere_indices_size = 6 * res * res;
-
-    sphere_vertex = new float[sphere_vertex_size];
-    sphere_normal = new float[sphere_vertex_size];
-    sphere_indices = new GLuint[sphere_indices_size];
-
-    for (int j = 0; j <= res; j++) {
-        for (int i = 0; i <= res; i++) {
-            int k = i + j * (res + 1);
-            sphere_vertex[3 * k] = (float)i / res;
-            sphere_vertex[3 * k + 1] = .0f;
-            sphere_vertex[3 * k + 2] = (float)j / res;
-            const float M_PI = glm::pi<float>();
-            float theta = sphere_vertex[3 * k + 0] * 2 * M_PI;
-            float phi = sphere_vertex[3 * k + 2] * M_PI;
-
-            sphere_normal[3 * k + 0] = sphere_vertex[3 * k + 0] = c.x + r * glm::cos(theta) * glm::sin(phi);
-            sphere_normal[3 * k + 1] = sphere_vertex[3 * k + 1] = c.y + r * glm::sin(theta) * glm::sin(phi);
-            sphere_normal[3 * k + 2] = sphere_vertex[3 * k + 2] = c.z + r * glm::cos(phi);
-        }
-    }
-
-    int k = 0;
-    for (int j = 0; j < res; j++) {
-        for (int i = 0; i < res; i++) {
-            sphere_indices[k++] = i + j * (res + 1);
-            sphere_indices[k++] = i + (j + 1) * (res + 1);
-            sphere_indices[k++] = i + 1 + (j + 1) * (res + 1);
-
-            sphere_indices[k++] = i + j * (res + 1);
-            sphere_indices[k++] = i + 1 + (j + 1) * (res + 1);
-            sphere_indices[k++] = i + 1 + j * (res + 1);
-        }
-    }
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sphere_vertex_size * sizeof(float), sphere_vertex, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glGenBuffers(1, &nbo);
-    glBindBuffer(GL_ARRAY_BUFFER, nbo);
-    glBufferData(GL_ARRAY_BUFFER, sphere_vertex_size * sizeof(float), sphere_normal, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere_indices_size * sizeof(GLuint), sphere_indices, GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
-
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, sphere_indices_size, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
-
-
 
 void ClothSimulationApplication::Update(float deltaTime)
 {
     ProccessKeyboardInput(deltaTime);
-    if (keys[GLFW_KEY_I]) cloth->ball_control('I');
-    if (keys[GLFW_KEY_K]) cloth->ball_control('K');
-    if (keys[GLFW_KEY_J]) cloth->ball_control('J');
-    if (keys[GLFW_KEY_L]) cloth->ball_control('L');
-    if (keys[GLFW_KEY_U]) cloth->ball_control('U');
-    if (keys[GLFW_KEY_O]) cloth->ball_control('O');
-    if (keys[GLFW_KEY_LEFT_BRACKET]) cloth->ball_control('[');
-    if (keys[GLFW_KEY_RIGHT_BRACKET]) cloth->ball_control(']');
+    if (keys[GLFW_KEY_I]) 
+    {
+        moveableSphere->Update('I');
+    } 
+    if (keys[GLFW_KEY_K])
+    {
+        moveableSphere->Update('K');
+    }
+    if (keys[GLFW_KEY_J])
+    {
+        moveableSphere->Update('J');
+    }
+    if (keys[GLFW_KEY_L])
+    {
+        moveableSphere->Update('L');
+    }
+    if (keys[GLFW_KEY_U])
+    {
+        moveableSphere->Update('U');
+    }
+    if (keys[GLFW_KEY_O])
+    {
+        moveableSphere->Update('O');
+    }
 }
 
 void ClothSimulationApplication::FixedUpdate(float deltaTime)
 {
-    //float timeStep = (float)1/60.0f;
-    float timeStep = 0.00015f;
+    float timeStep = (float)1/60.0f;
+    //float timeStep = 0.00015f;
     cloth->Update(timeStep, cloth->get_ball_center(), cloth->get_ball_radius());
 }
 
@@ -291,25 +232,35 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
 
 
 
-    if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        moveableSphere->Update(MoveableSphere::Direction::FORWARD, deltaTime);
-    }
+    //if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_PRESS)
+    //{
+    //    moveableSphere->Update(MoveableSphere::Direction::FORWARD, deltaTime);
+    //}
 
-    if (glfwGetKey(_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        moveableSphere->Update(MoveableSphere::Direction::BACKWARD, deltaTime);
-    }
+    //if (glfwGetKey(_window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    //{
+    //    moveableSphere->Update(MoveableSphere::Direction::BACKWARD, deltaTime);
+    //}
 
-    if (glfwGetKey(_window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    {
-        moveableSphere->Update(MoveableSphere::Direction::LEFT, deltaTime);
-    }
+    //if (glfwGetKey(_window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    //{
+    //    moveableSphere->Update(MoveableSphere::Direction::LEFT, deltaTime);
+    //}
 
-    if (glfwGetKey(_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    {
-        moveableSphere->Update(MoveableSphere::Direction::RIGHT, deltaTime);
-    }
+    //if (glfwGetKey(_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    //{
+    //    moveableSphere->Update(MoveableSphere::Direction::RIGHT, deltaTime);
+    //}
+
+    //if (glfwGetKey(_window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+    //{
+    //    moveableSphere->Update(MoveableSphere::Direction::Up, deltaTime);
+    //}
+
+    //if (glfwGetKey(_window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+    //{
+    //    moveableSphere->Update(MoveableSphere::Direction::Down, deltaTime);
+    //}
 
     if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(Camera::Direction::FORWARD, deltaTime);

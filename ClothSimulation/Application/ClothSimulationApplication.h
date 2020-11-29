@@ -37,8 +37,6 @@ public:
 
 private:
 	void ProccessKeyboardInput(float deltaTime);
-	void draw_sphere(Shader& shader, Camera& camera, glm::mat4 projection, glm::vec3 position);
-	void draw_sphere(float r, glm::vec3 c);
 private:
 	Camera camera;
 	Shader shaderProgram;
@@ -50,6 +48,9 @@ private:
 	ImGuiIO* _imguiIO;
 	ImVec4 _clearColor;
 
+	glm::vec3 ballCenter;
+	float ballRadius;
+
 	std::unique_ptr<Light> light;
 
 	std::unique_ptr<VerletIntergrator> verletIntergration;
@@ -59,8 +60,6 @@ private:
 	std::unique_ptr<SpringForce> springForce;
 	std::unique_ptr<WindForce> windForce;
 
-	bool drawSphere;
-	int m;
 	std::vector<GLfloat> vertices;
 	std::vector<int> indices;
 	std::unique_ptr<Cloth> cloth;

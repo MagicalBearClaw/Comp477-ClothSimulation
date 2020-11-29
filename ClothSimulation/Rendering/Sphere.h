@@ -5,28 +5,33 @@
 #include "Camera.h"
 
 
-struct Vertex {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TexCoords;
-};
 class Sphere
 {
 public:
-    Sphere(const std::string textureFileName, float radius = 1.0f, int sectorCount = 36, int stackCount = 18);
+    Sphere(int resolution, float radius, glm::vec3 position, const std::string textureFileName);
     ~Sphere();
-    void Draw(Shader& shader, Camera& camera, glm::mat4 model, glm::mat4 projection);
+    void Draw(Shader& shader, Camera& camera, float radius, glm::vec3 position);
+    void Update(glm::vec3 position);
+    float Radius;
+    glm::vec3 Position;
 private:
     void LoadTexture(const std::string& textureFileName);
     void Initialize();
     void Create();
 private:
-    float radius;
-    int sectorCount;
-    int stackCount;
+    struct Vertex
+    {
+        glm::vec3 Position;
+        glm::vec3 Normal;
+        glm::vec2 TexCoords;
+    };
+
+    int resolution;
+    
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<GLuint> indices;
     std::string textureFileName;
+
     GLuint textureId;
     GLuint vao;
     GLuint vbo;

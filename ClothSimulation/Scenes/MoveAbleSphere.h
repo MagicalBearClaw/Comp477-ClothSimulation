@@ -17,6 +17,8 @@ public:
     };
 	MoveableSphere(float radius, glm::vec3 position, float speed, const std::string& textureFileName);
 	void Update(Direction direction, float deltaTime);
+	void Update(char input);
+	void Move(glm::vec3 position);
 	void Draw(Shader& shader, Camera& camera, glm::mat4 projection);
 	void ClothCollisionHandler(Particle* particle);
 public:
