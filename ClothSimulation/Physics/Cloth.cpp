@@ -1,5 +1,7 @@
 #include "../stdafx.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "cloth.h"
+
 
 Cloth::Cloth(int width, int height, const std::string& textureFileName)
     : height(height), width(width), textureFileName(textureFileName)
@@ -9,11 +11,8 @@ Cloth::Cloth(int width, int height, const std::string& textureFileName)
     Mass = 1.0f;
     Stiffness = 2.0f;
     elapsedTime = 0.0f;
-    IsWindForceEnabled = true;
     NumberOfConstraintIterations = 15;
-    Damping = 0.001f;
     Color = glm::vec3(1.0f, 1.0f, 1.0f);
-
 
     Initialize();
 }

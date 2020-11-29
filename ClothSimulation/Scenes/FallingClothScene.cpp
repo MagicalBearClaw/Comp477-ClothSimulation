@@ -5,14 +5,10 @@ void FallingClothScene::Initialize()
 {
 }
 
-void FallingClothScene::FixedUpdate(float deltaTime)
+void FallingClothScene::Update(bool keyState[], float deltaTime)
 {
 }
 
-void FallingClothScene::Update(float deltaTime)
-{
-}
-
-void FallingClothScene::Draw()
+void FallingClothScene::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
 }

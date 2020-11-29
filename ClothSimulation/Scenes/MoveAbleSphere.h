@@ -3,6 +3,7 @@
 #include "../Rendering/Camera.h"
 #include "../Rendering/Shader.h"
 #include "../Physics/Particle.h"
+
 class MoveableSphere
 {
 public:
@@ -12,8 +13,8 @@ public:
         BACKWARD,
         LEFT,
         RIGHT,
-		Up,
-		Down,
+		UP,
+		DOWN,
     };
 
 	MoveableSphere(float radius, glm::vec3 position, float speed);
@@ -22,9 +23,9 @@ public:
 	void ClothCollisionHandler(Particle* particle);
 public:
 	float Radius;
-	glm::vec3 Position;
 	float Speed;
+	float CollisionOffset;
+	glm::vec3 Position;
 private:
-	bool keys[1024];
 	std::unique_ptr<Sphere> sphere;
 };

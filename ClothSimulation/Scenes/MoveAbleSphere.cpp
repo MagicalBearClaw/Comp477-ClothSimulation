@@ -1,9 +1,9 @@
 #include "MoveAbleSphere.h"
 
-MoveableSphere::MoveableSphere(float radius, glm::vec3 position, float speed = 0.02f) : Radius(radius), Position(position), Speed(speed)
+MoveableSphere::MoveableSphere(float radius, glm::vec3 position, float speed = 0.02f) 
+                               : Radius(radius), Position(position), Speed(speed), CollisionOffset(0.17)
 {
     sphere = std::make_unique<Sphere>(50, radius, position);
-
 }
 
 void MoveableSphere::Update(Direction direction, float deltaTime)
@@ -16,9 +16,9 @@ void MoveableSphere::Update(Direction direction, float deltaTime)
         Position.x += Speed;
     if (direction == Direction::RIGHT)
         Position.x -= Speed;
-    if (direction == Direction::Up)
+    if (direction == Direction::UP)
         Position.y -= Speed;
-    if (direction == Direction::Down)
+    if (direction == Direction::DOWN)
         Position.y += Speed;
 
     sphere->Update(Position);
@@ -32,8 +32,8 @@ void MoveableSphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 void MoveableSphere::ClothCollisionHandler(Particle* particle)
 {
     glm::vec3 offset = particle->Position - Position;
-    if (glm::length(offset) < Radius + 0.17f)
+    if (glm::length(offset) < Radius + CollisionOffset)
     {
-        particle->Position += glm::normalize(offset) * (Radius + 0.17f - glm::length(offset));
+        particle->Position += glm::normalize(offset) * (Radius + CollisionOffset - glm::length(offset));
     }
 }

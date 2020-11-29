@@ -1,7 +1,6 @@
 #include "../stdafx.h"
 #include "ClothSimulationApplication.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+
 
 ClothSimulationApplication::ClothSimulationApplication(const std::string& windowTitle, int windowWith, int windowHeight)
     : Application(windowTitle, windowWith, windowHeight), camera(glm::vec3(0.0f, 0.0f, 3.0f))
@@ -18,13 +17,16 @@ bool ClothSimulationApplication::Initialize()
         std::cout << "failed to initialize base application" << std::endl;
         return false;
     }
+
     std::cout << "Initialize base Application" << std::endl;
+    
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     imguiIO = &ImGui::GetIO();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
     ImGui_ImplOpenGL3_Init(_glslVersion.c_str());
+
     std::cout << "Initialized IMGUI" << std::endl;
 
     clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -32,38 +34,8 @@ bool ClothSimulationApplication::Initialize()
 
     shaderProgram = Shader();
     shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
-    std::string catTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
     std::cout << "initialize shaders" << std::endl;
 
-    light = std::make_unique<Light>();
-    light->Color = glm::vec3(1.0f, 1.0f, 1.0f);
-    light->Position = glm::vec3(0.2f, 1.8f, 1.0f);
-
-
-    cloth = std::make_unique<Cloth>(30, 30, catTexture);
-
-    ballRadius = 0.25f;
-    ballCenter = glm::vec3(cloth->SegmentLength * 30 * 0.5f, cloth->SegmentLength * 30 * 1.8f, ballRadius * 2);
-
-    moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballCenter, 0.015f);
-    cloth->AddParticlPositionConstraint(0);
-    cloth->AddParticlPositionConstraint(29);
-
-
-    verletIntergration = std::make_unique<VerletIntegrator>(0.001f);
-    semiEulerIntergration = std::make_unique<SemiImplicitEulerIntegrator>();
-    rk4Integrator = std::make_unique<RK4Integrator>();
-    gravitationalForce = std::make_unique<GravitationalForce>(glm::vec3(0, 0.98f, 0));
-    springForce = std::make_unique<SpringForce>(30, 30, cloth->SegmentLength, cloth->Stiffness);
-    windForce = std::make_unique<WindForce>(0.0005f, 0.002f);
-    windForce->IsEnabled = false;
-    cloth->IntergrationMethod = verletIntergration.get();
-
-    std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
-    cloth->AddCollisionHandler(collisionHandler);
-    cloth->AddForceGenerator(gravitationalForce.get());
-    cloth->AddForceGenerator(springForce.get());
-    cloth->AddForceGenerator(windForce.get());
     basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
@@ -82,22 +54,14 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.001f, 10000.0f);
     shaderProgram.Use();
-    light->Draw(shaderProgram);
-    cloth->Draw(shaderProgram, camera, projection);
-    moveableSphere->Draw(shaderProgram, camera, projection);
+    basicClothScene->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ClothSimulationApplication::Update(float deltaTime)
 {
     ProccessKeyboardInput(deltaTime);
-}
-
-void ClothSimulationApplication::FixedUpdate(float deltaTime)
-{
-    float timeStep = (float)1/60.0f;
-    //float timeStep = 0.00015f;
-    cloth->Update(timeStep);
+    basicClothScene->Update(keys, deltaTime);
 }
 
 void ClothSimulationApplication::ShutDOwn()
@@ -113,6 +77,7 @@ void ClothSimulationApplication::HandleMouseScroll(double xoffset, double yoffse
     {
         return;
     }
+
     camera.ProcessMouseScroll(yoffset);
 }
 
@@ -122,6 +87,7 @@ void ClothSimulationApplication::HandleMouse(double xPosition, double yPosition)
     {
         return;
     }
+
     if (firstMouse)
     {
         lastX = xPosition;
@@ -146,50 +112,88 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     }
 
     if (glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(_window, true);
-
-    if (glfwGetKey(_window, GLFW_KEY_1) == GLFW_PRESS)
     {
-        drawInWireframe = !drawInWireframe;
+        glfwSetWindowShouldClose(_window, true);
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_F1) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_F1] = true;
+    }
+    else
+    {
+        keys[GLFW_KEY_F1] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        moveableSphere->Update(MoveableSphere::Direction::FORWARD, deltaTime);
+        keys[GLFW_KEY_UP] = true;
+    }
+    else
+    {
+        keys[GLFW_KEY_UP] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        moveableSphere->Update(MoveableSphere::Direction::BACKWARD, deltaTime);
+        keys[GLFW_KEY_DOWN] = true;
+    }
+    else
+    {
+        keys[GLFW_KEY_DOWN] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-        moveableSphere->Update(MoveableSphere::Direction::LEFT, deltaTime);
+        keys[GLFW_KEY_LEFT] = true;
+    }
+    else
+    {
+        keys[GLFW_KEY_LEFT] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-        moveableSphere->Update(MoveableSphere::Direction::RIGHT, deltaTime);
+        keys[GLFW_KEY_RIGHT] = true;
+    }
+    else
+    {
+        keys[GLFW_KEY_RIGHT] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
     {
-        moveableSphere->Update(MoveableSphere::Direction::Up, deltaTime);
+        keys[GLFW_KEY_RIGHT_SHIFT] = true;
+    }
+    else
+    {
+        keys[GLFW_KEY_RIGHT_SHIFT] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
     {
-        moveableSphere->Update(MoveableSphere::Direction::Down, deltaTime);
+        keys[GLFW_KEY_RIGHT_CONTROL] = true;
+    }
+    else
+    {
+        keys[GLFW_KEY_RIGHT_CONTROL] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
+    {
         camera.ProcessKeyboard(Camera::Direction::FORWARD, deltaTime);
+    }
     if (glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
+    {
         camera.ProcessKeyboard(Camera::Direction::BACKWARD, deltaTime);
+    }
     if (glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
+    {
         camera.ProcessKeyboard(Camera::Direction::RIGHT, deltaTime);
+    }
     if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
+    {
         camera.ProcessKeyboard(Camera::Direction::LEFT, deltaTime);
+    }
 }
 

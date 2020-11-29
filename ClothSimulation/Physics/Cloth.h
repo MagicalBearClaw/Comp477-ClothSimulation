@@ -1,14 +1,14 @@
 #pragma once
 
 #include "../stdafx.h"
-#include <stb_image.h>
-
 #include "Particle.h"
 #include "Constraint.h"
 #include "Integrators/IIntergrator.h"
 #include "ForceGenerators/IForceGenerator.h"
 #include "../Rendering/Shader.h"
 #include "../Rendering/Camera.h"
+
+#include <stb_image.h>
 
 class Cloth 
 {
@@ -25,8 +25,6 @@ public:
     float SegmentLength;
     float Mass;
     float Stiffness;
-    float Damping;
-    bool IsWindForceEnabled;
     int NumberOfConstraintIterations;
     IIntegrator* IntergrationMethod;
     glm::vec3 Color;
@@ -52,11 +50,9 @@ private:
     GLuint vao;
     GLuint ebo;
     GLuint textureId;
+
     int width;
     int height;
-
-    glm::vec3 ball_center;
-    float ball_radius;
 
     std::vector<Vertex> vertices;
     std::string textureFileName;

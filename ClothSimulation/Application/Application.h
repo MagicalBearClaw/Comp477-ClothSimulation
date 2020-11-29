@@ -12,7 +12,6 @@ protected:
 	virtual bool Initialize();
 	virtual void Draw(float deltaTime) = 0;
 	virtual void Update(float deltaTime) = 0;
-	virtual void FixedUpdate(float deltaTime) = 0;
 	virtual void ShutDOwn() = 0;
 	virtual void HandleMouseScroll(double xoffset, double yoffset) = 0;
 	virtual void HandleMouse(double xPosition, double yPosition) = 0;

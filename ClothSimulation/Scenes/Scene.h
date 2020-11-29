@@ -21,12 +21,12 @@ class Scene
 public:
 	Scene(const std::string& windowTitle, int applicationWindowWidth, int applicationWindowHeight);
 	virtual void Initialize();
-	virtual void FixedUpdate(float deltaTime) = 0;
-	virtual void Update(float deltaTime) = 0;
-	virtual void Draw() = 0;
+	virtual void Update(bool keyState[], float deltaTime) = 0;
+	virtual void Draw(Shader& shader, Camera& camera, glm::mat4 projection) = 0;
 	void DrawUI(float deltaTime);
 
-
+public:
+	bool DrawInWireFrame;
 protected:
 	virtual void Reset();
 protected:
@@ -39,8 +39,8 @@ protected:
 	};
 
 	// wind force properties
-	glm::vec3 WindSpeed;
-	glm::vec3 DefaultWindSpeed;
+	glm::vec2 WindSpeed;
+	glm::vec2 DefaultWindSpeed;
 	bool IsWindEnabled;
 
 	// gravity force properties
@@ -85,27 +85,24 @@ protected:
 	float DefaultRk4TimeStep;
 	float DefaultRk4tCollisionOffset;
 
-	float TimeStep;
-	float CollisionOffset;
-
-
 	// cloth properties
 	glm::vec3 ClothColor;
 	glm::vec3 DefaultClothColor;
 
 	glm::vec2 ClothSize;
+	glm::vec2 DefaultClothSize;
+
+	float SegmentLength;
+	float DefaultSegmentLength;
+
 	int NumberOfConstraintIterations;
-	float Stiffness;
-	float Mass;
-
-	glm::vec2 DefaultWindowSize;
 	int DefaultNumberOfConstraintIterations;
+	float Stiffness;
 	float DefaultStiffness;
+	float Mass;
 	float DefaultMass;
+
 	bool IsSimulationUIOpen;
-
-
-
 protected:
 	std::unique_ptr<Light> light;
 
@@ -117,14 +114,21 @@ protected:
 	std::unique_ptr<GravitationalForce> gravitationalForce;
 	std::unique_ptr<SpringForce> springForce;
 	std::unique_ptr<WindForce> windForce;
+
+	float ballRadius;
+	glm::vec3 ballPosition;
+
+
 	std::deque<float> deltaTimes;
 	const int maxDeltaTimes = 1000;
+	
 	std::unique_ptr<Cloth> cloth;
-
 
 	int applicationWindowWidth;
 	int applicationWindowHeight;
+
 	int integrationMethodType;
 	const char* intergrationMethodNames[4] = { "Explicit Euler", "Verlet", "Semi Implicit Euler", "RK4" };
+	
 	std::string windowTitle;
 };

@@ -38,7 +38,6 @@ int Application::Run()
 	while (!glfwWindowShouldClose(_window))
 	{
 		glfwPollEvents();
-		FixedUpdate(1.0f / 60.0f);
 		Update(_stopWatch.ElapsedTime());
 		Draw(_stopWatch.ElapsedTime());
 		glfwSwapBuffers(_window);
