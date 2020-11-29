@@ -342,7 +342,7 @@
     <ClInclude Include="Physics\ForceGenerators\IForceGenerator.h" />
     <ClInclude Include="Physics\ForceGenerators\SpringForce.h" />
     <ClInclude Include="Physics\ForceGenerators\WindForce.h" />
-    <ClInclude Include="Physics\Integrators\ExplicitEulerIntergrator.h" />
+    <ClInclude Include="Physics\Integrators\ExplicitEulerIntegrator.h" />
     <ClInclude Include="Physics\Integrators\IIntergrator.h" />
     <ClInclude Include="Physics\Integrators\RK4Integrator.h" />
     <ClInclude Include="Physics\Integrators\SemiImplicitEulerIntegrator.h" />

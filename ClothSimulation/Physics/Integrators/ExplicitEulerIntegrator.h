@@ -3,7 +3,7 @@
 #include "../Particle.h"
 #include "IIntergrator.h"
 
-class ExplicitEulerIntergrator : public IIntegrator
+class ExplicitEulerIntegrator : public IIntegrator
 {
 public:
 	// Inherited via IIntegrator

@@ -3,7 +3,7 @@
 #include "../Particle.h"
 #include "IIntergrator.h"
 
-class SemiImplicitEulerIntergrator : public IIntegrator
+class SemiImplicitEulerIntegrator : public IIntegrator
 {
 public:
 	// Inherited via IIntegrator

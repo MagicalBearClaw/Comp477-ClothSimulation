@@ -51,13 +51,14 @@ bool ClothSimulationApplication::Initialize()
     cloth->AddParticlPositionConstraint(29);
 
 
-    verletIntergration = std::make_unique<VerletIntergrator>(0.001f);
-    semiEulerIntergration = std::make_unique<SemiImplicitEulerIntergrator>();
+    verletIntergration = std::make_unique<VerletIntegrator>(0.001f);
+    semiEulerIntergration = std::make_unique<SemiImplicitEulerIntegrator>();
+    rk4Integrator = std::make_unique<RK4Integrator>();
     gravitationalForce = std::make_unique<GravitationalForce>(glm::vec3(0, 0.98f, 0));
     springForce = std::make_unique<SpringForce>(30, 30, cloth->SegmentLength, cloth->Stiffness);
     windForce = std::make_unique<WindForce>(0.0005f, 0.002f);
     windForce->IsEnabled = false;
-    cloth->IntergrationMethod = semiEulerIntergration.get();
+    cloth->IntergrationMethod = rk4Integrator.get();
 
     std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
     cloth->AddCollisionHandler(collisionHandler);

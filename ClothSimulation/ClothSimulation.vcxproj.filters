@@ -221,9 +221,6 @@
     <ClInclude Include="Physics\Integrators\RK4Integrator.h">
       <Filter>Header Files\Physics\Integrators</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\Integrators\ExplicitEulerIntergrator.h">
-      <Filter>Header Files\Physics\Integrators</Filter>
-    </ClInclude>
     <ClInclude Include="Physics\Integrators\VerletIntegrator.h">
       <Filter>Header Files\Physics\Integrators</Filter>
     </ClInclude>
@@ -247,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="Rendering\Light.h">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Integrators\ExplicitEulerIntegrator.h">
+      <Filter>Header Files\Physics\Integrators</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

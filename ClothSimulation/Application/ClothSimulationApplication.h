@@ -13,8 +13,8 @@
 #include "../Physics/Integrators/IIntergrator.h"
 #include "../Physics/Integrators/VerletIntegrator.h"
 #include "../Physics/Integrators/SemiImplicitEulerIntegrator.h"
-#include "../Physics/Integrators/ExplicitEulerIntergrator.h"
-
+#include "../Physics/Integrators/ExplicitEulerIntegrator.h"
+#include "../Physics/Integrators/RK4Integrator.h"
 #include "../Physics/ForceGenerators/GravitationalForce.h"
 #include "../Physics/ForceGenerators/WindForce.h"
 #include "../Physics/ForceGenerators/SpringForce.h"
@@ -53,9 +53,9 @@ private:
 
 	std::unique_ptr<Light> light;
 
-	std::unique_ptr<VerletIntergrator> verletIntergration;
-	std::unique_ptr<SemiImplicitEulerIntergrator> semiEulerIntergration;
-
+	std::unique_ptr<VerletIntegrator> verletIntergration;
+	std::unique_ptr<SemiImplicitEulerIntegrator> semiEulerIntergration;
+	std::unique_ptr<RK4Integrator> rk4Integrator;
 	std::unique_ptr<GravitationalForce> gravitationalForce;
 	std::unique_ptr<SpringForce> springForce;
 	std::unique_ptr<WindForce> windForce;
