@@ -1,63 +1,59 @@
 #include "MoveAbleSphere.h"
 
-MoveableSphere::MoveableSphere(float radius, glm::vec3 position, float speed, const std::string& textureFileName) : Radius(radius), Position(position), Speed(speed)
+MoveableSphere::MoveableSphere(float radius, glm::vec3 position, float speed = 0.02f) : Radius(radius), Position(position), Speed(speed)
 {
-    sphere = std::make_unique<Sphere>(50, radius, position, textureFileName);
+    sphere = std::make_unique<Sphere>(50, radius, position);
+
 }
 
 void MoveableSphere::Update(char input)
 {
-    float speed = 0.02f;
-    switch (input) {
-    case 'I':
-        Position -= glm::vec3(0, speed, 0);
-        break;
-    case 'K':
-        Position += glm::vec3(0, speed, 0);
-        break;
-    case 'J':
-        Position -= glm::vec3(speed, 0, 0);
-        break;
-    case 'L':
-        Position += glm::vec3(speed, 0, 0);
-        break;
-    case 'U':
-        Position -= glm::vec3(0, 0, speed);
-        break;
-    case 'O':
-        Position += glm::vec3(0, 0, speed);
-        break;
-    case '[':
-        if (Radius > 0.2f) Radius -= 0.002f;
-        break;
-    case ']':
-        if (Radius < 4.0f) Radius += 0.002f;
-        break;
-    }
+    //switch (input) {
+    //case 'I':
+    //    Position -= glm::vec3(0, speed, 0);
+    //    break;
+    //case 'K':
+    //    Position += glm::vec3(0, speed, 0);
+    //    break;
+    //case 'J':
+    //    Position -= glm::vec3(speed, 0, 0);
+    //    break;
+    //case 'L':
+    //    Position += glm::vec3(speed, 0, 0);
+    //    break;
+    //case 'U':
+    //    Position -= glm::vec3(0, 0, speed);
+    //    break;
+    //case 'O':
+    //    Position += glm::vec3(0, 0, speed);
+    //    break;
+    //case '[':
+    //    if (Radius > 0.2f) Radius -= 0.002f;
+    //    break;
+    //case ']':
+    //    if (Radius < 4.0f) Radius += 0.002f;
+    //    break;
+    //}
+
+    //sphere->Update(Position);
 }
 
 void MoveableSphere::Update(Direction direction, float deltaTime)
 {
-    float speed = 0.05f;
     if (direction == Direction::FORWARD)
-        Position.z -= speed;
+        Position.z -= Speed;
     if (direction == Direction::BACKWARD)
-        Position.z += speed;
+        Position.z += Speed;
     if (direction == Direction::LEFT)
-        Position.x += speed;
+        Position.x += Speed;
     if (direction == Direction::RIGHT)
-        Position.x -= speed;
+        Position.x -= Speed;
     if (direction == Direction::Up)
-        Position.y -= speed;
+        Position.y -= Speed;
     if (direction == Direction::Down)
-        Position.y += speed;
+        Position.y += Speed;
 
     sphere->Update(Position);
-}
-
-void MoveableSphere::Move(glm::vec3 position)
-{
-    sphere->Update(position);
 }
 
 void MoveableSphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)

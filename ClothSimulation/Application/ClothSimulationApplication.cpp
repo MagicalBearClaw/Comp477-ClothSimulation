@@ -32,7 +32,7 @@ bool ClothSimulationApplication::Initialize()
 
     shaderProgram = Shader();
     shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
-    std::string containerTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
+    std::string catTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
     std::cout << "initialize shaders" << std::endl;
 
     light = std::make_unique<Light>();
@@ -40,13 +40,13 @@ bool ClothSimulationApplication::Initialize()
     light->Position = glm::vec3(0.2f, 1.8f, 1.0f);
 
 
-    cloth = std::make_unique<Cloth>(30, 30, containerTexture);
+    cloth = std::make_unique<Cloth>(30, 30, catTexture);
 
     // Ball initialization
     ballRadius = 0.25f;
     ballCenter = glm::vec3(cloth->SegmentLength * 30 * 0.5f, cloth->SegmentLength * 30 * 1.8f, ballRadius * 2);
 
-    moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballCenter, .2f, containerTexture);
+    moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballCenter, 0.015f);
     cloth->AddParticlPositionConstraint(0);
     cloth->AddParticlPositionConstraint(29);
 
@@ -58,7 +58,7 @@ bool ClothSimulationApplication::Initialize()
     springForce = std::make_unique<SpringForce>(30, 30, cloth->SegmentLength, cloth->Stiffness);
     windForce = std::make_unique<WindForce>(0.0005f, 0.002f);
     windForce->IsEnabled = false;
-    cloth->IntergrationMethod = rk4Integrator.get();
+    cloth->IntergrationMethod = verletIntergration.get();
 
     std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
     cloth->AddCollisionHandler(collisionHandler);
@@ -83,13 +83,6 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.001f, 10000.0f);
 
-    // Color input
-    GLint object_color_loc = glGetUniformLocation(shaderProgram.ID,
-        "object_color");
-
-
-    glUniform3f(object_color_loc, 1.0f, 0.5f, 0.2f);
-
     light->Draw(shaderProgram);
     // Draw
     shaderProgram.Use();
@@ -102,30 +95,6 @@ void ClothSimulationApplication::Draw(float deltaTime)
 void ClothSimulationApplication::Update(float deltaTime)
 {
     ProccessKeyboardInput(deltaTime);
-    if (keys[GLFW_KEY_I]) 
-    {
-        moveableSphere->Update('I');
-    } 
-    if (keys[GLFW_KEY_K])
-    {
-        moveableSphere->Update('K');
-    }
-    if (keys[GLFW_KEY_J])
-    {
-        moveableSphere->Update('J');
-    }
-    if (keys[GLFW_KEY_L])
-    {
-        moveableSphere->Update('L');
-    }
-    if (keys[GLFW_KEY_U])
-    {
-        moveableSphere->Update('U');
-    }
-    if (keys[GLFW_KEY_O])
-    {
-        moveableSphere->Update('O');
-    }
 }
 
 void ClothSimulationApplication::FixedUpdate(float deltaTime)
@@ -188,80 +157,80 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
         drawInWireframe = !drawInWireframe;
     }
 
-    if (glfwGetKey(_window, GLFW_KEY_I) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_I] = true;
-    }
-    else {
-        keys[GLFW_KEY_I] = false;
-    }
-    if (glfwGetKey(_window, GLFW_KEY_J) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_J] = true;
-    }
-    else {
-        keys[GLFW_KEY_J] = false;
-    }
-    if (glfwGetKey(_window, GLFW_KEY_K) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_K] = true;
-    }
-    else {
-        keys[GLFW_KEY_K] = false;
-    }
-    if (glfwGetKey(_window, GLFW_KEY_L) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_L] = true;
-    }
-    else {
-        keys[GLFW_KEY_L] = false;
-    }
-    if (glfwGetKey(_window, GLFW_KEY_O) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_O] = true;
-    }
-    else {
-        keys[GLFW_KEY_O] = false;
-    }
-    if (glfwGetKey(_window, GLFW_KEY_U) == GLFW_PRESS)
-    {
-        keys[GLFW_KEY_U] = true;
-    }
-    else {
-        keys[GLFW_KEY_U] = false;
-    }
-
-
-
-    //if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_PRESS)
+    //if (glfwGetKey(_window, GLFW_KEY_I) == GLFW_PRESS)
     //{
-    //    moveableSphere->Update(MoveableSphere::Direction::FORWARD, deltaTime);
+    //    keys[GLFW_KEY_I] = true;
+    //}
+    //else {
+    //    keys[GLFW_KEY_I] = false;
+    //}
+    //if (glfwGetKey(_window, GLFW_KEY_J) == GLFW_PRESS)
+    //{
+    //    keys[GLFW_KEY_J] = true;
+    //}
+    //else {
+    //    keys[GLFW_KEY_J] = false;
+    //}
+    //if (glfwGetKey(_window, GLFW_KEY_K) == GLFW_PRESS)
+    //{
+    //    keys[GLFW_KEY_K] = true;
+    //}
+    //else {
+    //    keys[GLFW_KEY_K] = false;
+    //}
+    //if (glfwGetKey(_window, GLFW_KEY_L) == GLFW_PRESS)
+    //{
+    //    keys[GLFW_KEY_L] = true;
+    //}
+    //else {
+    //    keys[GLFW_KEY_L] = false;
+    //}
+    //if (glfwGetKey(_window, GLFW_KEY_O) == GLFW_PRESS)
+    //{
+    //    keys[GLFW_KEY_O] = true;
+    //}
+    //else {
+    //    keys[GLFW_KEY_O] = false;
+    //}
+    //if (glfwGetKey(_window, GLFW_KEY_U) == GLFW_PRESS)
+    //{
+    //    keys[GLFW_KEY_U] = true;
+    //}
+    //else {
+    //    keys[GLFW_KEY_U] = false;
     //}
 
-    //if (glfwGetKey(_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    //{
-    //    moveableSphere->Update(MoveableSphere::Direction::BACKWARD, deltaTime);
-    //}
 
-    //if (glfwGetKey(_window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    //{
-    //    moveableSphere->Update(MoveableSphere::Direction::LEFT, deltaTime);
-    //}
 
-    //if (glfwGetKey(_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    //{
-    //    moveableSphere->Update(MoveableSphere::Direction::RIGHT, deltaTime);
-    //}
+    if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        moveableSphere->Update(MoveableSphere::Direction::FORWARD, deltaTime);
+    }
 
-    //if (glfwGetKey(_window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
-    //{
-    //    moveableSphere->Update(MoveableSphere::Direction::Up, deltaTime);
-    //}
+    if (glfwGetKey(_window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        moveableSphere->Update(MoveableSphere::Direction::BACKWARD, deltaTime);
+    }
 
-    //if (glfwGetKey(_window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
-    //{
-    //    moveableSphere->Update(MoveableSphere::Direction::Down, deltaTime);
-    //}
+    if (glfwGetKey(_window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    {
+        moveableSphere->Update(MoveableSphere::Direction::LEFT, deltaTime);
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    {
+        moveableSphere->Update(MoveableSphere::Direction::RIGHT, deltaTime);
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+    {
+        moveableSphere->Update(MoveableSphere::Direction::Up, deltaTime);
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+    {
+        moveableSphere->Update(MoveableSphere::Direction::Down, deltaTime);
+    }
 
     if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(Camera::Direction::FORWARD, deltaTime);
