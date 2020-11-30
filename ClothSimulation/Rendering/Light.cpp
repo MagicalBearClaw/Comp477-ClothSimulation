@@ -13,14 +13,8 @@ Light::~Light()
 
 void Light::Draw(Shader& shader)
 {
-    GLint light_color_loc = glGetUniformLocation(shader.ID,
-        "light_color");
-    GLint light_pos_loc = glGetUniformLocation(shader.ID,
-        "light_pos");
-
-    glUniform3f(light_color_loc, Color.x, Color.y, Color.z);
-    glUniform3f(light_pos_loc, Position.x, Position.y, Position.z);
-
+    shader.Set("light_color", Color);
+    shader.Set("light_pos", Position);
 }
 
 void Light::Initialize()

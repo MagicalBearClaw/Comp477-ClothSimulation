@@ -103,22 +103,22 @@ void Scene::Update(bool keyState[], float deltaTime)
 
 void Scene::DrawUI(float deltaTime)
 {
+    if (deltaTimes.size() >= maxDeltaTimes)
+    {
+        deltaTimes.pop_front();
+    }
+    deltaTimes.push_back(deltaTime * 1000); // push in ms 
+
     if (!IsSimulationUIOpen)
         return;
 
     ImGui::Begin(windowTitle.c_str(), &IsSimulationUIOpen);
     ImGui::SetWindowPos(windowTitle.c_str(), ImVec2(applicationWindowWidth - 420, 50), ImGuiCond_Once);
 
-    if (deltaTimes.size() >= maxDeltaTimes)
-    {
-        deltaTimes.pop_front();
-    }
-    deltaTimes.push_back(deltaTime * 1000);
-
     ImGui::SetNextItemOpen(true);
     if (ImGui::TreeNode("Simulation statistics"))
     {
-        ImGui::PlotLines("Frame Times", &deltaTimes[0], deltaTimes.size(), 0, 0, 100, 0, ImVec2(250, 50));
+        ImGui::PlotLines("Frame Times", &deltaTimes[0], deltaTimes.size(), 0, nullptr, 0, 60, ImVec2(250, 50));
         ImGui::TreePop();
     }
 

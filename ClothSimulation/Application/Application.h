@@ -27,4 +27,8 @@ protected:
 	std::string _glslVersion;
 	GLFWwindow* _window;
 	StopWatch _stopWatch;
+
+private:
+	float lastFrameTime;
+	float currentFrameTime;
 };

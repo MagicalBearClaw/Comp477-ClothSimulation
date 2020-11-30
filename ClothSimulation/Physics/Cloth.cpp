@@ -91,16 +91,6 @@ void Cloth::Update(float deltaTime)
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-    GLint object_color_loc = glGetUniformLocation(shader.ID,
-        "object_color");
-    glUniform3f(object_color_loc, Color.x, Color.y, Color.z);
-    GLint diffuse_loc = glGetUniformLocation(shader.ID,
-        "diffuse");
-    glUniform1i(diffuse_loc, textureId);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
-        &vertices[0], GL_DYNAMIC_DRAW);
 
     glm::mat4 model;
     float scale = 0.5f;
@@ -108,13 +98,14 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     model = glm::translate(model, glm::vec3(-SegmentLength * width / 2.0f,
         -SegmentLength * height / 1.2f, 0));
 
-
     glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
-    GLint mvp_loc = glGetUniformLocation(shader.ID, "mvp");
-    GLint model_loc = glGetUniformLocation(shader.ID, "model");
-    glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
-    glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+    shader.Set("mvp", mvp);
+    shader.Set("model", model);
+    shader.Set("object_color", Color);
+    shader.Set("diffuse", textureId);
 
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

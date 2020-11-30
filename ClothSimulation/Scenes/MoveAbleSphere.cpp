@@ -26,7 +26,7 @@ void MoveableSphere::Update(Direction direction, float deltaTime)
 
 void MoveableSphere::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-    sphere->Draw(shader, camera, Radius, Position);
+    sphere->Draw(shader, camera, Radius, Position, projection);
 }
 
 void MoveableSphere::ClothCollisionHandler(Particle* particle)

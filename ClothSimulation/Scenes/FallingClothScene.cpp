@@ -4,12 +4,14 @@
 FallingClothScene::FallingClothScene(const std::string& windowTitle, int applicationWindowWidth, int applicationWindowHeight)
 									 : Scene(windowTitle, applicationWindowWidth, applicationWindowHeight)
 {
+	ballPosition = glm::vec3(0.5, 1, 0.5);
 	Initialize();
 }
 
 void FallingClothScene::Initialize()
 {
-	moveableSphere = std::make_unique<MoveableSphere>(ballRadius, glm::vec3(0.5,1,0.5), 0.012f);
+
+	moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballPosition, 0.012f);
 	std::string catTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
 	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexture);
 

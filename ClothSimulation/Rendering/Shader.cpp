@@ -84,6 +84,13 @@ void Shader::Set<int>(const std::string& name, const int& value) const
 {
     glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
+
+template<>
+void Shader::Set<unsigned int>(const std::string& name, const unsigned int& value) const
+{
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+}
+
 template<>
 void Shader::Set<float>(const std::string& name, const float& value) const
 {

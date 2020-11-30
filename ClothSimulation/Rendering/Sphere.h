@@ -10,7 +10,7 @@ class Sphere
 public:
     Sphere(int resolution, float radius, glm::vec3 position);
     ~Sphere();
-    void Draw(Shader& shader, Camera& camera, float radius, glm::vec3 position);
+    void Draw(Shader& shader, Camera& camera, float radius, glm::vec3 position, glm::mat4 projection);
     void Update(glm::vec3 position);
     float Radius;
     glm::vec3 Position;
@@ -24,7 +24,6 @@ private:
     {
         glm::vec3 Position;
         glm::vec3 Normal;
-        glm::vec2 TexCoords;
     };
 
     int resolution;

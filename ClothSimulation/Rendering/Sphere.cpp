@@ -14,19 +14,12 @@ Sphere::~Sphere()
     glDeleteBuffers(1, &ebo);
 }
 
-void Sphere::Draw(Shader& shader, Camera& camera, float radius, glm::vec3 position)
+void Sphere::Draw(Shader& shader, Camera& camera, float radius, glm::vec3 positio, glm::mat4 projection)
 {
-    shader.Use();
-    
-    // Color input
-    GLint object_color_loc = glGetUniformLocation(shader.ID,
-        "object_color");
-
-    glUniform3f(object_color_loc, 1.0f, 0.5f, 0.2f);
+    shader.Set("object_color", glm::vec3(1.0f, 0.5f, 0.2f));
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]),
-        &vertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -41,26 +34,6 @@ void Sphere::Update(glm::vec3 newPosition)
         vertex.Position += newPosition;
     }
     Position = newPosition;
-    //int index = 0;
-    //for (int j = 0; j <= resolution; j++)
-    //{
-    //    for (int i = 0; i <= resolution; i++)
-    //    {
-    //        Vertex& vertex = vertices[index];
-    //        vertex.Position.x = (float)i / resolution;
-    //        vertex.Position.y = 0.0f;
-    //        vertex.Position.z = (float)j / resolution;
-
-    //        float theta = vertex.Position.x * 2 * glm::pi<float>();
-    //        float phi = vertex.Position.z * glm::pi<float>();
-
-    //        vertex.Normal.x = vertex.Position.x = newPosition.x + Radius * glm::cos(theta) * glm::sin(phi);
-    //        vertex.Normal.y = vertex.Position.y = newPosition.y + Radius * glm::sin(theta) * glm::sin(phi);
-    //        vertex.Normal.z = vertex.Position.z = newPosition.z + Radius * glm::cos(phi);
-    //        
-    //        index++;
-    //    }
-    //}
 }
 
 void Sphere::Initialize()
@@ -107,7 +80,6 @@ void Sphere::Create()
             vertex.Normal.y = vertex.Position.y = Position.y + Radius * glm::sin(theta) * glm::sin(phi);
             vertex.Normal.z = vertex.Position.z = Position.z + Radius * glm::cos(phi);
 
-            vertex.TexCoords = glm::vec2((float)i / resolution, (float)j / resolution);
             vertices.push_back(vertex);
         }
     }

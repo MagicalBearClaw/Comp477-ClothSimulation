@@ -3,9 +3,6 @@
 #include "stdafx.h"
 #include "Application/ClothSimulationApplication.h"
 
-
-
-// Main code
 int main()
 {
     ClothSimulationApplication* application = new ClothSimulationApplication("Cloth Simulation COMP 477", 1920, 1020);

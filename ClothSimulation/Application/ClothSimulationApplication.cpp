@@ -36,7 +36,7 @@ bool ClothSimulationApplication::Initialize()
     shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
     std::cout << "initialize shaders" << std::endl;
 
-    basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
+    //basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;

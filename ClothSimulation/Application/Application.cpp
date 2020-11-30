@@ -35,11 +35,17 @@ void Application::ScrollCallBack(GLFWwindow* window, double xOffset, double yOff
 
 int Application::Run()
 {
+	currentFrameTime = glfwGetTime();
 	while (!glfwWindowShouldClose(_window))
 	{
+		lastFrameTime = currentFrameTime;
+		currentFrameTime = glfwGetTime();
+
+		float deltaTime = currentFrameTime - lastFrameTime;
+
 		glfwPollEvents();
-		Update(_stopWatch.ElapsedTime());
-		Draw(_stopWatch.ElapsedTime());
+		Update(deltaTime);
+		Draw(deltaTime);
 		glfwSwapBuffers(_window);
 
 	}
@@ -59,10 +65,10 @@ bool Application::Initialize()
 	{
 		std::cout << "Failed to initialize GLDFW" << std::endl;
 		return false;
-
 	}
 
 	std::cout << "Initializing GLDFW" << std::endl;
+
 	_glslVersion = "#version 130";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -80,14 +86,20 @@ bool Application::Initialize()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return false;
 	}
+	
 	std::cout << "Initialized GLAD" << std::endl;
-	// tell GLFW to capture our mouse
-	//glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+	glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetFramebufferSizeCallback(_window, WindowResizeCallback);
+	
 	std::cout << "Set window resize callback" << std::endl;
+	
 	glfwSetCursorPosCallback(_window, MouseCallback);
 	glfwSetScrollCallback(_window, ScrollCallBack);
+	
 	std::cout << "Set window mouse input callback" << std::endl;
+	
 	glfwSetWindowUserPointer(_window, this);
+	
 	std::cout << "Set user pointer to application framework" << std::endl;
 }
