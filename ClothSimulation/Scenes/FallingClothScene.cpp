@@ -12,16 +12,9 @@ void FallingClothScene::Initialize()
 {
 
 	moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballPosition, 0.012f);
-	std::string catTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
-	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexture);
-
-	cloth->IntergrationMethod = rk4Integrator.get();
-	integrationMethodType = IntegratorType::RK4;
-	cloth->AddForceGenerator(gravitationalForce.get());
-	cloth->AddForceGenerator(springForce.get());
-	cloth->AddForceGenerator(windForce.get());
-	std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
-	cloth->AddCollisionHandler(collisionHandler);
+	catTexturePath = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
+	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexturePath);
+	RecreateCloth();
 }
 
 void FallingClothScene::Update(bool keyState[], float deltaTime)
@@ -38,10 +31,44 @@ void FallingClothScene::Draw(Shader& shader, Camera& camera, glm::mat4 projectio
 	cloth->Draw(shader, camera, projection);
 }
 
-void FallingClothScene::Restart()
+void FallingClothScene::RecreateCloth()
 {
-}
+	if (cloth != nullptr)
+	{
+		cloth.reset();
+	}
 
-void FallingClothScene::Reset()
-{
+	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexturePath);
+
+	switch (integrationMethodType)
+	{
+		case IntegratorType::Verlet:
+		{
+			cloth->IntergrationMethod = verletInegrator.get();
+			break;
+		}
+		case IntegratorType::ExplicitEuler:
+		{
+			cloth->IntergrationMethod = explicitEulerInegrator.get();
+			break;
+		}
+		case IntegratorType::SemiImplicitEuler:
+		{
+			cloth->IntergrationMethod = semiEulerInegrator.get();
+			break;
+		}
+		case IntegratorType::RK4:
+		{
+			cloth->IntergrationMethod = rk4Integrator.get();
+			break;
+		}
+	}
+
+	cloth->AddForceGenerator(gravitationalForce.get());
+	cloth->AddForceGenerator(springForce.get());
+	cloth->AddForceGenerator(windForce.get());
+	cloth->AddParticlPositionConstraint(0);
+	cloth->AddParticlPositionConstraint(ClothSize.x - 1);
+	std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
+	cloth->AddCollisionHandler(collisionHandler);
 }

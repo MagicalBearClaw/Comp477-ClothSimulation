@@ -14,12 +14,10 @@ public:
 
 protected:
 	// Inherited via Scene
-	virtual void Restart() override;
-	virtual void Reset() override;
-
+	virtual void RecreateCloth() override;
 private:
 	std::unique_ptr<MoveableSphere> moveableSphere;
-
+	std::string catTexturePath;
 };
 
 

@@ -91,7 +91,7 @@ void Cloth::Update(float deltaTime)
 
 void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 {
-
+    shader.Use();
     glm::mat4 model;
     float scale = 0.5f;
     model = glm::scale(model, glm::vec3(scale));
@@ -101,7 +101,7 @@ void Cloth::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
     glm::mat4 mvp = projection * camera.GetViewMatrix() * model;
     shader.Set("mvp", mvp);
     shader.Set("model", model);
-    shader.Set("object_color", Color);
+    shader.Set("objectColor", Color);
     shader.Set("diffuse", textureId);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -138,99 +138,20 @@ void Cloth::CreateIndexBuffer()
             int currentVertex = i * width + j;
             indices.push_back(currentVertex);
             
-            auto it = vertexToIndexMapping.find(currentVertex);
-            if (it != vertexToIndexMapping.end())
-            {
-                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
-                vertexIndices.push_back(indices.size() - 1);
-                vertexToIndexMapping[currentVertex] = vertexIndices;
-            }
-            else 
-            {
-                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
-                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
-            }
-
             currentVertex = i * width + j + 1;
             indices.push_back(currentVertex);
-
-            it = vertexToIndexMapping.find(currentVertex);
-            if (it != vertexToIndexMapping.end())
-            {
-                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
-                vertexIndices.push_back(indices.size() - 1);
-                vertexToIndexMapping[currentVertex] = vertexIndices;
-            }
-            else
-            {
-                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
-                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
-            }
-            
+           
             currentVertex = (i + 1) * width + j;
             indices.push_back(currentVertex);
-
-            it = vertexToIndexMapping.find(currentVertex);
-            if (it != vertexToIndexMapping.end())
-            {
-                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
-                vertexIndices.push_back(indices.size() - 1);
-                vertexToIndexMapping[currentVertex] = vertexIndices;
-            }
-            else
-            {
-                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
-                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
-            }
 
             currentVertex = i * width + j + 1;
             indices.push_back(currentVertex);
             
-            it = vertexToIndexMapping.find(currentVertex);
-            if (it != vertexToIndexMapping.end())
-            {
-                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
-                vertexIndices.push_back(indices.size() - 1);
-                vertexToIndexMapping[currentVertex] = vertexIndices;
-            }
-            else
-            {
-                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
-                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
-            }
-
             currentVertex = (i + 1) * width + j;
             indices.push_back(currentVertex);
             
-            it = vertexToIndexMapping.find(currentVertex);
-            if (it != vertexToIndexMapping.end())
-            {
-                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
-                vertexIndices.push_back(indices.size() - 1);
-                vertexToIndexMapping[currentVertex] = vertexIndices;
-            }
-            else
-            {
-                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
-                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
-            }
-
             currentVertex = (i + 1) * width + j + 1;
             indices.push_back(currentVertex);
-
-            it = vertexToIndexMapping.find(currentVertex);
-            if (it != vertexToIndexMapping.end())
-            {
-                std::vector<int> vertexIndices = vertexToIndexMapping[currentVertex];
-                vertexIndices.push_back(indices.size() - 1);
-                vertexToIndexMapping[currentVertex] = vertexIndices;
-            }
-            else
-            {
-                std::vector<int> newIndiciesVector = { (int)(indices.size() - 1) };
-                vertexToIndexMapping.emplace(currentVertex, newIndiciesVector);
-            }
-
         }
     }
 }
@@ -329,13 +250,10 @@ void Cloth::Reset()
         }
     }
 
-    if (vertices.size() >= 0 && indices.size() >= 0)
-    {
-        glDeleteVertexArrays(1, &vao);
-        glDeleteBuffers(1, &vbo);
-        glDeleteBuffers(1, &ebo);
-        glDeleteTextures(1, &textureId);
-    }
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
+    glDeleteTextures(1, &textureId);
 }
 
 void Cloth::CreateConstraints() 

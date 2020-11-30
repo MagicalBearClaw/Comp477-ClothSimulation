@@ -13,8 +13,8 @@ Light::~Light()
 
 void Light::Draw(Shader& shader)
 {
-    shader.Set("light_color", Color);
-    shader.Set("light_pos", Position);
+    shader.Set("lightColor", Color);
+    shader.Set("lightPosition", Position);
 }
 
 void Light::Initialize()

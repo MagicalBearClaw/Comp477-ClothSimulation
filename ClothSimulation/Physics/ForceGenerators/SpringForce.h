@@ -11,7 +11,7 @@ public:
 	virtual void ApplyForce(Particle* particle, std::vector<Particle*>& particles, float timeStep) override;
 	float Stiffness;
 private:
-	float segmentLength;
+	float resetLength;
 	int width;
 	int height;
 };

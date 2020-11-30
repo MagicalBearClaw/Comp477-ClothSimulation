@@ -10,7 +10,7 @@ Scene::Scene(const std::string& windowTitle , int applicationWindowWidth, int ap
     DrawInWireFrame = false;
     IsSimulationUIOpen = false;
 
-    WindSpeed = DefaultWindSpeed = glm::vec2(0.0005f, 0.002f);
+    WindSpeed = DefaultWindSpeed = glm::vec2(0.5f, 2.0f);
     IsWindEnabled = false;
     
     Gravity = DefaultGravity = glm::vec3(0, 0.98f, 0);
@@ -57,7 +57,7 @@ void Scene::Initialize()
     gravitationalForce = std::make_unique<GravitationalForce>(Gravity);
     springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness);
 
-    windForce = std::make_unique<WindForce>(WindSpeed.x, WindSpeed.y);
+    windForce = std::make_unique<WindForce>(WindSpeed.x / 1000, WindSpeed.y / 1000);
     windForce->IsEnabled = false;
 }
 
@@ -70,6 +70,17 @@ void Scene::Update(bool keyState[], float deltaTime)
 
     light->Color = LightColor;
     light->Position = LightPosition;
+    cloth->Mass = Mass;
+    cloth->Color = ClothColor;
+    cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
+    cloth->Stiffness = Stiffness;
+    
+    windForce->IsEnabled = IsWindEnabled;
+    windForce->MinimumSpeed = WindSpeed.x / 1000;
+    windForce->MaximumSpeed = WindSpeed.y / 1000;
+    
+    springForce->Stiffness = Stiffness;
+
 
     switch (integrationMethodType)
     {
@@ -97,17 +108,49 @@ void Scene::Update(bool keyState[], float deltaTime)
             CurrentCollisionOffset = Rk4tCollisionOffset;
             break;
         }
-    }
+    }        
+}
 
+void Scene::ResetClothDefaults()
+{
+    ClothSize = DefaultClothSize;
+    Mass = DefaultMass;
+    Stiffness = DefaultStiffness;
+    NumberOfConstraintIterations = DefaultNumberOfConstraintIterations;
+    ClothColor = DefaultClothColor;
+    SegmentLength = DefaultSegmentLength;
+}
+
+void Scene::ResetAllDefaults()
+{
+    RecreateCloth();
+    ResetClothDefaults();
+    LightColor = DefaultLightColor;
+    LightPosition = DefaultLightPosition;
+
+    DrawInWireFrame = false;
+    WindSpeed = DefaultWindSpeed;
+    IsWindEnabled = false;
+
+    Gravity = DefaultGravity;
+
+    integrationMethodType = IntegratorType::Verlet;
+
+    VerletDrag = DefaultVerletDrag;
+
+    ExplicitEulerCollisionOffset = DefaultExplicitEulerTimeStep;
+    VerletCollisionOffset = DefaultVerletCollisionOffset;
+    SemiImplicitCollisionOffset = DefaultSemiImplicitCollisionOffset;
+    Rk4tCollisionOffset = DefaultRk4tCollisionOffset;
+
+    ExplicitEulerTimeStep = DefaultExplicitEulerTimeStep;
+    VerletTimeStep = DefaultVerletTimeStep;
+    SemiImplicitTimeStep = DefaultSemiImplicitTimeStep;
+    Rk4TimeStep = DefaultRk4TimeStep;
 }
 
 void Scene::DrawUI(float deltaTime)
 {
-    if (deltaTimes.size() >= maxDeltaTimes)
-    {
-        deltaTimes.pop_front();
-    }
-    deltaTimes.push_back(deltaTime * 1000); // push in ms 
 
     if (!IsSimulationUIOpen)
         return;
@@ -116,16 +159,9 @@ void Scene::DrawUI(float deltaTime)
     ImGui::SetWindowPos(windowTitle.c_str(), ImVec2(applicationWindowWidth - 420, 50), ImGuiCond_Once);
 
     ImGui::SetNextItemOpen(true);
-    if (ImGui::TreeNode("Simulation statistics"))
-    {
-        ImGui::PlotLines("Frame Times", &deltaTimes[0], deltaTimes.size(), 0, nullptr, 0, 60, ImVec2(250, 50));
-        ImGui::TreePop();
-    }
-
-    ImGui::SetNextItemOpen(true);
     if (ImGui::TreeNode("Scene Properties"))
     {
-        ImGui::InputFloat2("Light Position", &LightPosition[0]);
+        ImGui::InputFloat3("Light Position", &LightPosition[0]);
         ImGui::ColorEdit3("Light Color", glm::value_ptr(LightColor));
         ImGui::Checkbox("WireFrame", &DrawInWireFrame);
         ImGui::TreePop();
@@ -144,18 +180,18 @@ void Scene::DrawUI(float deltaTime)
     if (ImGui::TreeNode("Cloth Properties"))
     {
         ImGui::InputFloat2("Size", glm::value_ptr(ClothSize));
-        ImGui::InputFloat("Segment Length", &SegmentLength);
         ImGui::ColorEdit3("Color", glm::value_ptr(ClothColor));
         ImGui::InputInt("Constraint Iterations", &NumberOfConstraintIterations);
         ImGui::InputFloat("Stiffness", &Stiffness);
         ImGui::InputFloat("Mass", &Mass);
-        if (ImGui::Button("ReCreate"))
+        if (ImGui::Button("Recreate"))
         {
-            // todo: handle recreation of the cloth
+            RecreateCloth();
         }
-        if (ImGui::Button("Reset"))
+        if (ImGui::Button("Reset to Defaults"))
         {
-            // todo: handle recreation of the cloth
+            ResetClothDefaults();
+            RecreateCloth();
         }
         ImGui::TreePop();
     }
@@ -196,9 +232,10 @@ void Scene::DrawUI(float deltaTime)
         ImGui::TreePop();
     }
 
-    if (ImGui::Button("Reset Defaults"))
+    if (ImGui::Button("Reset All Defaults"))
     {
-        // todo: handle recreation of the cloth and re-apply defaults;
+        ResetAllDefaults();
+        RecreateCloth();
     }
 
     ImGui::End();

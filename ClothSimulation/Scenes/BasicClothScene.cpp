@@ -10,18 +10,8 @@ BasicClothScene::BasicClothScene(const std::string& windowTitle, int application
 void BasicClothScene::Initialize()
 {
 	moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballPosition, 0.012f);
-	std::string catTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
-	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexture);
-
-	cloth->IntergrationMethod = verletInegrator.get();
-
-	cloth->AddForceGenerator(gravitationalForce.get());
-	cloth->AddForceGenerator(springForce.get());
-	cloth->AddForceGenerator(windForce.get());
-	cloth->AddParticlPositionConstraint(0);
-	cloth->AddParticlPositionConstraint(ClothSize.x -1);
-	std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
-	cloth->AddCollisionHandler(collisionHandler);
+	catTexturePath = std::filesystem::path("./Assets/Textures/cat2.jpg").generic_u8string();
+	RecreateCloth();
 }
 
 void BasicClothScene::Update(bool keyState[], float deltaTime)
@@ -65,10 +55,55 @@ void BasicClothScene::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 	cloth->Draw(shader, camera, projection);
 }
 
-void BasicClothScene::Restart()
-{
-}
 
-void BasicClothScene::Reset()
+
+void BasicClothScene::RecreateCloth()
 {
+	if (cloth != nullptr)
+	{
+		cloth.reset();
+	}
+
+	if (springForce != nullptr)
+	{
+		springForce.reset();
+	}
+
+	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexturePath);
+	cloth->Mass = Mass;
+	cloth->Color = ClothColor;
+	cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
+	cloth->Stiffness = Stiffness;
+	springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness);
+	switch (integrationMethodType)
+	{
+		case IntegratorType::Verlet:
+		{
+			cloth->IntergrationMethod = verletInegrator.get();
+			break;
+		}
+		case IntegratorType::ExplicitEuler:
+		{
+			cloth->IntergrationMethod = explicitEulerInegrator.get();
+			break;
+		}
+		case IntegratorType::SemiImplicitEuler:
+		{
+			cloth->IntergrationMethod = semiEulerInegrator.get();
+			break;
+		}
+		case IntegratorType::RK4:
+		{
+			cloth->IntergrationMethod = rk4Integrator.get();
+			break;
+		}
+	}
+
+	cloth->AddForceGenerator(gravitationalForce.get());
+	cloth->AddForceGenerator(springForce.get());
+	cloth->AddForceGenerator(windForce.get());
+	cloth->AddParticlPositionConstraint(0);
+	cloth->AddParticlPositionConstraint(ClothSize.x - 1);
+	std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
+	cloth->AddCollisionHandler(collisionHandler);
 }

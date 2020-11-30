@@ -16,7 +16,7 @@ Sphere::~Sphere()
 
 void Sphere::Draw(Shader& shader, Camera& camera, float radius, glm::vec3 positio, glm::mat4 projection)
 {
-    shader.Set("object_color", glm::vec3(1.0f, 0.5f, 0.2f));
+    shader.Set("objectColor", glm::vec3(23, 3, 252));
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);

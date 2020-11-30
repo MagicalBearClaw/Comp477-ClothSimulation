@@ -61,6 +61,5 @@ private:
     std::vector<Constraint*> constraints;
     std::vector<IForceGenerator*> forceGenerators;
     std::vector<std::function<void(Particle* particle)>> collisionHandlers;
-    std::unordered_map<int, std::vector<int>> vertexToIndexMapping;
 };
 

@@ -36,7 +36,8 @@ private:
 	float lastX;
 	float lastY;
 	bool firstMouse;
-	
+	bool isMouseEnabled;
+
 	std::unique_ptr<BasicClothScene> basicClothScene;
 	std::unique_ptr<FallingClothScene> fallingClothScene;
 

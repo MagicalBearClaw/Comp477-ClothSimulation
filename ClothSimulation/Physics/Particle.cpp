@@ -9,6 +9,8 @@ Particle::Particle(int vertexId, glm::vec3 position, float mass)
     VertexId = vertexId;
     Mass = mass;
 }
+
+
 std::vector<int> Particle::GetAjcentParticles(int gridWidth, int gridHeight) 
 {
     std::vector<int> particles;

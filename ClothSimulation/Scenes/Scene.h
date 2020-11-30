@@ -23,13 +23,11 @@ public:
 	virtual void Initialize();
 	virtual void Update(bool keyState[], float deltaTime);
 	virtual void Draw(Shader& shader, Camera& camera, glm::mat4 projection) = 0;
+	virtual void RecreateCloth() = 0;
 	void DrawUI(float deltaTime);
 
 public:
 	bool DrawInWireFrame;
-protected:
-	virtual void Restart() = 0;
-	virtual void Reset() = 0;
 protected:
 	enum IntegratorType
 	{
@@ -136,4 +134,8 @@ protected:
 	const char* intergrationMethodNames[4] = { "Explicit Euler", "Verlet", "Semi Implicit Euler", "RK4" };
 	
 	std::string windowTitle;
+
+private:
+	void ResetClothDefaults();
+	void ResetAllDefaults();
 };

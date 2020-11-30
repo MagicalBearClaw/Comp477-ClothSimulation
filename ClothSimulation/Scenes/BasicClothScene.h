@@ -12,15 +12,10 @@ public:
 	virtual void Initialize() override;
 	virtual void Update(bool keyState[], float deltaTime) override;
 	virtual void Draw(Shader& shader, Camera& camera, glm::mat4 projection) override;
-
-protected:
-	// Inherited via Scene
-	virtual void Restart() override;
-	virtual void Reset() override;
+	virtual void RecreateCloth() override;
 private:
 	std::unique_ptr<MoveableSphere> moveableSphere;
-
-
+	std::string catTexturePath;
 };
 
 

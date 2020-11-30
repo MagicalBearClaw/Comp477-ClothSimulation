@@ -8,6 +8,7 @@ ClothSimulationApplication::ClothSimulationApplication(const std::string& window
     float lastX = (float)_windowWith / 2.0;
     float lastY = (float)_windowHeight / 2.0;
     firstMouse = true;
+    isMouseEnabled = true;
 }
 
 bool ClothSimulationApplication::Initialize()
@@ -36,8 +37,8 @@ bool ClothSimulationApplication::Initialize()
     shaderProgram.Load("./Assets/Shaders/main.vs", "./Assets/Shaders/main.fs");
     std::cout << "initialize shaders" << std::endl;
 
-    //basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
-    fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
+    basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
+    //fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
 }
@@ -47,7 +48,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    fallingClothScene->DrawUI(deltaTime);
+    basicClothScene->DrawUI(deltaTime);
     ImGui::Render();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -55,14 +56,25 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.001f, 10000.0f);
     shaderProgram.Use();
-    fallingClothScene->Draw(shaderProgram, camera, projection);
+
+    if (basicClothScene->DrawInWireFrame)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else 
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+
+    basicClothScene->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ClothSimulationApplication::Update(float deltaTime)
 {
     ProccessKeyboardInput(deltaTime);
-    fallingClothScene->Update(keys, deltaTime);
+    basicClothScene->Update(keys, deltaTime);
 }
 
 void ClothSimulationApplication::ShutDOwn()
@@ -96,6 +108,9 @@ void ClothSimulationApplication::HandleMouse(double xPosition, double yPosition)
         firstMouse = false;
     }
 
+    if (!isMouseEnabled)
+        return;
+
     float xoffset = xPosition - lastX;
     float yoffset = lastY - yPosition;
 
@@ -120,6 +135,7 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     if (glfwGetKey(_window, GLFW_KEY_F1) == GLFW_PRESS)
     {
         keys[GLFW_KEY_F1] = true;
+        isMouseEnabled = !isMouseEnabled;
     }
     else
     {

@@ -5,9 +5,9 @@ const float Camera::YAW = -90.0f;
 const float Camera::PITCH = 0.0f;
 
 #if !NDEBUG
-const float Camera::SPEED = 155.5f;
-#else
 const float Camera::SPEED = 5.5f;
+#else
+const float Camera::SPEED = 2.5f;
 #endif
 const float Camera::SENSITIVITY = 0.1f;
 const float Camera::ZOOM = 45.0f;
