@@ -37,7 +37,7 @@ bool ClothSimulationApplication::Initialize()
     std::cout << "initialize shaders" << std::endl;
 
     basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
-    //fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
+    fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
     return true;
 }
@@ -47,7 +47,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    basicClothScene->DrawUI(deltaTime);
+    fallingClothScene->DrawUI(deltaTime);
     ImGui::Render();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -55,14 +55,14 @@ void ClothSimulationApplication::Draw(float deltaTime)
 
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.001f, 10000.0f);
     shaderProgram.Use();
-    basicClothScene->Draw(shaderProgram, camera, projection);
+    fallingClothScene->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ClothSimulationApplication::Update(float deltaTime)
 {
     ProccessKeyboardInput(deltaTime);
-    basicClothScene->Update(keys, deltaTime);
+    fallingClothScene->Update(keys, deltaTime);
 }
 
 void ClothSimulationApplication::ShutDOwn()

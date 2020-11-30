@@ -28,7 +28,8 @@ public:
 public:
 	bool DrawInWireFrame;
 protected:
-	virtual void Reset();
+	virtual void Restart() = 0;
+	virtual void Reset() = 0;
 protected:
 	enum IntegratorType
 	{

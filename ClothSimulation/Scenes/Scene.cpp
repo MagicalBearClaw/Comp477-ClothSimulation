@@ -29,13 +29,13 @@ Scene::Scene(const std::string& windowTitle , int applicationWindowWidth, int ap
 
     VerletDrag = DefaultVerletDrag = 0.01f;
 
-    ExplicitEulerCollisionOffset = DefaultExplicitEulerTimeStep = 0.17f;
+    ExplicitEulerCollisionOffset = DefaultExplicitEulerTimeStep = 0.1f;
     VerletCollisionOffset = DefaultVerletCollisionOffset = 0.07f;
-    SemiImplicitCollisionOffset = DefaultSemiImplicitCollisionOffset = 0.17f;
-    Rk4tCollisionOffset = DefaultRk4tCollisionOffset = 0.17f;
+    SemiImplicitCollisionOffset = DefaultSemiImplicitCollisionOffset = 0.165f;
+    Rk4tCollisionOffset = DefaultRk4tCollisionOffset = 0.165f;
 
-    ExplicitEulerTimeStep = DefaultExplicitEulerTimeStep = 0.00015f;
-    VerletTimeStep = DefaultVerletTimeStep = (float)1 / 60.0f;
+    ExplicitEulerTimeStep = DefaultExplicitEulerTimeStep = 0.015f;
+    VerletTimeStep = DefaultVerletTimeStep = 0.0015f;
     SemiImplicitTimeStep = DefaultSemiImplicitTimeStep = (float)1 / 60.0f;
     Rk4TimeStep = DefaultRk4TimeStep = (float)1 / 60.0f;
 
@@ -49,9 +49,6 @@ void Scene::Initialize()
     light->Color = LightColor;
     light->Position = LightPosition;
 
-    std::string catTexture = std::filesystem::path("./Assets/Textures/cat2.jpg").generic_u8string();
-    cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexture);
-
     explicitEulerInegrator = std::make_unique<ExplicitEulerIntegrator>();
     verletInegrator = std::make_unique<VerletIntegrator>(VerletDrag);
     semiEulerInegrator = std::make_unique<SemiImplicitEulerIntegrator>();
@@ -62,13 +59,6 @@ void Scene::Initialize()
 
     windForce = std::make_unique<WindForce>(WindSpeed.x, WindSpeed.y);
     windForce->IsEnabled = false;
-    
-    cloth->IntergrationMethod = verletInegrator.get();
-
-    cloth->AddForceGenerator(gravitationalForce.get());
-    cloth->AddForceGenerator(springForce.get());
-    cloth->AddForceGenerator(windForce.get());
-
 }
 
 void Scene::Update(bool keyState[], float deltaTime)
@@ -212,8 +202,4 @@ void Scene::DrawUI(float deltaTime)
     }
 
     ImGui::End();
-}
-
-void Scene::Reset()
-{
 }

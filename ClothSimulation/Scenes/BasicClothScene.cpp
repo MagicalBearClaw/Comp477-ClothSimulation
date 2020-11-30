@@ -10,7 +10,14 @@ BasicClothScene::BasicClothScene(const std::string& windowTitle, int application
 void BasicClothScene::Initialize()
 {
 	moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballPosition, 0.012f);
+	std::string catTexture = std::filesystem::path("./Assets/Textures/unicorn.jpg").generic_u8string();
+	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexture);
 
+	cloth->IntergrationMethod = verletInegrator.get();
+
+	cloth->AddForceGenerator(gravitationalForce.get());
+	cloth->AddForceGenerator(springForce.get());
+	cloth->AddForceGenerator(windForce.get());
 	cloth->AddParticlPositionConstraint(0);
 	cloth->AddParticlPositionConstraint(ClothSize.x -1);
 	std::function<void(Particle*)> collisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
@@ -56,4 +63,12 @@ void BasicClothScene::Draw(Shader& shader, Camera& camera, glm::mat4 projection)
 	light->Draw(shader);
 	moveableSphere->Draw(shader, camera, projection);
 	cloth->Draw(shader, camera, projection);
+}
+
+void BasicClothScene::Restart()
+{
+}
+
+void BasicClothScene::Reset()
+{
 }

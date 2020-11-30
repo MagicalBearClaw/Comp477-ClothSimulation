@@ -9,6 +9,12 @@ public:
 	// Inherited via IIntegrator
 	virtual void Intergrate(Particle* body, float timeStep) override;
 private:
-	glm::vec3 Evaluate(glm::vec3 position, glm::vec3 velocity, float timeStep);
-
+	struct DerivativeState
+	{
+		glm::vec3 PositionDelta;
+		glm::vec3 VelocityDelta;
+	};
+private:
+	DerivativeState Evaluate(Particle* particle, float timeStep, const DerivativeState& previousDerivativeState);
+	DerivativeState Evaluate(Particle* particle);
 };
