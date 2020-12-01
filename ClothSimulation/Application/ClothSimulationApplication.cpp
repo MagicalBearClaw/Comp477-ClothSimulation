@@ -175,7 +175,7 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
         keys[GLFW_KEY_F1] = true;
         isMouseEnabled = !isMouseEnabled;
     }
-    else
+    else if (glfwGetKey(_window, GLFW_KEY_F1) == GLFW_RELEASE)
     {
         keys[GLFW_KEY_F1] = false;
     }
@@ -184,7 +184,7 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     {
         keys[GLFW_KEY_UP] = true;
     }
-    else
+    else if (glfwGetKey(_window, GLFW_KEY_UP) == GLFW_RELEASE)
     {
         keys[GLFW_KEY_UP] = false;
     }
@@ -193,7 +193,7 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     {
         keys[GLFW_KEY_DOWN] = true;
     }
-    else
+    else if (glfwGetKey(_window, GLFW_KEY_DOWN) == GLFW_RELEASE)
     {
         keys[GLFW_KEY_DOWN] = false;
     }
@@ -202,7 +202,7 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     {
         keys[GLFW_KEY_LEFT] = true;
     }
-    else
+    else if (glfwGetKey(_window, GLFW_KEY_LEFT) == GLFW_RELEASE)
     {
         keys[GLFW_KEY_LEFT] = false;
     }
@@ -211,7 +211,7 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     {
         keys[GLFW_KEY_RIGHT] = true;
     }
-    else
+    else if (glfwGetKey(_window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
     {
         keys[GLFW_KEY_RIGHT] = false;
     }
@@ -220,7 +220,7 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     {
         keys[GLFW_KEY_RIGHT_SHIFT] = true;
     }
-    else
+    else if (glfwGetKey(_window, GLFW_KEY_RIGHT_SHIFT) == GLFW_RELEASE)
     {
         keys[GLFW_KEY_RIGHT_SHIFT] = false;
     }
@@ -229,9 +229,18 @@ void ClothSimulationApplication::ProccessKeyboardInput(float deltaTime)
     {
         keys[GLFW_KEY_RIGHT_CONTROL] = true;
     }
-    else
+    else if (glfwGetKey(_window, GLFW_KEY_RIGHT_CONTROL) == GLFW_RELEASE)
     {
         keys[GLFW_KEY_RIGHT_CONTROL] = false;
+    }
+
+    if (glfwGetKey(_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        keys[GLFW_KEY_SPACE] = true;
+    }
+    else if(glfwGetKey(_window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+    {
+        keys[GLFW_KEY_SPACE] = false;
     }
 
     if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)

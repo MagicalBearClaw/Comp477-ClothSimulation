@@ -153,6 +153,9 @@
     <ClCompile Include="Scenes\Scene.cpp">
       <Filter>Source Files\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Scenes\Projectile.cpp">
+      <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -250,6 +253,9 @@
     </ClInclude>
     <ClInclude Include="Physics\Integrators\ExplicitEulerIntegrator.h">
       <Filter>Header Files\Physics\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\Projectile.h">
+      <Filter>Header Files\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

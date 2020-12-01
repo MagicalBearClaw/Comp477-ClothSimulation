@@ -1,8 +1,8 @@
 #pragma once
 #include "../stdafx.h"
 #include "Scene.h"
-#include "MoveAbleSphere.h"
-
+#include "MoveableSphere.h"
+#include "Projectile.h"
 
 class BasicClothScene : public Scene
 {
@@ -15,6 +15,12 @@ public:
 	virtual void RecreateCloth() override;
 private:
 	std::unique_ptr<MoveableSphere> moveableSphere;
+	std::unique_ptr<Projectile> projectile;
+	float shootInterval;
+	glm::vec3 position;
+	int shootStartedTime;
+	bool hasFired;
+	glm::vec3 DefaultProjectilePosition;
 	std::string catTexturePath;
 };
 
