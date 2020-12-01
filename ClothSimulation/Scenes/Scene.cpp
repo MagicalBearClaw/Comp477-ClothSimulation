@@ -75,6 +75,8 @@ void Scene::Update(bool keyState[], float deltaTime)
     cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
     cloth->Stiffness = Stiffness;
     
+    gravitationalForce->Gravity = Gravity;
+
     windForce->IsEnabled = IsWindEnabled;
     windForce->MinimumSpeed = WindSpeed.x / 1000;
     windForce->MaximumSpeed = WindSpeed.y / 1000;
