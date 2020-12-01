@@ -38,8 +38,12 @@ bool ClothSimulationApplication::Initialize()
     std::cout << "initialize shaders" << std::endl;
 
     basicClothScene = std::make_unique<BasicClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
-    //fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
+    fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
+
+    scene = basicClothScene.get();
+    previousSelectedSceneType = selectedSceneType = sceneType = SceneType::Basic;
+
     return true;
 }
 
@@ -48,7 +52,19 @@ void ClothSimulationApplication::Draw(float deltaTime)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    basicClothScene->DrawUI(deltaTime);
+
+    scene->BeginUI();
+    if (scene->IsSimulationUIOpen)
+    {
+        ImGui::SetNextItemOpen(true);
+        if (ImGui::TreeNode("Scene Selection"))
+        {
+            ImGui::Combo("type", &selectedSceneType, sceneTypeNames, IM_ARRAYSIZE(sceneTypeNames));
+            ImGui::TreePop();
+        }
+    }
+    scene->DrawUI(deltaTime);
+    scene->EndUI();
     ImGui::Render();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -57,7 +73,7 @@ void ClothSimulationApplication::Draw(float deltaTime)
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)_windowWith / (float)_windowHeight, 0.001f, 10000.0f);
     shaderProgram.Use();
 
-    if (basicClothScene->DrawInWireFrame)
+    if (scene->DrawInWireFrame)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
@@ -67,14 +83,36 @@ void ClothSimulationApplication::Draw(float deltaTime)
     }
 
 
-    basicClothScene->Draw(shaderProgram, camera, projection);
+    scene->Draw(shaderProgram, camera, projection);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ClothSimulationApplication::Update(float deltaTime)
 {
     ProccessKeyboardInput(deltaTime);
-    basicClothScene->Update(keys, deltaTime);
+
+    if (previousSelectedSceneType != selectedSceneType)
+    {
+        switch (selectedSceneType)
+        {
+            case SceneType::Basic:
+            {
+                scene = basicClothScene.get();
+                scene->ResetAllDefaults();
+                previousSelectedSceneType = selectedSceneType;
+                break;
+            }
+            case SceneType::Falling:
+            {
+                scene = fallingClothScene.get();
+                scene->ResetAllDefaults();
+                previousSelectedSceneType = selectedSceneType;
+                break;
+            }
+        }
+    }
+
+    scene->Update(keys, deltaTime);
 }
 
 void ClothSimulationApplication::ShutDOwn()

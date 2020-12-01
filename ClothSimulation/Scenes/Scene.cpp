@@ -29,7 +29,7 @@ Scene::Scene(const std::string& windowTitle , int applicationWindowWidth, int ap
 
     VerletDrag = DefaultVerletDrag = 0.01f;
 
-    ExplicitEulerCollisionOffset = DefaultExplicitEulerTimeStep = 0.1f;
+    ExplicitEulerCollisionOffset = DefaultExplicitEulerTimeStep = 0.15f;
     VerletCollisionOffset = DefaultVerletCollisionOffset = 0.07f;
     SemiImplicitCollisionOffset = DefaultSemiImplicitCollisionOffset = 0.165f;
     Rk4tCollisionOffset = DefaultRk4tCollisionOffset = 0.165f;
@@ -155,9 +155,6 @@ void Scene::DrawUI(float deltaTime)
     if (!IsSimulationUIOpen)
         return;
 
-    ImGui::Begin(windowTitle.c_str(), &IsSimulationUIOpen);
-    ImGui::SetWindowPos(windowTitle.c_str(), ImVec2(applicationWindowWidth - 420, 50), ImGuiCond_Once);
-
     ImGui::SetNextItemOpen(true);
     if (ImGui::TreeNode("Scene Properties"))
     {
@@ -229,6 +226,10 @@ void Scene::DrawUI(float deltaTime)
             }
         }
 
+        if (ImGui::Button("Restart"))
+        {
+            RecreateCloth();
+        }
         ImGui::TreePop();
     }
 
@@ -237,6 +238,20 @@ void Scene::DrawUI(float deltaTime)
         ResetAllDefaults();
         RecreateCloth();
     }
+}
 
+void Scene::BeginUI()
+{
+    if (!IsSimulationUIOpen)
+        return;
+
+    ImGui::Begin(windowTitle.c_str(), &IsSimulationUIOpen);
+    ImGui::SetWindowPos(windowTitle.c_str(), ImVec2(applicationWindowWidth - 650, 50), ImGuiCond_Once);
+}
+
+void Scene::EndUI()
+{
+    if (!IsSimulationUIOpen)
+        return;
     ImGui::End();
 }

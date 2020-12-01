@@ -25,9 +25,12 @@ public:
 	virtual void Draw(Shader& shader, Camera& camera, glm::mat4 projection) = 0;
 	virtual void RecreateCloth() = 0;
 	void DrawUI(float deltaTime);
-
+	void BeginUI();
+	void EndUI();
+	void ResetAllDefaults();
 public:
 	bool DrawInWireFrame;
+	bool IsSimulationUIOpen;
 protected:
 	enum IntegratorType
 	{
@@ -101,8 +104,6 @@ protected:
 	float Mass;
 	float DefaultMass;
 
-	bool IsSimulationUIOpen;
-
 	float CurrentTimeStep;
 	float CurrentCollisionOffset;
 
@@ -137,5 +138,4 @@ protected:
 
 private:
 	void ResetClothDefaults();
-	void ResetAllDefaults();
 };

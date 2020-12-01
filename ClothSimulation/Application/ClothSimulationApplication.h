@@ -29,14 +29,22 @@ public:
 private:
 	void ProccessKeyboardInput(float deltaTime);
 private:
+	enum SceneType 
+	{
+		Basic,
+		Falling
+	};
 	Camera camera;
-	
 	Shader shaderProgram;
 	
 	float lastX;
 	float lastY;
 	bool firstMouse;
 	bool isMouseEnabled;
+	int selectedSceneType;
+	int previousSelectedSceneType;
+	Scene* scene;
+	SceneType sceneType;
 
 	std::unique_ptr<BasicClothScene> basicClothScene;
 	std::unique_ptr<FallingClothScene> fallingClothScene;
@@ -44,4 +52,5 @@ private:
 	ImGuiIO* imguiIO;
 	ImVec4 clearColor;
 	bool keys[1024];
+	const char* sceneTypeNames[2] = { "Basic", "Falling" };
 };
