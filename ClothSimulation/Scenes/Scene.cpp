@@ -64,10 +64,12 @@ void Scene::Initialize()
 
 void Scene::Update(bool keyState[], float deltaTime)
 {
-    if (keyState[GLFW_KEY_F1])
+    if (keyState[GLFW_KEY_F1] && !wasF1Pressed)
     {
         IsSimulationUIOpen = !IsSimulationUIOpen;
     }
+
+    wasF1Pressed = keyState[GLFW_KEY_F1];
 
     light->Color = LightColor;
     light->Position = LightPosition;

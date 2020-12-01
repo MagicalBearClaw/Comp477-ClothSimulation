@@ -140,4 +140,6 @@ protected:
 
 private:
 	void ResetClothDefaults();
+private:
+	bool wasF1Pressed;
 };
