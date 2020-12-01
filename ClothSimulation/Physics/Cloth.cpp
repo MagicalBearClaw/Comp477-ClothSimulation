@@ -9,7 +9,6 @@ Cloth::Cloth(int width, int height, const std::string& textureFileName)
     SegmentLength = 1.0f / (float)(std::max(height - 1, width - 1));
     vertexCount = width * height;
     Mass = 1.0f;
-    Stiffness = 2.0f;
     elapsedTime = 0.0f;
     NumberOfConstraintIterations = 15;
     Color = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -264,41 +263,53 @@ void Cloth::CreateConstraints()
         int row = i / width;
         int col = i - row * width;
 
+        // right constraint
         if (col < width - 1)
         {
             Constraint* c = new Constraint(i, i + 1, SegmentLength);
             constraints.push_back(c);
         }
+        // down constraint
         if (row < height - 1)
         {
             Constraint* c = new Constraint(i, i + width, SegmentLength);
             constraints.push_back(c);
         }
+
+        // down right
         if (col < width - 1 && row < height - 1)
         {
             Constraint* c = new Constraint(i, i + width + 1, SegmentLength * glm::sqrt(2));
             constraints.push_back(c);
         }
+
+        // up right
         if (row > 0 && col < width - 1)
         {
             Constraint* c = new Constraint(i, i - width + 1, SegmentLength * glm::sqrt(2));
             constraints.push_back(c);
         }
+
+        // right 2
         if (col < width - 2)
         {
             Constraint* c = new Constraint(i, i + 1, SegmentLength * 2);
             constraints.push_back(c);
         }
+
+        // down 2
         if (row < height - 2)
         {
             Constraint* c = new Constraint(i, i + width, SegmentLength * 2);
             constraints.push_back(c);
         }
+
         if (col < width - 2 && row < height - 2)
         {
             Constraint* c = new Constraint(i, i + width + 1, SegmentLength * glm::sqrt(2) * 2);
             constraints.push_back(c);
         }
+
         if (row > 1 && col < width - 2)
         {
             Constraint* c = new Constraint(i, i - width + 1, SegmentLength * glm::sqrt(2) * 2);

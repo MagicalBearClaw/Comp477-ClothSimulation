@@ -101,6 +101,8 @@ protected:
 	int DefaultNumberOfConstraintIterations;
 	float Stiffness;
 	float DefaultStiffness;
+	float Damping;
+	float DefaultDamping;
 	float Mass;
 	float DefaultMass;
 

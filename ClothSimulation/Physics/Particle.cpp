@@ -10,6 +10,40 @@ Particle::Particle(int vertexId, glm::vec3 position, float mass)
     Mass = mass;
 }
 
+std::vector<int> Particle::GetAjcent2Particles(int gridWidth, int gridHeight)
+{
+    std::vector<int> particles;
+
+    int row = VertexId / gridWidth;
+    int column = VertexId - row * gridWidth;
+
+    int up = (row - 2) * gridWidth + column;
+    if (row > 1)
+    {
+        particles.push_back(up);
+    }
+
+    int down = (row + 2) * gridWidth + column;
+    if (row < gridHeight - 2)
+    {
+        particles.push_back(down);
+    }
+
+    int left = row * gridWidth + column - 2;
+    if (column > 1)
+    {
+        particles.push_back(left);
+    }
+
+    int right = row * gridWidth + column + 2;
+    if (column < gridWidth - 2)
+    {
+        particles.push_back(right);
+    }
+
+    return particles;
+}
+
 
 std::vector<int> Particle::GetAjcentParticles(int gridWidth, int gridHeight) 
 {

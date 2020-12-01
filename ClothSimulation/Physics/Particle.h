@@ -15,4 +15,5 @@ public:
     int VertexId;
     std::vector<int> GetAjcentParticles(int row, int column);
     std::vector<int> GetDiagonalParticles(int row, int column);
+    std::vector<int> GetAjcent2Particles(int gridWidth, int gridHeight);
 };

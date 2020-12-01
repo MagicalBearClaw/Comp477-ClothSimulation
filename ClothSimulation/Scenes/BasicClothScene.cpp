@@ -97,8 +97,7 @@ void BasicClothScene::RecreateCloth()
 	cloth->Mass = Mass;
 	cloth->Color = ClothColor;
 	cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
-	cloth->Stiffness = Stiffness;
-	springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness);
+	springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness, Damping);
 	switch (integrationMethodType)
 	{
 		case IntegratorType::Verlet:

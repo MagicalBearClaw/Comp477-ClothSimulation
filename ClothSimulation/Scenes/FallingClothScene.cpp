@@ -39,7 +39,10 @@ void FallingClothScene::RecreateCloth()
 	}
 
 	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexturePath);
-
+	cloth->Mass = Mass;
+	cloth->Color = ClothColor;
+	cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
+	springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness, Damping);
 	switch (integrationMethodType)
 	{
 		case IntegratorType::Verlet:

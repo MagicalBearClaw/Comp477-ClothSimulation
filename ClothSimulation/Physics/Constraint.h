@@ -16,5 +16,4 @@ private:
     std::vector<Constraint*>* constraints;
     float restLength;
     int constraintIndex;
-    bool isEnabled;
 };

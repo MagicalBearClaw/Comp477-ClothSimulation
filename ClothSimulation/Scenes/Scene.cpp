@@ -10,7 +10,7 @@ Scene::Scene(const std::string& windowTitle , int applicationWindowWidth, int ap
     DrawInWireFrame = false;
     IsSimulationUIOpen = false;
 
-    WindSpeed = DefaultWindSpeed = glm::vec2(0.5f, 2.0f);
+    WindSpeed = DefaultWindSpeed = glm::vec2(0.1f, 1.0f);
     IsWindEnabled = false;
     
     Gravity = DefaultGravity = glm::vec3(0, 0.98f, 0);
@@ -18,6 +18,7 @@ Scene::Scene(const std::string& windowTitle , int applicationWindowWidth, int ap
     ClothSize = DefaultClothSize = glm::vec2(30, 30);
     Mass = DefaultMass = 1.0f;
     Stiffness = DefaultStiffness = 2.0f;
+    Damping = DefaultDamping = 0.01f;
     NumberOfConstraintIterations = DefaultNumberOfConstraintIterations = 15;
     ClothColor = DefaultClothColor = glm::vec3(1.0f, 1.0f, 1.0f);
     SegmentLength = DefaultSegmentLength = 1.0f / (float)(std::max(ClothSize.y - 1, ClothSize.x - 1));
@@ -55,7 +56,7 @@ void Scene::Initialize()
     rk4Integrator = std::make_unique<RK4Integrator>();
 
     gravitationalForce = std::make_unique<GravitationalForce>(Gravity);
-    springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness);
+    springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness, Damping);
 
     windForce = std::make_unique<WindForce>(WindSpeed.x / 1000, WindSpeed.y / 1000);
     windForce->IsEnabled = false;
@@ -73,7 +74,6 @@ void Scene::Update(bool keyState[], float deltaTime)
     cloth->Mass = Mass;
     cloth->Color = ClothColor;
     cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
-    cloth->Stiffness = Stiffness;
     
     gravitationalForce->Gravity = Gravity;
 
@@ -82,7 +82,7 @@ void Scene::Update(bool keyState[], float deltaTime)
     windForce->MaximumSpeed = WindSpeed.y / 1000;
     
     springForce->Stiffness = Stiffness;
-
+    springForce->Damping = Damping;
 
     switch (integrationMethodType)
     {
@@ -90,24 +90,28 @@ void Scene::Update(bool keyState[], float deltaTime)
         {
             CurrentTimeStep = ExplicitEulerTimeStep;
             CurrentCollisionOffset = ExplicitEulerCollisionOffset;
+            cloth->IntergrationMethod = explicitEulerInegrator.get();
             break;
         }
         case IntegratorType::Verlet:
         {
             CurrentTimeStep = VerletTimeStep;
             CurrentCollisionOffset = VerletCollisionOffset;
+            cloth->IntergrationMethod = verletInegrator.get();
             break;
         }
         case IntegratorType::SemiImplicitEuler:
         {
             CurrentTimeStep = SemiImplicitTimeStep;
             CurrentCollisionOffset = SemiImplicitCollisionOffset;
+            cloth->IntergrationMethod = semiEulerInegrator.get();
             break;
         }
         case IntegratorType::RK4:
         {
             CurrentTimeStep = Rk4TimeStep;
             CurrentCollisionOffset = Rk4tCollisionOffset;
+            cloth->IntergrationMethod = rk4Integrator.get();
             break;
         }
     }        
@@ -169,9 +173,9 @@ void Scene::DrawUI(float deltaTime)
     ImGui::SetNextItemOpen(true);
     if (ImGui::TreeNode("Simulation Properties"))
     {
-        ImGui::InputFloat3("Gravity", glm::value_ptr(Gravity));
+        ImGui::SliderFloat3("Gravity", glm::value_ptr(Gravity), 0, 10, "%.7f", 0);
         ImGui::Checkbox("Enable Wind", &IsWindEnabled);
-        ImGui::InputFloat2("Wind Speed", glm::value_ptr(WindSpeed));
+        ImGui::SliderFloat2("Wind Speed", glm::value_ptr(WindSpeed), 0, 2, "%.7f", 0);
         ImGui::TreePop();
     }
 
@@ -180,9 +184,10 @@ void Scene::DrawUI(float deltaTime)
     {
         ImGui::InputFloat2("Size", glm::value_ptr(ClothSize));
         ImGui::ColorEdit3("Color", glm::value_ptr(ClothColor));
-        ImGui::InputInt("Constraint Iterations", &NumberOfConstraintIterations);
-        ImGui::InputFloat("Stiffness", &Stiffness);
-        ImGui::InputFloat("Mass", &Mass);
+        ImGui::SliderInt("Constraint Iterations", &NumberOfConstraintIterations, 0, 50);
+        ImGui::SliderFloat("Stiffness", &Stiffness, 0, 10, "%.7f", 0);
+        ImGui::SliderFloat("Damping", &Damping, 0, 5, "%.7f", 0);
+        ImGui::SliderFloat("Mass", &Mass, 1, 50, "%.7f", 0);
         if (ImGui::Button("Recreate"))
         {
             RecreateCloth();
@@ -199,13 +204,14 @@ void Scene::DrawUI(float deltaTime)
     if (ImGui::TreeNode("Intergration Methods"))
     {
         ImGui::Combo("Inegration Methods", &integrationMethodType, intergrationMethodNames, IM_ARRAYSIZE(intergrationMethodNames));
+
         switch (integrationMethodType)
         {
             case IntegratorType::Verlet:
             {
-                ImGui::InputFloat("Drag", &VerletDrag);
-                ImGui::InputFloat("Time Step", &VerletTimeStep);
-                ImGui::InputFloat("Collision Offset", &VerletCollisionOffset);
+                ImGui::SliderFloat("Drag", &VerletDrag, 0, 2, "%.7f", 0);
+                ImGui::SliderFloat("Time Step", &VerletTimeStep, 0, 2, "%.7f", 0);
+                ImGui::SliderFloat("Collision Offset", &VerletCollisionOffset, 0, 2, "%.7f", 0);
                 break;
             }
             case IntegratorType::ExplicitEuler:
@@ -222,11 +228,12 @@ void Scene::DrawUI(float deltaTime)
             }
             case IntegratorType::RK4:
             {
-                ImGui::InputFloat("Time Step", &SemiImplicitTimeStep);
-                ImGui::InputFloat("Collision Offset", &SemiImplicitCollisionOffset);
+                ImGui::InputFloat("Time Step", &Rk4TimeStep);
+                ImGui::InputFloat("Collision Offset", &Rk4tCollisionOffset);
                 break;
             }
         }
+
 
         if (ImGui::Button("Restart"))
         {

@@ -24,7 +24,6 @@ public:
 public:
     float SegmentLength;
     float Mass;
-    float Stiffness;
     int NumberOfConstraintIterations;
     IIntegrator* IntergrationMethod;
     glm::vec3 Color;
