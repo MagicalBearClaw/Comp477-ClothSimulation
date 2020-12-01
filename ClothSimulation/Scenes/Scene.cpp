@@ -216,20 +216,20 @@ void Scene::DrawUI(float deltaTime)
             }
             case IntegratorType::ExplicitEuler:
             {
-                ImGui::InputFloat("Time Step", &ExplicitEulerTimeStep);
-                ImGui::InputFloat("Collision Offset", &ExplicitEulerCollisionOffset);
+                ImGui::SliderFloat("Time Step", &ExplicitEulerTimeStep, 0, 2, "%.7f", 0);
+                ImGui::SliderFloat("Collision Offset", &ExplicitEulerCollisionOffset, 0, 2, "%.7f", 0);
                 break;
             }
             case IntegratorType::SemiImplicitEuler:
             {
-                ImGui::InputFloat("Time Step", &SemiImplicitTimeStep);
-                ImGui::InputFloat("Collision Offset", &SemiImplicitCollisionOffset);
+                ImGui::SliderFloat("Time Step", &SemiImplicitTimeStep, 0, 2, "%.7f", 0);
+                ImGui::SliderFloat("Collision Offset", &SemiImplicitCollisionOffset, 0, 2, "%.7f", 0);
                 break;
             }
             case IntegratorType::RK4:
             {
-                ImGui::InputFloat("Time Step", &Rk4TimeStep);
-                ImGui::InputFloat("Collision Offset", &Rk4tCollisionOffset);
+                ImGui::SliderFloat("Time Step", &Rk4TimeStep, 0, 2, "%.7f", 0);
+                ImGui::SliderFloat("Collision Offset", &Rk4tCollisionOffset, 0, 2, "%.7f", 0);
                 break;
             }
         }
