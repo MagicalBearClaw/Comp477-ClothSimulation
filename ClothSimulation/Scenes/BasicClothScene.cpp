@@ -93,7 +93,7 @@ void BasicClothScene::RecreateCloth()
 		springForce.reset();
 	}
 
-	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexturePath);
+	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, Mass, catTexturePath);
 	cloth->Mass = Mass;
 	cloth->Color = ClothColor;
 	cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;

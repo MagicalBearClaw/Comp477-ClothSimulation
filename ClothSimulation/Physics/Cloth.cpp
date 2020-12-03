@@ -3,12 +3,11 @@
 #include "cloth.h"
 
 
-Cloth::Cloth(int width, int height, const std::string& textureFileName)
-    : height(height), width(width), textureFileName(textureFileName)
+Cloth::Cloth(int width, int height, float mass, const std::string& textureFileName)
+    : height(height), width(width), Mass(mass), textureFileName(textureFileName)
 {
     SegmentLength = 1.0f / (float)(std::max(height - 1, width - 1));
     vertexCount = width * height;
-    Mass = 1.0f;
     elapsedTime = 0.0f;
     NumberOfConstraintIterations = 15;
     Color = glm::vec3(1.0f, 1.0f, 1.0f);

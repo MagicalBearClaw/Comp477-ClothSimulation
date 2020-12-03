@@ -13,7 +13,6 @@ void FallingClothScene::Initialize()
 
 	moveableSphere = std::make_unique<MoveableSphere>(ballRadius, ballPosition, 0.012f);
 	catTexturePath = std::filesystem::path("./Assets/Textures/cat2.jpg").generic_u8string();
-	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexturePath);
 	RecreateCloth();
 }
 
@@ -38,7 +37,7 @@ void FallingClothScene::RecreateCloth()
 		cloth.reset();
 	}
 
-	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, catTexturePath);
+	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, Mass, catTexturePath);
 	cloth->Mass = Mass;
 	cloth->Color = ClothColor;
 	cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;

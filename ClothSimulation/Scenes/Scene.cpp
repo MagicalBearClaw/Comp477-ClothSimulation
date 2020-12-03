@@ -16,7 +16,7 @@ Scene::Scene(const std::string& windowTitle , int applicationWindowWidth, int ap
     Gravity = DefaultGravity = glm::vec3(0, 0.98f, 0);
     
     ClothSize = DefaultClothSize = glm::vec2(30, 30);
-    Mass = DefaultMass = 1.0f;
+    Mass = DefaultMass = 2.0f;
     Stiffness = DefaultStiffness = 2.0f;
     Damping = DefaultDamping = 0.01f;
     NumberOfConstraintIterations = DefaultNumberOfConstraintIterations = 15;
@@ -124,6 +124,7 @@ void Scene::ResetClothDefaults()
     ClothSize = DefaultClothSize;
     Mass = DefaultMass;
     Stiffness = DefaultStiffness;
+    Damping = DefaultDamping;
     NumberOfConstraintIterations = DefaultNumberOfConstraintIterations;
     ClothColor = DefaultClothColor;
     SegmentLength = DefaultSegmentLength;
