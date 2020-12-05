@@ -42,7 +42,7 @@ int Application::Run()
 		currentFrameTime = glfwGetTime();
 
 		float deltaTime = currentFrameTime - lastFrameTime;
-
+		std::cout << "Time per frame: " << deltaTime * 1000 << std::endl;
 		glfwPollEvents();
 		Update(deltaTime);
 		Draw(deltaTime);
