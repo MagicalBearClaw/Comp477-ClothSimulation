@@ -9,7 +9,7 @@ public:
 	FallingClothScene(const std::string& windowTitle, int applicationWindowWidth, int applicationWindowHeight);
 	// Inherited via Scene
 	virtual void Initialize() override;
-	virtual void Update(bool keyState[], float deltaTime) override;
+	virtual void Update(bool keyState[], Camera& camera, float deltaTime) override;
 	virtual void Draw(Shader& shader, Camera& camera, glm::mat4 projection) override;
 
 protected:

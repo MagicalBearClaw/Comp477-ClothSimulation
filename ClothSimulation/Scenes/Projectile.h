@@ -19,6 +19,7 @@ public:
 	bool IsActive;
 	glm::vec3 Position;
 	glm::vec3 Velocity;
+	glm::vec3 CameraFront;
 private:
 	std::unique_ptr<Sphere> sphere;
 };

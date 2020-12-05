@@ -21,7 +21,7 @@ class Scene
 public:
 	Scene(const std::string& windowTitle, int applicationWindowWidth, int applicationWindowHeight);
 	virtual void Initialize();
-	virtual void Update(bool keyState[], float deltaTime);
+	virtual void Update(bool keyState[], Camera& camera, float deltaTime);
 	virtual void Draw(Shader& shader, Camera& camera, glm::mat4 projection) = 0;
 	virtual void RecreateCloth() = 0;
 	void DrawUI(float deltaTime);
@@ -31,6 +31,8 @@ public:
 public:
 	bool DrawInWireFrame;
 	bool IsSimulationUIOpen;
+protected:
+	float CalculateSegmentLength(glm::vec2 resolution);
 protected:
 	enum IntegratorType
 	{
@@ -91,7 +93,7 @@ protected:
 	glm::vec3 ClothColor;
 	glm::vec3 DefaultClothColor;
 
-	glm::vec2 ClothSize;
+	glm::vec2 ClothResolution;
 	glm::vec2 DefaultClothSize;
 
 	float SegmentLength;

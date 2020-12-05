@@ -41,8 +41,8 @@ bool ClothSimulationApplication::Initialize()
     fallingClothScene = std::make_unique<FallingClothScene>("Cloth Simulation tools", _windowWith, _windowHeight);
     std::cout << "Initialized scnenes, ready to work" << std::endl;
 
-    scene = fallingClothScene.get();
-    previousSelectedSceneType = selectedSceneType = sceneType = SceneType::Falling;
+    scene = basicClothScene.get();
+    previousSelectedSceneType = selectedSceneType = sceneType = SceneType::Basic;
 
     return true;
 }
@@ -112,7 +112,7 @@ void ClothSimulationApplication::Update(float deltaTime)
         }
     }
 
-    scene->Update(keys, deltaTime);
+    scene->Update(keys, camera, deltaTime);
 }
 
 void ClothSimulationApplication::ShutDOwn()

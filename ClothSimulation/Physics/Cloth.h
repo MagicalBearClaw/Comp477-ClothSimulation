@@ -14,7 +14,7 @@ class Cloth
 {
 
 public:
-    Cloth(int width, int height, float mass, const std::string& textureFileName);
+    Cloth(int width, int height, float segmentLength, float mass, const std::string& textureFileName);
     ~Cloth();
     void Update(float deltaTime);
     void Draw(Shader& shader, Camera& camera, glm::mat4 projection);

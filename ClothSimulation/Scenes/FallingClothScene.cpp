@@ -16,9 +16,9 @@ void FallingClothScene::Initialize()
 	RecreateCloth();
 }
 
-void FallingClothScene::Update(bool keyState[], float deltaTime)
+void FallingClothScene::Update(bool keyState[], Camera& camera, float deltaTime)
 {
-	Scene::Update(keyState, deltaTime);
+	Scene::Update(keyState, camera, deltaTime);
 	moveableSphere->CollisionOffset = CurrentCollisionOffset;
 	cloth->Update(CurrentTimeStep);
 }
@@ -37,11 +37,12 @@ void FallingClothScene::RecreateCloth()
 		cloth.reset();
 	}
 
-	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, Mass, catTexturePath);
+	SegmentLength = CalculateSegmentLength(ClothResolution);
+	cloth = std::make_unique<Cloth>(ClothResolution.x, ClothResolution.y, SegmentLength, Mass, catTexturePath);
 	cloth->Mass = Mass;
 	cloth->Color = ClothColor;
 	cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
-	springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness, Damping);
+	springForce = std::make_unique<SpringForce>(ClothResolution.x, ClothResolution.y, SegmentLength, Stiffness, Damping);
 	switch (integrationMethodType)
 	{
 		case IntegratorType::Verlet:

@@ -3,10 +3,9 @@
 #include "cloth.h"
 
 
-Cloth::Cloth(int width, int height, float mass, const std::string& textureFileName)
-    : height(height), width(width), Mass(mass), textureFileName(textureFileName)
+Cloth::Cloth(int width, int height, float segmentLength, float mass, const std::string& textureFileName)
+    : height(height), width(width), Mass(mass), SegmentLength(segmentLength), textureFileName(textureFileName)
 {
-    SegmentLength = 1.0f / (float)(std::max(height - 1, width - 1));
     vertexCount = width * height;
     elapsedTime = 0.0f;
     NumberOfConstraintIterations = 15;

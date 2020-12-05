@@ -13,7 +13,7 @@ void Projectile::Update(float deltaTime)
     if (!IsActive)
         return;
 
-    Position.z -= Speed * deltaTime;
+    Position += Speed * CameraFront * deltaTime;
     sphere->Update(Position);
 }
 

@@ -6,9 +6,9 @@ WindForce::WindForce(float minimumSpeed, float maximumSpeed) : MinimumSpeed(mini
 
 void WindForce::ApplyForce(Particle* particle, std::vector<Particle*>& particles, float timeStep)
 {
-    float x = glm::abs(glm::tan(0.01f * ElapsedTime));
-    float y = glm::abs(glm::sin(0.1f * ElapsedTime) - 0.2f);
-    float z = glm::abs(glm::cos(sin(particle->Position[0] * ElapsedTime) - 0.8f));
+    float x = glm::cos(0.1f * ElapsedTime);
+    float y = glm::sin(0.1f * ElapsedTime) - 0.2f;
+    float z = glm::cos(sin(particle->Position[0] * ElapsedTime) - 0.8f);
     float minSpeed = -1 * MinimumSpeed;
     float maxSpeed = -1 * MaximumSpeed;
 

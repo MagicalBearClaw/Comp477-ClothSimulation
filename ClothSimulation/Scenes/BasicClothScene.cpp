@@ -17,9 +17,9 @@ void BasicClothScene::Initialize()
 	RecreateCloth();
 }
 
-void BasicClothScene::Update(bool keyState[], float deltaTime)
+void BasicClothScene::Update(bool keyState[], Camera& camera, float deltaTime)
 {
-	Scene::Update(keyState, deltaTime);
+	Scene::Update(keyState, camera, deltaTime);
 
 	moveableSphere->CollisionOffset = CurrentCollisionOffset;
 	projectile->CollisionOffset = CurrentCollisionOffset;
@@ -55,6 +55,8 @@ void BasicClothScene::Update(bool keyState[], float deltaTime)
 		projectile->IsActive = true;
 		hasFired = true;
 		shootStartedTime = glfwGetTime();
+		projectile->Position = camera.Position;
+		projectile->CameraFront = camera.Front;
 	}
 
 	int shotDeltaTime = glfwGetTime() - shootStartedTime;
@@ -62,7 +64,8 @@ void BasicClothScene::Update(bool keyState[], float deltaTime)
 	{
 		projectile->IsActive = false;
 		hasFired = false;
-		projectile->Position = DefaultProjectilePosition;
+		projectile->Position = camera.Position;
+		projectile->CameraFront = camera.Front;
 		projectile->Velocity = glm::vec3(0, 0, 0);
 		shootStartedTime = 0;
 	}
@@ -93,11 +96,12 @@ void BasicClothScene::RecreateCloth()
 		springForce.reset();
 	}
 
-	cloth = std::make_unique<Cloth>(ClothSize.x, ClothSize.y, Mass, catTexturePath);
+	SegmentLength = CalculateSegmentLength(ClothResolution);
+	cloth = std::make_unique<Cloth>(ClothResolution.x, ClothResolution.y, SegmentLength, Mass, catTexturePath);
 	cloth->Mass = Mass;
 	cloth->Color = ClothColor;
 	cloth->NumberOfConstraintIterations = NumberOfConstraintIterations;
-	springForce = std::make_unique<SpringForce>(ClothSize.x, ClothSize.y, SegmentLength, Stiffness, Damping);
+	springForce = std::make_unique<SpringForce>(ClothResolution.x, ClothResolution.y, SegmentLength, Stiffness, Damping);
 	switch (integrationMethodType)
 	{
 		case IntegratorType::Verlet:
@@ -126,7 +130,7 @@ void BasicClothScene::RecreateCloth()
 	cloth->AddForceGenerator(springForce.get());
 	cloth->AddForceGenerator(windForce.get());
 	cloth->AddParticlPositionConstraint(0);
-	cloth->AddParticlPositionConstraint(ClothSize.x - 1);
+	cloth->AddParticlPositionConstraint(ClothResolution.x - 1);
 	std::function<void(Particle*)> moveableSphereCollisionHandler = std::bind(&MoveableSphere::ClothCollisionHandler, moveableSphere.get(), std::placeholders::_1);
 	std::function<void(Particle*)> projectileCollisionHandler = std::bind(&Projectile::ClothCollisionHandler, projectile.get(), std::placeholders::_1);
 	cloth->AddCollisionHandler(moveableSphereCollisionHandler);
