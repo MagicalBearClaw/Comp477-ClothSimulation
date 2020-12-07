@@ -190,7 +190,7 @@ void Scene::DrawUI(float deltaTime)
     ImGui::SetNextItemOpen(true);
     if (ImGui::TreeNode("Cloth Properties"))
     {
-        ImGui::InputFloat2("Size", glm::value_ptr(ClothResolution));
+        ImGui::InputFloat2("Resolution", glm::value_ptr(ClothResolution));
         ImGui::ColorEdit3("Color", glm::value_ptr(ClothColor));
         ImGui::SliderInt("Constraint Iterations", &NumberOfConstraintIterations, 0, 50);
         ImGui::SliderFloat("Stiffness", &Stiffness, 0, 10, "%.7f", 0);
